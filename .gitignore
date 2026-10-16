@@ -1,0 +1,59 @@
+# Custom project ignores
+plans/
+proyecto_contexto.txt
+*.log
+
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.ipynb_checkpoints/
+
+# Virtual Environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment Variables & Secrets
+.env
+!.env.example
+
+# Testing & Type checking
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+notas/
+.playwright-mcp/

@@ -1,0 +1,317 @@
+[
+  {
+    "id": "L0",
+    "nombre": "Lomas del Paraíso (+ Apu Siqay)",
+    "distrito": "Villa María del Triunfo",
+    "tipo": "Naturaleza/Trekking",
+    "dificultad": "Moderado",
+    "coordenadas": {
+      "lat": -12.1697,
+      "lon": -76.9234
+    },
+    "saturacion_base": 0.15,
+    "seguridad_base": 7.5,
+    "clima_verdor_base": 9.0,
+    "accesibilidad_base": 6.5,
+    "costo_estimado": 15.0,
+    "tiempo_estimado_horas": 4.5,
+    "distancia_centro_min": 60,
+    "transporte_principal": "Tren Eléctrico L1 (Est. María Auxiliadora) + Combi a Paraíso",
+    "descripcion": "Circuito ecoturístico comunitario de 2,000 ha gestionado por pobladores locales. Famoso por el mirador del colchón de nubes en Apu Siqay.",
+    "temporada_optima": "Junio - Octubre"
+  },
+  {
+    "id": "L1",
+    "nombre": "Lomas de Carabayllo 2",
+    "distrito": "Carabayllo",
+    "tipo": "Naturaleza/Trekking",
+    "dificultad": "Moderado",
+    "coordenadas": {
+      "lat": -11.8322,
+      "lon": -77.0125
+    },
+    "saturacion_base": 0.20,
+    "seguridad_base": 6.5,
+    "clima_verdor_base": 8.5,
+    "accesibilidad_base": 5.5,
+    "costo_estimado": 18.0,
+    "tiempo_estimado_horas": 5.0,
+    "distancia_centro_min": 90,
+    "transporte_principal": "Alimentador Metropolitano hasta Carabayllo + colectivo local",
+    "descripcion": "Área protegida por el ACR Sistema de Lomas de Lima. Cuenta con 4 rutas oficiales de control de aforo (Colchón Ancestral, Zorro Místico).",
+    "temporada_optima": "Junio - Octubre"
+  },
+  {
+    "id": "L2",
+    "nombre": "Lomas de Primavera",
+    "distrito": "Carabayllo",
+    "tipo": "Naturaleza/Trekking",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -11.8654,
+      "lon": -77.0289
+    },
+    "saturacion_base": 0.10,
+    "seguridad_base": 6.0,
+    "clima_verdor_base": 8.0,
+    "accesibilidad_base": 6.0,
+    "costo_estimado": 12.0,
+    "tiempo_estimado_horas": 3.0,
+    "distancia_centro_min": 60,
+    "transporte_principal": "Bus Panamericana Norte / Av. Túpac Amaru hasta paradero Primavera",
+    "descripcion": "Ecosistema de baja concurrencia ideal para senderismo suave y avistamiento de aves endémicas en temporada de niebla.",
+    "temporada_optima": "Junio - Octubre"
+  },
+  {
+    "id": "L3",
+    "nombre": "Lomas de Manchay",
+    "distrito": "Ate",
+    "tipo": "Naturaleza",
+    "dificultad": "Moderado",
+    "coordenadas": {
+      "lat": -12.1158,
+      "lon": -76.8821
+    },
+    "saturacion_base": 0.08,
+    "seguridad_base": 6.0,
+    "clima_verdor_base": 7.5,
+    "accesibilidad_base": 5.5,
+    "costo_estimado": 10.0,
+    "tiempo_estimado_horas": 3.5,
+    "distancia_centro_min": 45,
+    "transporte_principal": "Bus Corredor Rojo hasta La Molina + combi hacia Manchay Bajo",
+    "descripcion": "Zona de conservación comunitaria con formaciones rocosas singulares y senderos con pendiente moderada.",
+    "temporada_optima": "Julio - Octubre"
+  },
+  {
+    "id": "L4",
+    "nombre": "Lomas de Mangomarca",
+    "distrito": "San Juan de Lurigancho",
+    "tipo": "Naturaleza/Arqueología",
+    "dificultad": "Moderado",
+    "coordenadas": {
+      "lat": -12.0089,
+      "lon": -76.9814
+    },
+    "saturacion_base": 0.15,
+    "seguridad_base": 6.5,
+    "clima_verdor_base": 8.5,
+    "accesibilidad_base": 7.0,
+    "costo_estimado": 10.0,
+    "tiempo_estimado_horas": 4.0,
+    "distancia_centro_min": 50,
+    "transporte_principal": "Tren Eléctrico L1 (Est. Pirámide del Sol) + bus auxiliar a Mangomarca",
+    "descripcion": "Espacio de más de 500 hectáreas que combina flora silvestre con el sitio arqueológico de la cultura Ruricancho.",
+    "temporada_optima": "Junio - Octubre"
+  },
+  {
+    "id": "L5",
+    "nombre": "Lomas de Amancaes",
+    "distrito": "Rímac",
+    "tipo": "Naturaleza",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -12.0181,
+      "lon": -77.0392
+    },
+    "saturacion_base": 0.45,
+    "seguridad_base": 7.0,
+    "clima_verdor_base": 8.0,
+    "accesibilidad_base": 8.5,
+    "costo_estimado": 8.0,
+    "tiempo_estimado_horas": 2.5,
+    "distancia_centro_min": 40,
+    "transporte_principal": "Corredor Azul (Línea 301/303) hasta paradero Flor de Amancaes",
+    "descripcion": "Loma emblemática de la historia limeña y hábitat natural de la flor de amancaes (Ismene amancaes), flor símbolo de Lima.",
+    "temporada_optima": "Junio - Septiembre"
+  },
+  {
+    "id": "L6",
+    "nombre": "Lomas de Lachay (Reserva)",
+    "distrito": "Huaura / Huaral",
+    "tipo": "Naturaleza/Reserva",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -11.3653,
+      "lon": -77.3694
+    },
+    "saturacion_base": 0.50,
+    "seguridad_base": 9.0,
+    "clima_verdor_base": 9.5,
+    "accesibilidad_base": 7.5,
+    "costo_estimado": 45.0,
+    "tiempo_estimado_horas": 6.0,
+    "distancia_centro_min": 120,
+    "transporte_principal": "Bus interprovincial Panamericana Norte km 105 + caminata de ingreso",
+    "descripcion": "Reserva Nacional protegida por SERNANP. Ecosistema de condensación de nieblas con senderos interpretativos señalizados.",
+    "temporada_optima": "Junio - Noviembre"
+  },
+  {
+    "id": "L7",
+    "nombre": "Lomas de Lúcumo",
+    "distrito": "Pachacámac",
+    "tipo": "Naturaleza/Arqueología",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -12.1936,
+      "lon": -76.8833
+    },
+    "saturacion_base": 0.45,
+    "seguridad_base": 8.5,
+    "clima_verdor_base": 9.0,
+    "accesibilidad_base": 7.5,
+    "costo_estimado": 25.0,
+    "tiempo_estimado_horas": 4.0,
+    "distancia_centro_min": 60,
+    "transporte_principal": "Bus Panamericana Sur hasta puente Lurín + colectivo hacia Quebrada Verde",
+    "descripcion": "Circuito ecoturístico pionero en Lima sur. Posee pinturas rupestres, farallones para escalada y servicios de guiado local.",
+    "temporada_optima": "Junio - Noviembre"
+  },
+  {
+    "id": "L8",
+    "nombre": "Morro Solar",
+    "distrito": "Chorrillos",
+    "tipo": "Naturaleza/Vista",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -12.1731,
+      "lon": -77.0342
+    },
+    "saturacion_base": 0.70,
+    "seguridad_base": 6.5,
+    "clima_verdor_base": 5.0,
+    "accesibilidad_base": 8.5,
+    "costo_estimado": 8.0,
+    "tiempo_estimado_horas": 2.5,
+    "distancia_centro_min": 30,
+    "transporte_principal": "Metropolitano hasta Estación Matellini + alimentador o taxi al Morro",
+    "descripcion": "Mirador panorámico de la bahía de Lima y monumento histórico con senderos costeros y rutas para trekking urbano y ciclismo.",
+    "temporada_optima": "Todo el año"
+  },
+  {
+    "id": "L9",
+    "nombre": "Huaca Pucllana",
+    "distrito": "Miraflores",
+    "tipo": "Cultural/Arqueología",
+    "dificultad": "Muy fácil",
+    "coordenadas": {
+      "lat": -12.1111,
+      "lon": -77.0336
+    },
+    "saturacion_base": 0.85,
+    "seguridad_base": 9.5,
+    "clima_verdor_base": 4.0,
+    "accesibilidad_base": 9.5,
+    "costo_estimado": 25.0,
+    "tiempo_estimado_horas": 2.0,
+    "distancia_centro_min": 20,
+    "transporte_principal": "Metropolitano (Estación Angamos) o Corredor Azul Tacna-Arequipa",
+    "descripcion": "Complejo arqueológico de adobe de la cultura Lima (siglo V d.C.). Sitio urbano altamente saturado usado como punto de contraste en el AG.",
+    "temporada_optima": "Todo el año"
+  },
+  {
+    "id": "L10",
+    "nombre": "Parque de la Reserva",
+    "distrito": "Cercado de Lima",
+    "tipo": "Naturaleza/Urbano",
+    "dificultad": "Muy fácil",
+    "coordenadas": {
+      "lat": -12.0697,
+      "lon": -77.0333
+    },
+    "saturacion_base": 0.65,
+    "seguridad_base": 8.0,
+    "clima_verdor_base": 5.0,
+    "accesibilidad_base": 9.5,
+    "costo_estimado": 10.0,
+    "tiempo_estimado_horas": 2.0,
+    "distancia_centro_min": 10,
+    "transporte_principal": "Metropolitano (Estación Estadio Nacional)",
+    "descripcion": "Parque histórico urbano y Circuito Mágico del Agua. Representa un punto verde céntrico de alta accesibilidad.",
+    "temporada_optima": "Todo el año"
+  },
+  {
+    "id": "L11",
+    "nombre": "Lomas de Ancón",
+    "distrito": "Ancón",
+    "tipo": "Naturaleza/Conservación",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -11.7589,
+      "lon": -77.1264
+    },
+    "saturacion_base": 0.12,
+    "seguridad_base": 7.0,
+    "clima_verdor_base": 8.0,
+    "accesibilidad_base": 6.5,
+    "costo_estimado": 14.0,
+    "tiempo_estimado_horas": 4.0,
+    "distancia_centro_min": 60,
+    "transporte_principal": "Bus interurbano Panamericana Norte hasta Ancón + colectivo local",
+    "descripcion": "Zona reservada que protege ecosistemas desérticos y lomas costeras en el norte de Lima Metropolitana.",
+    "temporada_optima": "Julio - Octubre"
+  },
+  {
+    "id": "L12",
+    "nombre": "Quebrada de Huaycoloro",
+    "distrito": "Lurigancho-Chosica",
+    "tipo": "Naturaleza/Cañón",
+    "dificultad": "Moderado",
+    "coordenadas": {
+      "lat": -11.9689,
+      "lon": -76.8856
+    },
+    "saturacion_base": 0.18,
+    "seguridad_base": 6.0,
+    "clima_verdor_base": 7.0,
+    "accesibilidad_base": 5.5,
+    "costo_estimado": 15.0,
+    "tiempo_estimado_horas": 4.5,
+    "distancia_centro_min": 60,
+    "transporte_principal": "Bus Carretera Central hasta Huachipa + combi hacia quebrada",
+    "descripcion": "Cañón seco con microclima singular y senderos de trekking rústico entre quebradas de Lima este.",
+    "temporada_optima": "Mayo - Noviembre"
+  },
+  {
+    "id": "L13",
+    "nombre": "Cerro de la Estrella",
+    "distrito": "Ate",
+    "tipo": "Naturaleza/Vista",
+    "dificultad": "Fácil",
+    "coordenadas": {
+      "lat": -12.0456,
+      "lon": -76.9242
+    },
+    "saturacion_base": 0.40,
+    "seguridad_base": 7.0,
+    "clima_verdor_base": 6.5,
+    "accesibilidad_base": 7.5,
+    "costo_estimado": 8.0,
+    "tiempo_estimado_horas": 2.5,
+    "distancia_centro_min": 40,
+    "transporte_principal": "Corredor Rojo o transporte a Carretera Central + colectivo",
+    "descripcion": "Mirador natural con vista al valle del Rímac, vegetación estacional y rutas cortas de trekking periurbano.",
+    "temporada_optima": "Todo el año"
+  },
+  {
+    "id": "L14",
+    "nombre": "La Loma Amarilla",
+    "distrito": "Santiago de Surco",
+    "tipo": "Naturaleza/Urbano",
+    "dificultad": "Muy fácil",
+    "coordenadas": {
+      "lat": -12.1389,
+      "lon": -76.9942
+    },
+    "saturacion_base": 0.55,
+    "seguridad_base": 9.0,
+    "clima_verdor_base": 6.0,
+    "accesibilidad_base": 9.0,
+    "costo_estimado": 5.0,
+    "tiempo_estimado_horas": 2.0,
+    "distancia_centro_min": 25,
+    "transporte_principal": "Tren Eléctrico L1 (Est. Ayacucho) o Metropolitano + alimentador",
+    "descripcion": "Parque ecológico urbano protegido de 4 hectáreas con senderos escalonados, arbolado denso y mirador.",
+    "temporada_optima": "Todo el año"
+  }
+]
