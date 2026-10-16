@@ -1,39 +1,101 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { Loma, Coordenadas, PresetZona, UserPreferencesRequest, OptimizationResult } from "./types";
-import { fetchLomas, fetchPresets, optimizeRoute, checkBackendHealth } from "./services/api";
+import type {
+  Loma,
+  Coordenadas,
+  PresetZona,
+  UserPreferencesRequest,
+  OptimizationResult,
+} from "./types";
+import {
+  fetchLomas,
+  fetchPresets,
+  optimizeRoute,
+  checkBackendHealth,
+} from "./services/api";
+import { ProProvider, usePro } from "./context/ProContext";
 import { GoogleStyleMap } from "./components/Map/GoogleStyleMap";
-import { FloatingSearchBar } from "./components/Search/FloatingSearchBar";
+import {
+  FloatingSearchBar,
+  type QuickFilterType,
+} from "./components/Search/FloatingSearchBar";
 import { RoutePlannerPanel } from "./components/Panels/RoutePlannerPanel";
 import { RouteResultsPanel } from "./components/Panels/RouteResultsPanel";
 import { LomaDetailSheet } from "./components/Panels/LomaDetailSheet";
-import { Mountain } from "lucide-react";
+import { ProUpgradeModal } from "./components/Panels/ProUpgradeModal";
+import { Mountain, WifiOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
-export function App() {
+function AppContent() {
+  const { offlinePackIds } = usePro();
   const [lomas, setLomas] = useState<Loma[]>([]);
   const [presets, setPresets] = useState<PresetZona[]>([]);
   const [backendOnline, setBackendOnline] = useState<boolean>(true);
-  const [userCoords, setUserCoords] = useState<Coordenadas>({ lat: -12.0464, lon: -77.0428 });
+  const [isBrowserOnline, setIsBrowserOnline] = useState<boolean>(
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+  const [userCoords, setUserCoords] = useState<Coordenadas>({
+    lat: -12.0464,
+    lon: -77.0428,
+  });
   const [selectedLoma, setSelectedLoma] = useState<Loma | null>(null);
   const [mapCenterTarget, setMapCenterTarget] = useState<Coordenadas | null>(null);
+  const [activeFilter, setActiveFilter] = useState<QuickFilterType>(null);
 
-  // Paneles flotantes estilo Google Maps
   const [isPlannerOpen, setIsPlannerOpen] = useState<boolean>(false);
   const [isResultsOpen, setIsResultsOpen] = useState<boolean>(false);
-  const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+  const [optimizationResult, setOptimizationResult] =
+    useState<OptimizationResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastPrefs, setLastPrefs] = useState<UserPreferencesRequest | null>(null);
 
-  // Memoized lookup map for lomas by ID - avoids O(n) lookups in render
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsBrowserOnline(true);
+      toast.success("Conexion a internet restablecida");
+    };
+    const handleOffline = () => {
+      setIsBrowserOnline(false);
+      toast.error("Sin conexion a internet. Modo Zero Signal activado.");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   const lomasById = useMemo(() => {
     const map = new Map<string, Loma>();
     lomas.forEach((l) => map.set(l.id, l));
     return map;
   }, [lomas]);
 
-  
+  const displayedLomas = useMemo(() => {
+    if (!activeFilter) return lomas;
+    if (activeFilter === "temporada") {
+      return lomas.filter(
+        (l) =>
+          l.temporada_optima?.toLowerCase().includes("jun") ||
+          l.temporada_optima?.toLowerCase().includes("jul") ||
+          l.temporada_optima?.toLowerCase().includes("ago") ||
+          l.temporada_optima?.toLowerCase().includes("sep") ||
+          l.temporada_optima?.toLowerCase().includes("oct")
+      );
+    }
+    if (activeFilter === "demo_pro") {
+      return lomas.filter((l) => l.id === "L0" || l.pro_demo_gratis);
+    }
+    if (activeFilter === "offline") {
+      return lomas.filter((l) => offlinePackIds.includes(l.id));
+    }
+    if (activeFilter === "naturales") {
+      return lomas.filter((l) => l.es_loma_natural !== false);
+    }
+    return lomas;
+  }, [lomas, activeFilter, offlinePackIds]);
 
-  // Carga inicial de datos desde el backend
   useEffect(() => {
     async function loadData() {
       try {
@@ -46,41 +108,45 @@ export function App() {
         ]);
         setLomas(lomasData);
         setPresets(presetsData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error al conectar con la API:", err);
         setBackendOnline(false);
-        toast.error("No se pudo conectar al Backend FastAPI.");
+        toast.error("No se pudo conectar al Backend FastAPI. Modo offline activo.");
       }
     }
     loadData();
   }, []);
 
-  // Manejo de optimización de ruta
-  const handleOptimize = useCallback(async (prefs: UserPreferencesRequest) => {
-    setIsLoading(true);
-    setLastPrefs(prefs);
-    try {
-      const result = await optimizeRoute(prefs);
-      setOptimizationResult(result);
-      setIsPlannerOpen(false);
-      setIsResultsOpen(true);
-      toast.success("Ruta óptima calculada con éxito");
+  const handleOptimize = useCallback(
+    async (prefs: UserPreferencesRequest) => {
+      setIsLoading(true);
+      setLastPrefs(prefs);
+      try {
+        const result = await optimizeRoute(prefs);
+        setOptimizationResult(result);
+        setIsPlannerOpen(false);
+        setIsResultsOpen(true);
+        toast.success("Ruta optima calculada con exito");
 
-      // Centrar el mapa en la primera loma de la ruta calculada
-      if (result.ruta_ids.length > 0) {
-        const firstLoma = lomasById.get(result.ruta_ids[0]);
-        if (firstLoma) {
-          setMapCenterTarget(firstLoma.coordenadas);
+        if (result.ruta_ids.length > 0) {
+          const firstLoma = lomasById.get(result.ruta_ids[0]);
+          if (firstLoma) {
+            setMapCenterTarget(firstLoma.coordenadas);
+          }
         }
+      } catch (err: unknown) {
+        console.error("Error en optimizacion:", err);
+        const msg =
+          err instanceof Error
+            ? err.message
+            : "Ocurrio un error al calcular la ruta.";
+        toast.error(msg);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: any) {
-      console.error("Error en optimización:", err);
-      const msg = err.message || "Ocurrió un error al calcular la ruta.";
-      toast.error(msg);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [lomasById]);
+    },
+    [lomasById]
+  );
 
   const handleSelectLoma = useCallback((loma: Loma) => {
     setSelectedLoma(loma);
@@ -100,7 +166,6 @@ export function App() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Notificaciones Toast en Modo Claro y Centradas Arriba */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -109,7 +174,8 @@ export function App() {
             background: "#ffffff",
             color: "#0f172a",
             border: "1px solid #e2e8f0",
-            boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)",
+            boxShadow:
+              "0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)",
             borderRadius: "12px",
             fontSize: "14px",
             fontFamily: "'Rubik Variable', 'Rubik', sans-serif",
@@ -118,9 +184,8 @@ export function App() {
         }}
       />
 
-      {/* 1. MAPA DE FONDO COMPLETO (100% Pantalla) */}
       <GoogleStyleMap
-        lomas={lomas}
+        lomas={displayedLomas}
         selectedLoma={selectedLoma}
         onSelectLoma={handleSelectLoma}
         userCoords={userCoords}
@@ -129,7 +194,6 @@ export function App() {
         mapCenterTarget={mapCenterTarget}
       />
 
-      {/* 2. BARRA DE BÚSQUEDA FLOTANTE */}
       <FloatingSearchBar
         lomas={lomas}
         onSelectLoma={handleSelectLoma}
@@ -143,22 +207,22 @@ export function App() {
           setIsResultsOpen(true);
           setIsPlannerOpen(false);
         }}
+        activeFilter={activeFilter}
+        onFilterChange={setActiveFilter}
       />
 
-      {/* 3. PANEL FLOTANTE DE PLANIFICACIÓN (Slid-out, altura acotada) */}
       {isPlannerOpen && (
-      <RoutePlannerPanel
-        isOpen={isPlannerOpen}
-        onClose={() => setIsPlannerOpen(false)}
-        userCoords={userCoords}
-        onUserCoordsChange={setUserCoords}
-        presets={presets}
-        onOptimize={handleOptimize}
-        isLoading={isLoading}
-      />
+        <RoutePlannerPanel
+          isOpen={isPlannerOpen}
+          onClose={() => setIsPlannerOpen(false)}
+          userCoords={userCoords}
+          onUserCoordsChange={setUserCoords}
+          presets={presets}
+          onOptimize={handleOptimize}
+          isLoading={isLoading}
+        />
       )}
 
-      {/* 4. PANEL FLOTANTE DE RESULTADOS DE RUTA OPTIMIZADA */}
       <RouteResultsPanel
         isOpen={isResultsOpen}
         onClose={() => setIsResultsOpen(false)}
@@ -169,7 +233,6 @@ export function App() {
         onNewSearch={handleNewSearch}
       />
 
-      {/* 5. FICHA TÉCNICA DESLIZABLE DE LOMA SELECCIONADA */}
       <LomaDetailSheet
         loma={selectedLoma}
         onClose={() => setSelectedLoma(null)}
@@ -177,7 +240,8 @@ export function App() {
         onFocusMap={(coords) => setMapCenterTarget(coords)}
       />
 
-      {/* 6. BADGE FLOTANTE DE ESTADO (Bottom-Left) */}
+      <ProUpgradeModal lomas={lomas} />
+
       <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-card/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-control border border-border text-xs text-foreground/80">
         <span className="flex items-center gap-1.5 font-semibold text-primary">
           <Mountain className="w-3.5 h-3.5" />
@@ -187,17 +251,38 @@ export function App() {
         <span className="flex items-center gap-1.5">
           <span
             className={`w-2 h-2 rounded-full ${
-              backendOnline ? "bg-primary animate-pulse" : "bg-destructive"
+              backendOnline && isBrowserOnline
+                ? "bg-primary animate-pulse"
+                : "bg-destructive"
             }`}
           />
-          <span className="text-xs text-muted-foreground">
-            {backendOnline ? "FastAPI Conectado" : "FastAPI Desconectado"}
+          <span className="text-xs text-muted-foreground flex items-center gap-1">
+            {!isBrowserOnline ? (
+              <>
+                <WifiOff className="w-3 h-3 text-destructive" />
+                <span>Modo Sin Senal</span>
+              </>
+            ) : backendOnline ? (
+              "FastAPI Conectado"
+            ) : (
+              "FastAPI Desconectado"
+            )}
           </span>
         </span>
         <span className="text-border">|</span>
-        <span className="text-muted-foreground">{lomas.length} lomas</span>
+        <span className="text-muted-foreground">
+          {displayedLomas.length} de {lomas.length} lomas
+        </span>
       </div>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ProProvider>
+      <AppContent />
+    </ProProvider>
   );
 }
 
