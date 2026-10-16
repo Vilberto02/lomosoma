@@ -44,7 +44,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
   const [sendero, setSendero] = useState<SenderoProfile | null>(
     selectedLoma?.sendero ?? null
   );
-  const [isMinimized, setIsMinimized] = useState<boolean>(false);
+  const [isMinimized, setIsMinimized] = useState<boolean>(true);
   const [isWhistling, setIsWhistling] = useState<boolean>(false);
   const [whistleController, setWhistleController] = useState<{ stop: () => void } | null>(
     null
@@ -153,58 +153,67 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
   const emergencySmsUrl = buildEmergencySmsHref(userCoords, selectedLoma.nombre, altitud);
 
   return (
-    <div className="absolute top-20 left-4 sm:left-6 z-30 w-[92vw] sm:w-[360px] max-w-[360px] animate-in slide-in-from-top-4 fade-in-50 duration-200">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 sm:left-[456px] sm:translate-x-0 z-20 w-[94vw] sm:w-[410px] max-w-[420px] transition-all duration-200 pointer-events-auto">
       <div
-        className={`rounded-2xl border shadow-panel backdrop-blur-md transition-all overflow-hidden ${
+        className={`rounded-2xl border shadow-2xl backdrop-blur-xl transition-all overflow-hidden ${
           isOffTrail
-            ? "bg-amber-500/10 border-amber-500 shadow-amber-500/20"
-            : "bg-card/95 border-border"
+            ? "bg-amber-950/95 border-amber-500 shadow-amber-500/20 text-white"
+            : "bg-slate-950/95 border-emerald-500/30 text-white shadow-panel"
         }`}
       >
-        <div
-          className={`p-3.5 flex items-center justify-between border-b ${
-            isOffTrail
-              ? "bg-amber-500/20 border-amber-500/40 text-amber-900"
-              : "bg-slate-900 text-white border-border"
-          }`}
-        >
-          <div className="flex items-center gap-2">
+        <div className="p-3 flex items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-2.5 min-w-0">
             {isOffTrail ? (
-              <ShieldAlert className="w-5 h-5 text-amber-600 animate-bounce" />
+              <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 animate-bounce" />
             ) : (
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
             )}
-            <div>
-              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <div className="min-w-0">
+              <div className="text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-white/90">
                 <span>Fog Guardian GPS</span>
                 {isPackOffline && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/30 text-emerald-300 font-mono">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-300 font-mono">
                     Offline
                   </span>
                 )}
               </div>
-              <div className="text-[11px] opacity-90 truncate max-w-[200px]">
-                {selectedLoma.nombre}
+              <div className="text-xs text-white/70 truncate">
+                {isOffTrail ? (
+                  <span className="text-amber-300 font-medium">Desvio: {deviation}m</span>
+                ) : (
+                  <span>En sendero ({deviation}m) · {altitud} msnm</span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={handleToggleWhistle}
+              className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
+                isWhistling
+                  ? "bg-red-600 text-white animate-pulse"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+              title="Silbato de rescate 3000Hz"
+            >
+              {isWhistling ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            </button>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 rounded-lg hover:bg-white/20 transition-colors"
-              title={isMinimized ? "Expandir" : "Minimizar"}
+              className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+              title={isMinimized ? "Abrir HUD Tactico completo" : "Minimizar"}
             >
               {isMinimized ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
                 <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
               )}
             </button>
             {onClose && (
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg hover:bg-white/20 transition-colors"
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
                 title="Cerrar Guardian"
               >
                 <X className="w-4 h-4" />
@@ -221,7 +230,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
         )}
 
         {!isMinimized && (
-          <div className="p-3.5 space-y-3 bg-card text-foreground">
+          <div className="p-3.5 space-y-3 bg-slate-900/90 text-white">
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 rounded-xl bg-secondary/30 border border-border">
                 <div className="text-[10px] uppercase font-semibold text-muted-foreground">

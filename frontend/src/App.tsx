@@ -15,14 +15,11 @@ import {
 import { ProProvider, usePro } from "./context/ProContext";
 import { GoogleStyleMap } from "./components/Map/GoogleStyleMap";
 import {
-  FloatingSearchBar,
+  AppSidebar,
   type QuickFilterType,
-} from "./components/Search/FloatingSearchBar";
-import { RoutePlannerPanel } from "./components/Panels/RoutePlannerPanel";
-import { RouteResultsPanel } from "./components/Panels/RouteResultsPanel";
-import { LomaDetailSheet } from "./components/Panels/LomaDetailSheet";
+  type SidebarView,
+} from "./components/Navigation/AppSidebar";
 import { ProUpgradeModal } from "./components/Panels/ProUpgradeModal";
-import { Mountain, WifiOff } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
 function AppContent() {
@@ -40,9 +37,9 @@ function AppContent() {
   const [selectedLoma, setSelectedLoma] = useState<Loma | null>(null);
   const [mapCenterTarget, setMapCenterTarget] = useState<Coordenadas | null>(null);
   const [activeFilter, setActiveFilter] = useState<QuickFilterType>(null);
+  const [activeView, setActiveView] = useState<SidebarView>("catalog");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
 
-  const [isPlannerOpen, setIsPlannerOpen] = useState<boolean>(false);
-  const [isResultsOpen, setIsResultsOpen] = useState<boolean>(false);
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizationResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -124,8 +121,8 @@ function AppContent() {
       try {
         const result = await optimizeRoute(prefs);
         setOptimizationResult(result);
-        setIsPlannerOpen(false);
-        setIsResultsOpen(true);
+        setActiveView("results");
+        setIsSidebarCollapsed(false);
         toast.success("Ruta optima calculada con exito");
 
         if (result.ruta_ids.length > 0) {
@@ -151,17 +148,40 @@ function AppContent() {
   const handleSelectLoma = useCallback((loma: Loma) => {
     setSelectedLoma(loma);
     setMapCenterTarget(loma.coordenadas);
+    setActiveView("detail");
+    setIsSidebarCollapsed(false);
+  }, []);
+
+  const handleBackToCatalog = useCallback(() => {
+    setSelectedLoma(null);
+    setActiveView("catalog");
   }, []);
 
   const handleSetAsStartPoint = useCallback((coords: Coordenadas) => {
     setUserCoords(coords);
     setSelectedLoma(null);
+    setActiveView("planner");
+    setIsSidebarCollapsed(false);
+    toast.success("Punto de inicio establecido para la ruta");
   }, []);
 
   const handleNewSearch = useCallback(() => {
     setOptimizationResult(null);
-    setIsResultsOpen(false);
-    setIsPlannerOpen(true);
+    setActiveView("planner");
+  }, []);
+
+  const handleChangeView = useCallback(
+    (view: SidebarView) => {
+      setActiveView(view);
+      if (view === "catalog") {
+        setSelectedLoma(null);
+      }
+    },
+    []
+  );
+
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarCollapsed((prev) => !prev);
   }, []);
 
   return (
@@ -194,86 +214,32 @@ function AppContent() {
         mapCenterTarget={mapCenterTarget}
       />
 
-      <FloatingSearchBar
+      <AppSidebar
         lomas={lomas}
+        selectedLoma={selectedLoma}
         onSelectLoma={handleSelectLoma}
-        isPlannerOpen={isPlannerOpen}
-        onTogglePlanner={() => {
-          setIsPlannerOpen(!isPlannerOpen);
-          if (!isPlannerOpen) setIsResultsOpen(false);
-        }}
-        hasActiveRoute={Boolean(optimizationResult)}
-        onOpenResults={() => {
-          setIsResultsOpen(true);
-          setIsPlannerOpen(false);
-        }}
+        onBackToCatalog={handleBackToCatalog}
+        userCoords={userCoords}
+        onUserCoordsChange={setUserCoords}
+        presets={presets}
+        onOptimize={handleOptimize}
+        optimizationResult={optimizationResult}
+        isLoading={isLoading}
+        lastPrefs={lastPrefs}
+        onNewSearch={handleNewSearch}
+        backendOnline={backendOnline}
+        isBrowserOnline={isBrowserOnline}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-      />
-
-      {isPlannerOpen && (
-        <RoutePlannerPanel
-          isOpen={isPlannerOpen}
-          onClose={() => setIsPlannerOpen(false)}
-          userCoords={userCoords}
-          onUserCoordsChange={setUserCoords}
-          presets={presets}
-          onOptimize={handleOptimize}
-          isLoading={isLoading}
-        />
-      )}
-
-      <RouteResultsPanel
-        isOpen={isResultsOpen}
-        onClose={() => setIsResultsOpen(false)}
-        result={optimizationResult}
-        lomas={lomas}
-        prefs={lastPrefs}
-        onFocusLoma={handleSelectLoma}
-        onNewSearch={handleNewSearch}
-      />
-
-      <LomaDetailSheet
-        loma={selectedLoma}
-        onClose={() => setSelectedLoma(null)}
-        onSetAsStartPoint={handleSetAsStartPoint}
         onFocusMap={(coords) => setMapCenterTarget(coords)}
+        onSetAsStartPoint={handleSetAsStartPoint}
+        activeView={activeView}
+        onChangeView={handleChangeView}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={handleToggleSidebar}
       />
 
       <ProUpgradeModal lomas={lomas} />
-
-      <div className="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-2 bg-card/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-control border border-border text-xs text-foreground/80">
-        <span className="flex items-center gap-1.5 font-semibold text-primary">
-          <Mountain className="w-3.5 h-3.5" />
-          Lomas de Lima
-        </span>
-        <span className="text-border">|</span>
-        <span className="flex items-center gap-1.5">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              backendOnline && isBrowserOnline
-                ? "bg-primary animate-pulse"
-                : "bg-destructive"
-            }`}
-          />
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            {!isBrowserOnline ? (
-              <>
-                <WifiOff className="w-3 h-3 text-destructive" />
-                <span>Modo Sin Senal</span>
-              </>
-            ) : backendOnline ? (
-              "FastAPI Conectado"
-            ) : (
-              "FastAPI Desconectado"
-            )}
-          </span>
-        </span>
-        <span className="text-border">|</span>
-        <span className="text-muted-foreground">
-          {displayedLomas.length} de {lomas.length} lomas
-        </span>
-      </div>
     </div>
   );
 }

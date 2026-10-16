@@ -27,6 +27,7 @@ import {
   Footprints,
   Users,
   Award,
+  ArrowLeft,
 } from "lucide-react";
 import { Card, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -39,6 +40,7 @@ interface LomaDetailSheetProps {
   onClose: () => void;
   onSetAsStartPoint: (coords: Coordenadas) => void;
   onFocusMap: (coords: Coordenadas) => void;
+  isEmbedded?: boolean;
 }
 
 const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
@@ -46,6 +48,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
   onClose,
   onSetAsStartPoint,
   onFocusMap,
+  isEmbedded = false,
 }) => {
   const {
     isLomaProUnlocked,
@@ -205,17 +208,35 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     currentLoma.composicion_terreno?.barro_arcilloso_pct ??
     15;
 
+  const containerClass = isEmbedded
+    ? "flex flex-col h-full w-full overflow-hidden bg-card"
+    : "absolute top-20 right-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[760px] flex flex-col animate-in slide-in-from-right-4 fade-in-50 duration-200";
+
+  const cardClass = isEmbedded
+    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden"
+    : "border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden";
+
   return (
-    <div className="absolute top-20 right-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[760px] flex flex-col animate-in slide-in-from-right-4 fade-in-50 duration-200">
-      <Card className="border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden">
+    <div className={containerClass}>
+      <Card className={cardClass}>
         {/* Cabecera Principal */}
         <div className="p-4 border-b border-border bg-card flex-shrink-0 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-3.5 right-3.5 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-1.5 rounded-lg hover:bg-primary/10"
+              title="Volver al catalogo de lomas"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Volver al catalogo</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
           <div className="flex items-center gap-2 mb-1.5">
             <Badge
               variant={

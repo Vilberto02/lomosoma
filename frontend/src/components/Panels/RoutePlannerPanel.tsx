@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, memo } from "react";
 import type { UserPreferencesRequest, Coordenadas, PresetZona } from "../../types";
-import { X, Sparkles, Navigation, Calendar, Wallet, Activity, Check, Loader2, ChevronDown } from "lucide-react";
+import { X, Sparkles, Navigation, Calendar, Wallet, Activity, Check, Loader2, ChevronDown, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -30,6 +30,7 @@ interface RoutePlannerPanelProps {
   presets: PresetZona[];
   onOptimize: (prefs: UserPreferencesRequest) => Promise<void>;
   isLoading: boolean;
+  isEmbedded?: boolean;
 }
 
 const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
@@ -40,6 +41,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
   presets,
   onOptimize,
   isLoading,
+  isEmbedded = false,
 }) => {
   const [dias, setDias] = useState<number>(3);
   const [presupuesto, setPresupuesto] = useState<number>(60);
@@ -90,31 +92,47 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
 
   if (!isOpen) return null;
 
+  const containerClass = isEmbedded
+    ? "flex flex-col h-full w-full overflow-hidden bg-card"
+    : "absolute top-20 left-4 z-20 w-[92vw] sm:w-[420px] max-w-[420px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200";
+
+  const cardClass = isEmbedded
+    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
+    : "border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden bg-white";
+
   return (
-    <div className="absolute top-20 left-4 z-20 w-[92vw] sm:w-[420px] max-w-[420px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200">
-      <Card className="border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden bg-white">
+    <div className={containerClass}>
+      <Card className={cardClass}>
         {/* Header Limpio y Minimalista */}
         <CardHeader className="p-4 border-b border-border bg-card flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <CardTitle className="text-base font-semibold text-foreground">
-                  Planificador de rutas
-                </CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Optimiza tu itinerario de trekking con IA
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-1.5 rounded-lg hover:bg-primary/10"
+              title="Volver al catalogo de lomas"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Volver al catalogo</span>
+            </button>
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <CardTitle className="text-base font-semibold text-foreground">
+                Planificador de rutas
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Optimiza tu itinerario de trekking con IA
+              </p>
+            </div>
           </div>
         </CardHeader>
 

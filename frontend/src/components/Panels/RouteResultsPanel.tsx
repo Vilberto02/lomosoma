@@ -12,6 +12,7 @@ import {
   CheckSquare,
   Users,
   ShieldCheck,
+  ArrowLeft,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -31,6 +32,7 @@ interface RouteResultsPanelProps {
   prefs?: UserPreferencesRequest | null;
   onFocusLoma: (loma: Loma) => void;
   onNewSearch: () => void;
+  isEmbedded?: boolean;
 }
 
 const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
@@ -41,6 +43,7 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
   prefs,
   onFocusLoma,
   onNewSearch,
+  isEmbedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("itinerario");
   const [scoresModalOpen, setScoresModalOpen] = useState<boolean>(false);
@@ -70,11 +73,44 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
 
   if (!isOpen || !result) return null;
 
+  const containerClass = isEmbedded
+    ? "flex flex-col h-full w-full overflow-hidden bg-card"
+    : "absolute top-20 left-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200";
+
+  const cardClass = isEmbedded
+    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden"
+    : "border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden";
+
   return (
-    <div className="absolute top-20 left-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200">
-      <Card className="border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden">
+    <div className={containerClass}>
+      <Card className={cardClass}>
         {/* Cabecera del Panel Minimalista */}
         <CardHeader className="p-4 border-b border-border bg-card flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-1.5 rounded-lg hover:bg-primary/10"
+              title="Volver al catalogo de lomas"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Volver al catalogo</span>
+            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={onNewSearch}
+                title="Nueva búsqueda"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -93,21 +129,6 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
                     : "Algoritmo Genético Multiobjetivo"}
                 </p>
               </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={onNewSearch}
-                title="Nueva búsqueda"
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           </div>
 
