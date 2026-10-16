@@ -21,7 +21,7 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(dias_a_k(4), 4)
         self.assertEqual(dias_a_k(5), 5)
         self.assertEqual(dias_a_k(6), 6)
-        self.assertEqual(dias_a_k(7), 6)  # Cota maxima K=6
+        self.assertEqual(dias_a_k(7), 6)  # Cota maxima K de 6
         self.assertEqual(dias_a_k(30), 6)
 
     def test_mapping_service_pesos_condicion(self):

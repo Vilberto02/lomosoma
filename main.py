@@ -8,7 +8,7 @@ import json
 import argparse
 from typing import Dict, Any
 
-# Compatibilidad UTF-8 en consola de Windows
+# Compatibilidad UTF8 en consola de Windows
 if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")

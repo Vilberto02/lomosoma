@@ -20,7 +20,7 @@ except ImportError:
     MAPAS_DISPONIBLES = False
 
 
-# Plugin Leaflet para emitir evento de fin de arrastre hacia streamlit-folium
+# Plugin Leaflet para emitir evento de fin de arrastre hacia streamlit folium
 if MAPAS_DISPONIBLES:
     class DraggableMarkerPlugin(MacroElement):
         def __init__(self, marker):
@@ -178,10 +178,10 @@ def main():
         st.caption("El motor NLP calibrará las reglas difusas y el AG a partir de tus palabras clave:")
         with st.expander("Ver características reconocibles", expanded=False):
             st.markdown("""
-            - ☀️ **Clima/Ambiente:** *soleado, despejado, garúa, neblina, verde.*
-            - 🏛️ **Intereses:** *arqueología, ruinas, miradores, fotografía, paisajes.*
-            - 🛡️ **Seguridad:** *muy seguro, vigilancia, zona tranquila.*
-            - 🌿 **Afluencia:** *tranquilo, sin gente, poco concurrido, aislado.*
+            - **Clima/Ambiente:** *soleado, despejado, garúa, neblina, verde.*
+            - **Intereses:** *arqueología, ruinas, miradores, fotografía, paisajes.*
+            - **Seguridad:** *muy seguro, vigilancia, zona tranquila.*
+            - **Afluencia:** *tranquilo, sin gente, poco concurrido, aislado.*
             """)
 
         texto_usuario = st.text_area(
@@ -212,7 +212,7 @@ def main():
         active_api_key = gemini_key_input.strip() if gemini_key_input.strip() else None
         llm_service_preview = LomasLLMService(api_key=active_api_key, model=gemini_model_input)
         if llm_service_preview.is_gemini_active():
-            st.success(f"🟢 **Gemini Activo** (`{gemini_model_input}`)")
+            st.success(f"**Gemini Activo** (`{gemini_model_input}`)")
         else:
             st.info("**Fallback Heurístico Local** (Sin API Key / Modo offline)")
 
@@ -325,7 +325,7 @@ def main():
         # 1. Tarjetas de Métricas Principales (5 Columnas)
         pres_usuario = st.session_state.perfil_usuario.get("presupuesto_max", 0.0) if st.session_state.perfil_usuario else 0.0
         if pres_usuario > 0 and ag['costo_total'] > pres_usuario:
-            st.warning(f"⚠️ **Aviso de Presupuesto:** El costo estimado (S/ {ag['costo_total']:.2f}) supera el presupuesto asignado (S/ {pres_usuario:.2f}). Se seleccionaron las lomas más económicas del catálogo para minimizar la penalización.")
+            st.warning(f"**Aviso de Presupuesto:** El costo estimado (S/ {ag['costo_total']:.2f}) supera el presupuesto asignado (S/ {pres_usuario:.2f}). Se seleccionaron las lomas más económicas del catálogo para minimizar la penalización.")
 
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("Destinos (K)", f"{resultado['k']}")
