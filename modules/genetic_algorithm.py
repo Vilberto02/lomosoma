@@ -8,7 +8,7 @@ import math
 import random
 from typing import List, Dict, Any, Tuple, Optional
 
-# Compatibilidad UTF-8 en Windows
+# Compatibilidad UTF 8 en Windows
 if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -258,13 +258,7 @@ class LomasGeneticOptimizer:
             "costo_mejor": round(mejor_destino.get("costo_estimado", 15.0), 2),
             "distancia_mejor": round(distancia_total, 2)
         }]
-        tramos = [
-            {
-                "de": "Punto de partida",
-                "hacia": mejor_destino["nombre"],
-                "distancia_km": round(distancia_total * 2, 1)
-            }
-        ]
+        tramos = []
 
         return {
             "ruta_ids": [mejor_id],

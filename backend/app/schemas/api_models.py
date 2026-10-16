@@ -162,6 +162,10 @@ class GuiaAccesoModel(BaseModel):
     tarifa_justa_mototaxi_pen: float = 4.0
     ultimo_transporte_retorno: str = "17:30"
     garita_nombre: str = ""
+    recomendaciones: str = ""
+    fuente_geometria: str = ""
+    distancia_haversine_km: float = 0.0
+    estacion_troncal: str = ""
 
 
 class LomaSummaryModel(BaseModel):
