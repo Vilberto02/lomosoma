@@ -18,7 +18,7 @@ export const UserMarker = memo(function UserMarker({
   const userMarkerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !(map as unknown as { _panes?: unknown })._panes || !map.getContainer()) return;
 
     const userIconHtml = `
       <div class="relative flex items-center justify-center w-11 h-11 ${draggable ? "cursor-grab active:cursor-grabbing" : "cursor-default"} select-none group">
@@ -42,7 +42,11 @@ export const UserMarker = memo(function UserMarker({
 
     if (!userMarkerRef.current || !map.hasLayer(userMarkerRef.current)) {
       if (userMarkerRef.current) {
-        userMarkerRef.current.remove();
+        try {
+          userMarkerRef.current.remove();
+        } catch {
+          // ignore
+        }
       }
 
       const marker = L.marker([userCoords.lat, userCoords.lon], {
@@ -72,8 +76,12 @@ export const UserMarker = memo(function UserMarker({
         });
       });
 
-      marker.addTo(map);
-      userMarkerRef.current = marker;
+      try {
+        marker.addTo(map);
+        userMarkerRef.current = marker;
+      } catch {
+        // ignore
+      }
     } else {
       userMarkerRef.current.setLatLng([userCoords.lat, userCoords.lon]);
       userMarkerRef.current.setIcon(userIcon);
@@ -85,8 +93,12 @@ export const UserMarker = memo(function UserMarker({
     }
 
     return () => {
-      if (userMarkerRef.current && map.hasLayer(userMarkerRef.current)) {
-        map.removeLayer(userMarkerRef.current);
+      if (userMarkerRef.current) {
+        try {
+          userMarkerRef.current.remove();
+        } catch {
+          // ignore
+        }
         userMarkerRef.current = null;
       }
     };

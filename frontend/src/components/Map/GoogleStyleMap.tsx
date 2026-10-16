@@ -58,9 +58,13 @@ const GoogleStyleMapComponent: React.FC<GoogleStyleMapProps> = ({
   );
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstance) return;
+    const container = mapContainerRef.current;
+    if (!container) return;
+    if ((container as unknown as { _leaflet_id?: number | null })._leaflet_id) {
+      return;
+    }
 
-    const map = L.map(mapContainerRef.current, {
+    const map = L.map(container, {
       center: [userCoords.lat, userCoords.lon],
       zoom: 11,
       zoomControl: false,
@@ -79,10 +83,11 @@ const GoogleStyleMapComponent: React.FC<GoogleStyleMapProps> = ({
 
     return () => {
       map.remove();
+      (container as unknown as { _leaflet_id?: number | null })._leaflet_id = null;
       setMapInstance(null);
       tileLayerRef.current = null;
     };
-  }, [userCoords.lat, userCoords.lon, mapInstance]);
+  }, []);
 
   useEffect(() => {
     if (!mapInstance || !mapCenterTarget) return;

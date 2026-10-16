@@ -33,7 +33,7 @@ export const MapMarkers = memo(function MapMarkers({
   const waypointMarkersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !(map as unknown as { _panes?: unknown })._panes || !map.getContainer()) return;
 
     const routeOrderMap = new Map<string, number>();
     if (optimizationResult?.ruta_ids) {
