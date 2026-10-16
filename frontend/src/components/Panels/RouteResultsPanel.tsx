@@ -1,6 +1,18 @@
 import React, { useState, useMemo, memo } from "react";
 import type { OptimizationResult, Loma, UserPreferencesRequest } from "../../types";
-import { X, MapPin, Gauge, Cpu, ChevronRight, RotateCcw, Route, Check } from "lucide-react";
+import {
+  X,
+  MapPin,
+  Gauge,
+  Cpu,
+  ChevronRight,
+  RotateCcw,
+  Route,
+  Check,
+  CheckSquare,
+  Users,
+  ShieldCheck,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -61,7 +73,7 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
   return (
     <div className="absolute top-20 left-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200">
       <Card className="border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden">
-        {/* Cabecera del Panel - Minimalista */}
+        {/* Cabecera del Panel Minimalista */}
         <CardHeader className="p-4 border-b border-border bg-card flex-shrink-0">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-3">
@@ -188,6 +200,64 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
                   {result.metodo === "atajo_determinista"
                     ? "atajo determinista"
                     : "algoritmo genético"}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {result.checklist_equipamiento && result.checklist_equipamiento.length > 0 && (
+              <AccordionItem value="checklist">
+                <AccordionTrigger className="text-sm font-semibold">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <span>Checklist de Equipamiento Inteligente</span>
+                    <Badge variant="outline" className="text-[10px] font-mono">
+                      {result.checklist_equipamiento.length} items
+                    </Badge>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-2 text-xs text-foreground/80 space-y-1.5">
+                  {result.checklist_equipamiento.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 py-0.5">
+                      <CheckSquare className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            <AccordionItem value="costos-grupales">
+              <AccordionTrigger className="text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-primary" />
+                  <span>Resumen de Costos y Chancha Grupal</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-2 text-xs text-foreground/80 space-y-2">
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <div className="p-2.5 rounded-lg bg-card border border-border">
+                    <div className="text-[10px] uppercase font-bold text-muted-foreground">
+                      Costo Individual
+                    </div>
+                    <div className="text-base font-black text-foreground mt-0.5">
+                      S/ {result.costo_total.toFixed(0)}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">Viajero solo</div>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
+                    <div className="text-[10px] uppercase font-bold text-primary">
+                      Cuota Grupo 4
+                    </div>
+                    <div className="text-base font-black text-primary mt-0.5">
+                      S/ {((result.costo_total * 4 * 0.72) / 4).toFixed(0)} / pers
+                    </div>
+                    <div className="text-[10px] text-emerald-700 font-semibold">
+                      Ahorro compartiendo guia y transporte
+                    </div>
+                  </div>
+                </div>
+                <div className="text-[11px] text-muted-foreground italic">
+                  Total estimado para 4 personas: S/ {(result.costo_total * 4 * 0.72).toFixed(0)} (entradas completas, 1 guia compartido y taxis divididos).
                 </div>
               </AccordionContent>
             </AccordionItem>
