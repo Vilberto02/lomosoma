@@ -21,7 +21,7 @@ from modules.access_module import LomasAccessService
 
 
 class LomasPipelineOrchestrator:
-    """Orquestador central para la ejecución end-to-end del sistema."""
+    """Orquestador central para la ejecucion completa del sistema."""
 
     def __init__(
         self,
@@ -56,11 +56,8 @@ class LomasPipelineOrchestrator:
         # 2. Inferencia difusa: Nivel de Riesgo del catálogo mediante LomasFuzzyEngine
         riesgos_todos = self.fuzzy_engine.calcular_riesgos_catalogo(self.destinos)
 
-        # 3. Beneficios base intrínsecos del catálogo (con bonificación por patrimonio)
-        beneficios_base = {
-            d['id']: round(7.0 + (1.0 if d.get('patrimonio', False) else 0.0), 2)
-            for d in self.destinos
-        }
+        # 3. Beneficios del catalogo segun intereses y clima preferido
+        beneficios_base = self.mapping_service.calcular_beneficios_personalizados(self.destinos, fuzzy_prefs)
 
         # 4. Mapeo y adaptación de parámetros mediante LomasMappingService
         config_ag = self.mapping_service.preparar_configuracion_ag(user_prefs, fuzzy_prefs)
@@ -75,7 +72,9 @@ class LomasPipelineOrchestrator:
         resultado_ag = optimizador.optimizar()
 
         # 7. Guías de Transporte y Acceso mediante LomasAccessService
-        guias_acceso = [self.access_service.obtener_guia_acceso(did) for did in resultado_ag["ruta_ids"]]
+        guias_acceso = [self.access_service.obtener_guia_acceso(
+            did, config_ag["nodo_base"]["lat"], config_ag["nodo_base"]["lon"]
+        ) for did in resultado_ag["ruta_ids"]]
 
         # 8. Itinerario Narrativo generado por LomasLLMService
         perfil_combinado = {
@@ -103,5 +102,9 @@ class LomasPipelineOrchestrator:
             metodo=resultado_ag.get("metodo", "algoritmo_genetico"),
             grafica_ascii=resultado_ag.get("grafica_ascii", ""),
             historial=resultado_ag.get("historial", []),
-            llm_provider=getattr(self.llm_service, "ultimo_origen", "fallback")
+            llm_provider=getattr(self.llm_service, "ultimo_origen", "fallback"),
+            checklist_equipamiento=self.mapping_service.generar_checklist_equipamiento(
+                resultado_ag["destinos_ordenados"], fuzzy_prefs, user_prefs.condicion_fisica
+            ),
+            afinidad_Destinos=beneficios_base,
         )

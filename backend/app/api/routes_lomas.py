@@ -4,18 +4,29 @@ Endpoints para la gestión del catálogo de lomas, búsqueda y presets de ubicac
 
 import os
 import json
+from collections import defaultdict, deque
+from datetime import datetime, timezone
+from threading import Lock
+from uuid import uuid4
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from backend.app.schemas.api_models import (
     LomaSummaryModel,
     LomaDetailModel,
     GuiaAccesoModel,
     CoordenadasModel,
-    PresetZonaModel
+    PresetZonaModel,
+    LomaCastReportModel,
+    SenderoProfileModel,
+    OfflinePackResponseModel,
+    ReporteCiudadanoCreateRequest,
+    ReporteCiudadanoModel,
 )
 from modules.access_module import LomasAccessService
 from modules.fuzzy_module import LomasFuzzyEngine
+from modules.weather_service import LomaCastService
+from modules.routing_service import LastMileRoutingService
 
 router = APIRouter(tags=["Lomas y Presets"])
 
@@ -31,6 +42,23 @@ DESTINOS_DICT = {d["id"]: d for d in DESTINOS}
 ACCESS_SERVICE = LomasAccessService(DESTINOS_DICT)
 FUZZY_ENGINE = LomasFuzzyEngine()
 SCORES_DIFUSOS = FUZZY_ENGINE.calcular_riesgos_catalogo(DESTINOS)
+WEATHER_SERVICE = LomaCastService(DESTINOS_DICT)
+ROUTING_SERVICE = LastMileRoutingService(DESTINOS_DICT)
+REPORTES = defaultdict(lambda: deque(maxlen=100))
+REPORTES_LOCK = Lock()
+
+
+def _obtener_loma(id_loma):
+    did = id_loma.strip().upper()
+    if did not in DESTINOS_DICT:
+        raise HTTPException(status_code=404, detail="Loma no encontrada")
+    return did, DESTINOS_DICT[did]
+
+
+def _resumen_clima(did):
+    reporte = WEATHER_SERVICE.obtener_reporte(did)
+    return {k: reporte[k] for k in ("fase_floracion_index", "fase_floracion_nombre", "indice_verdor_actual",
+                                    "probabilidad_colchon_hoy_pct", "estado_sendero_barro", "temp_actual_c")}
 
 PRESETS_LIMA = [
     PresetZonaModel(nombre="Centro de Lima (Plaza Mayor / Centro Histórico)", lat=-12.0464, lon=-77.0428),
@@ -52,12 +80,15 @@ PRESETS_LIMA = [
 def get_lomas(
     q: Optional[str] = Query(None, description="Búsqueda por nombre de loma o distrito"),
     distrito: Optional[str] = Query(None, description="Filtrar por distrito exacto"),
-    dificultad: Optional[str] = Query(None, description="Filtrar por dificultad (Fácil, Moderado, Difícil)")
+    dificultad: Optional[str] = Query(None, description="Filtrar por dificultad (Fácil, Moderado, Difícil)"),
+    solo_naturales: Optional[bool] = Query(None),
 ):
     """
     Retorna la lista completa de las lomas de Lima con soporte para búsqueda y filtros reactivos.
     """
     resultados = DESTINOS
+    if solo_naturales is True:
+        resultados = [d for d in resultados if d.get("es_loma_natural", True)]
 
     if q:
         q_lower = q.strip().lower()
@@ -72,37 +103,68 @@ def get_lomas(
     if dificultad:
         resultados = [d for d in resultados if d["dificultad"].lower() == dificultad.strip().lower()]
 
-    return [{**d, "score_difuso": SCORES_DIFUSOS.get(d["id"], 0.0)} for d in resultados]
+    return [{**d, "score_difuso": SCORES_DIFUSOS.get(d["id"], 0.0), "lomacast_resumen": _resumen_clima(d["id"])} for d in resultados]
 
 
 @router.get("/lomas/{id_loma}", response_model=LomaDetailModel)
-def get_loma_detail(id_loma: str):
+def get_loma_detail(id_loma: str, user_lat: Optional[float] = Query(None, ge=-90, le=90),
+                    user_lon: Optional[float] = Query(None, ge=-180, le=180)):
     """
     Retorna la ficha técnica y detallada de una loma específica junto a sus instrucciones de acceso y transporte público.
     """
-    id_upper = id_loma.strip().upper()
-    loma = DESTINOS_DICT.get(id_upper)
+    id_upper, loma = _obtener_loma(id_loma)
+    if (user_lat is None) != (user_lon is None):
+        raise HTTPException(status_code=422, detail="Enviar user_lat y user_lon juntos")
+    guia_raw = ACCESS_SERVICE.obtener_guia_acceso(id_upper, user_lat, user_lon)
+    garita = loma.get("garita_control") or loma["coordenadas"]
+    guia = GuiaAccesoModel(**guia_raw, id=id_upper,
+                          coordenadas_destino=CoordenadasModel(lat=garita["lat"], lon=garita["lon"]))
+    with REPORTES_LOCK:
+        recientes = list(REPORTES[id_upper])
+    return {**loma, "score_difuso": SCORES_DIFUSOS.get(id_upper, 0.0), "guia_acceso": guia,
+            "lomacast_resumen": _resumen_clima(id_upper), "lomacast": WEATHER_SERVICE.obtener_reporte(id_upper),
+            "sendero": ROUTING_SERVICE.obtener_perfil_sendero(id_upper), "reportes_recientes": recientes}
 
-    if not loma:
-        raise HTTPException(status_code=404, detail=f"Loma con ID '{id_loma}' no encontrada.")
 
-    # Generar o enriquecer con guía de acceso logístico
-    guia_raw = ACCESS_SERVICE.obtener_guia_acceso(id_upper)
-    guia = GuiaAccesoModel(
-        id=id_upper,
-        nombre=guia_raw.get("nombre", loma["nombre"]),
-        punto_partida_recomendado=guia_raw.get("punto_partida_recomendado", ""),
-        medio_transporte=guia_raw.get("medio_transporte", loma.get("transporte_principal", "")),
-        tiempo_total_min=guia_raw.get("tiempo_total_min", 60),
-        costo_total_soles=guia_raw.get("costo_total_soles", loma.get("costo_estimado", 10.0)),
-        pasos=guia_raw.get("pasos", []),
-        coordenadas_destino=CoordenadasModel(
-            lat=loma["coordenadas"]["lat"],
-            lon=loma["coordenadas"]["lon"]
-        )
-    )
+@router.get("/lomas/{id_loma}/lomacast", response_model=LomaCastReportModel)
+def get_lomacast(id_loma: str):
+    did, _ = _obtener_loma(id_loma)
+    return WEATHER_SERVICE.obtener_reporte(did)
 
-    return {**loma, "score_difuso": SCORES_DIFUSOS.get(id_upper, 0.0), "guia_acceso": guia}
+
+@router.get("/lomas/{id_loma}/sendero", response_model=SenderoProfileModel)
+def get_sendero(id_loma: str):
+    did, _ = _obtener_loma(id_loma)
+    return ROUTING_SERVICE.obtener_perfil_sendero(did)
+
+
+@router.get("/lomas/{id_loma}/gpx")
+def get_gpx(id_loma: str):
+    did, _ = _obtener_loma(id_loma)
+    return Response(content=ROUTING_SERVICE.generar_gpx_xml(did), media_type="application/gpx+xml",
+                    headers={"Content-Disposition": f'attachment; filename="lomosoma_{did}.gpx"'})
+
+
+@router.get("/lomas/{id_loma}/offline-pack", response_model=OfflinePackResponseModel)
+def get_offline_pack(id_loma: str, user_lat: Optional[float] = Query(None, ge=-90, le=90),
+                     user_lon: Optional[float] = Query(None, ge=-180, le=180)):
+    detail = LomaDetailModel.model_validate(get_loma_detail(id_loma, user_lat, user_lon)).model_dump(mode="json")
+    pack = ROUTING_SERVICE.generar_offline_pack(detail["id"], detail, detail["lomacast"])
+    pack = OfflinePackResponseModel.model_validate(pack).model_dump(mode="json")
+    pack["checksum_sha256"] = ROUTING_SERVICE.calcular_checksum(pack)
+    return pack
+
+
+@router.post("/lomas/{id_loma}/reportes", response_model=ReporteCiudadanoModel, status_code=201)
+def post_reporte(id_loma: str, request: ReporteCiudadanoCreateRequest):
+    did, _ = _obtener_loma(id_loma)
+    if not request.comentario.strip() or len(request.comentario) > 2000:
+        raise HTTPException(status_code=422, detail="Comentario requerido con maximo de 2000 caracteres")
+    reporte = ReporteCiudadanoModel(**request.model_dump(), id=uuid4().hex, loma_id=did,
+                                    fecha_iso=datetime.now(timezone.utc).isoformat())
+    with REPORTES_LOCK:
+        REPORTES[did].appendleft(reporte)
+    return reporte
 
 
 @router.get("/presets", response_model=List[PresetZonaModel])

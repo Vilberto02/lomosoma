@@ -3,21 +3,65 @@ Módulo de Mapeo y Adaptación de Parámetros de Dominio (POO).
 """
 
 from typing import Tuple, Dict, Any, Optional
+import unicodedata
 from modules.dtos import UserPreferencesDTO, FuzzySemanticPreferencesDTO, CoordenadasDTO
 
 
 class LomasMappingService:
-    """
-    Servicio de dominio para validar, mapear y adaptar las preferencias del usuario
-    a la configuración matemática requerida por el Algoritmo Genético y el Motor Difuso.
-    """
+    """Adaptacion de preferencias al optimizador de rutas."""
+
+    @staticmethod
+    def _normalizar(texto):
+        return "".join(c for c in unicodedata.normalize("NFD", str(texto).lower()) if not unicodedata.combining(c))
+
+    @classmethod
+    def calcular_beneficios_personalizados(cls, destinos, fuzzy_prefs):
+        grupos = {
+            "arqueologia": ("arqueolog", "ruina", "patrimonio", "histori", "cultural"),
+            "naturaleza": ("naturaleza", "flora", "flor", "vegetacion", "ecosistema"),
+            "senderismo": ("sender", "trekking", "circuito", "caminata"),
+            "vistas panoramicas": ("mirador", "panoram", "vista", "colchon"),
+            "fotografia": ("mirador", "panoram", "amancaes", "colchon"),
+            "aves y fauna": ("ave", "fauna", "vizcacha", "zorro"),
+        }
+        beneficios = {}
+        for d in destinos:
+            texto = cls._normalizar(" ".join([d.get("tipo", ""), d.get("descripcion", ""), *d.get("atractivos_principales", [])]))
+            valor = 7.0 + (1 if d.get("patrimonio") else 0)
+            for interes in set(cls._normalizar(x) for x in fuzzy_prefs.intereses):
+                if interes == "tranquilidad":
+                    valor += 2 * (1 - float(d.get("saturacion_base", 0.5)))
+                elif any(p in texto for p in grupos.get(interes, (interes,))):
+                    valor += 2
+            if "garua" in cls._normalizar(fuzzy_prefs.clima_preferido):
+                valor += float(d.get("clima_verdor_base", 5)) / 10
+            else:
+                valor += (10 - float(d.get("clima_verdor_base", 5))) / 10
+            beneficios[d["id"]] = round(valor, 2)
+        return beneficios
+
+    @classmethod
+    def generar_checklist_equipamiento(cls, destinos_ordenados, fuzzy_prefs, condicion_fisica):
+        lista = ["Agua potable y refrigerio", "Calzado de trekking con buen agarre", "Protector solar y gorra",
+                 "Efectivo para transporte y entrada", "Mapa offline y bateria externa", "Botiquin y silbato"]
+        if "garua" in cls._normalizar(fuzzy_prefs.clima_preferido) or any(d.get("es_loma_natural", True) for d in destinos_ordenados):
+            lista.append("Casaca impermeable y capa para neblina")
+        if ("facil" in cls._normalizar(condicion_fisica)
+                or any(d.get("pendiente_max_pct", 0) >= 20 for d in destinos_ordenados)):
+            lista.append("Bastones de trekking")
+        intereses = cls._normalizar(" ".join(fuzzy_prefs.intereses))
+        if "foto" in intereses or "vista" in intereses:
+            lista.append("Camara con proteccion contra humedad")
+        if "aves" in intereses or "fauna" in intereses:
+            lista.append("Binoculares")
+        return lista
 
     @staticmethod
     def dias_a_k(dias: int) -> int:
         """
         Mapea el número de días disponibles al parámetro K de destinos activos.
-        - Días <= 1: Retorna K=1 (atajo determinista).
-        - Días >= 2: Retorna K = clamp(días, 2, 6).
+        Hasta un dia retorna un destino mediante seleccion determinista.
+        Desde dos dias limita la cantidad de destinos entre dos y seis.
         """
         if dias <= 1:
             return 1
@@ -31,9 +75,9 @@ class LomasMappingService:
     ) -> Tuple[float, float, float]:
         """
         Traduce la condición física cualitativa a los hiperparámetros del AG:
-        - delta_exigencia: Peso de penalización por desvío del esfuerzo objetivo.
-        - gamma_riesgo: Penalización por riesgo difuso acumulado (modulada por sensibilidad).
-        - exigencia_target: Nivel objetivo difuso [0.0 - 1.0] (Fácil ~0.20, Moderado ~0.50, Difícil ~0.85).
+        delta_exigencia pondera el desvio del esfuerzo objetivo.
+        gamma_riesgo penaliza el riesgo segun la sensibilidad del usuario.
+        exigencia_target fija el objetivo entre cero y uno segun condicion fisica.
         """
         cond = (condicion_fisica or "Moderado").lower().strip()
         if "fácil" in cond or "facil" in cond:

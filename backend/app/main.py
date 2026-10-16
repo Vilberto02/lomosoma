@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.routes_lomas import router as lomas_router
 from backend.app.api.routes_optimize import router as optimize_router
+from backend.app.api.routes_billing import router as billing_router
 
 app = FastAPI(
     title="Sistema Inteligente de Rutas - Lomas de Lima",
@@ -39,6 +40,7 @@ app.add_middleware(
 # Registro de routers de la API
 app.include_router(lomas_router, prefix="/api")
 app.include_router(optimize_router, prefix="/api")
+app.include_router(billing_router, prefix="/api")
 
 
 @app.get("/api/health", tags=["Health"])

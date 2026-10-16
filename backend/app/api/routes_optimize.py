@@ -32,7 +32,9 @@ def optimize_route(request: UserPreferencesRequest):
         )
 
         resultado_dto = orchestrator.run(user_dto)
-        return resultado_dto.to_dict()
+        resultado = resultado_dto.to_dict()
+        resultado["afinidad_destinos"] = resultado.pop("afinidad_Destinos")
+        return resultado
 
     except Exception as e:
         raise HTTPException(
