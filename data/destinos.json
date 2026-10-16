@@ -18,7 +18,42 @@
     "distancia_centro_min": 60,
     "transporte_principal": "Tren Eléctrico L1 (Est. María Auxiliadora) + Combi a Paraíso",
     "descripcion": "Circuito ecoturístico comunitario de 2,000 ha gestionado por pobladores locales. Famoso por el mirador del colchón de nubes en Apu Siqay.",
-    "temporada_optima": "Junio - Octubre"
+    "temporada_optima": "Junio - Octubre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": true,
+    "altitud_max_msnm": 1015,
+    "desnivel_positivo_m": 580,
+    "distancia_sendero_km": 6.8,
+    "pendiente_max_pct": 24,
+    "meses_verdor": [6, 7, 8, 9, 10],
+    "atractivos_principales": ["Mirador Apu Siqay", "Colchón de Nubes", "Flor de Amancaes", "Vizcachas", "Vistas Panorámicas"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 45,
+      "roca_granito_pct": 30,
+      "barro_arcilloso_pct": 25
+    },
+    "garita_control": {
+      "nombre": "Garita Comunitaria Asociación Circuito Ecoturístico Lomas de Paraíso",
+      "lat": -12.1642,
+      "lon": -76.9288,
+      "horario_ingreso": "06:00 a 14:00",
+      "hora_limite_bajada": "16:30",
+      "ultimo_transporte_retorno": "17:45 (Última combi y mototaxi en paradero final de Edén del Manantial)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Escalera de Ingreso Sector Edén del Manantial (480 msnm)",
+        "lat": -12.1661,
+        "lon": -76.9265
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 7.0,
+      "entrada_escolar_pen": 3.0,
+      "guiado_grupal_pen": 40.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 4.0,
+      "asociacion": "Asociación Circuito Ecoturístico Lomas de Paraíso",
+      "whatsapp_contacto": "+51987654320"
+    }
   },
   {
     "id": "L1",
@@ -39,7 +74,42 @@
     "distancia_centro_min": 90,
     "transporte_principal": "Alimentador Metropolitano hasta Carabayllo + colectivo local",
     "descripcion": "Área protegida por el ACR Sistema de Lomas de Lima. Cuenta con 4 rutas oficiales de control de aforo (Colchón Ancestral, Zorro Místico).",
-    "temporada_optima": "Junio - Octubre"
+    "temporada_optima": "Junio - Octubre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 920,
+    "desnivel_positivo_m": 510,
+    "distancia_sendero_km": 7.4,
+    "pendiente_max_pct": 22,
+    "meses_verdor": [6, 7, 8, 9, 10],
+    "atractivos_principales": ["Ruta Colchón Ancestral", "Ruta Zorro Místico", "Aves y Fauna", "Naturaleza", "Senderismo"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 50,
+      "roca_granito_pct": 30,
+      "barro_arcilloso_pct": 20
+    },
+    "garita_control": {
+      "nombre": "Puesto de Control ACR Lomas de Carabayllo Sector San Benito",
+      "lat": -11.8365,
+      "lon": -77.0172,
+      "horario_ingreso": "06:30 a 13:00",
+      "hora_limite_bajada": "16:00",
+      "ultimo_transporte_retorno": "17:15 (Colectivos hacia Km 22 Túpac Amaru)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Quebrada Baja San Benito (390 msnm)",
+        "lat": -11.8348,
+        "lon": -77.0151
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 10.0,
+      "entrada_escolar_pen": 5.0,
+      "guiado_grupal_pen": 45.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 5.0,
+      "asociacion": "Defensores Ecológicos de las Lomas de Carabayllo",
+      "whatsapp_contacto": "+51987654321"
+    }
   },
   {
     "id": "L2",
@@ -60,7 +130,42 @@
     "distancia_centro_min": 60,
     "transporte_principal": "Bus Panamericana Norte / Av. Túpac Amaru hasta paradero Primavera",
     "descripcion": "Ecosistema de baja concurrencia ideal para senderismo suave y avistamiento de aves endémicas en temporada de niebla.",
-    "temporada_optima": "Junio - Octubre"
+    "temporada_optima": "Junio - Octubre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 680,
+    "desnivel_positivo_m": 320,
+    "distancia_sendero_km": 4.5,
+    "pendiente_max_pct": 16,
+    "meses_verdor": [6, 7, 8, 9, 10],
+    "atractivos_principales": ["Aves y Fauna", "Tranquilidad", "Naturaleza", "Fotografía"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 60,
+      "roca_granito_pct": 20,
+      "barro_arcilloso_pct": 20
+    },
+    "garita_control": {
+      "nombre": "Ingreso Comunitario Asociación Lomas de Primavera",
+      "lat": -11.8682,
+      "lon": -77.0320,
+      "horario_ingreso": "07:00 a 13:30",
+      "hora_limite_bajada": "16:00",
+      "ultimo_transporte_retorno": "17:30 (Mototaxis hacia Av. Camino Real / Túpac Amaru)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Mirador Inicial Loma Baja (420 msnm)",
+        "lat": -11.8670,
+        "lon": -77.0305
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 3.0,
+      "guiado_grupal_pen": 35.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 3.5,
+      "asociacion": "Asociación Ecológica Lomas de Primavera",
+      "whatsapp_contacto": "+51987654322"
+    }
   },
   {
     "id": "L3",
@@ -81,7 +186,42 @@
     "distancia_centro_min": 45,
     "transporte_principal": "Bus Corredor Rojo hasta La Molina + combi hacia Manchay Bajo",
     "descripcion": "Zona de conservación comunitaria con formaciones rocosas singulares y senderos con pendiente moderada.",
-    "temporada_optima": "Julio - Octubre"
+    "temporada_optima": "Julio - Octubre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 790,
+    "desnivel_positivo_m": 410,
+    "distancia_sendero_km": 5.2,
+    "pendiente_max_pct": 20,
+    "meses_verdor": [7, 8, 9, 10],
+    "atractivos_principales": ["Formaciones Rocosas", "Tranquilidad", "Vistas Panorámicas", "Senderismo"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 50,
+      "roca_granito_pct": 35,
+      "barro_arcilloso_pct": 15
+    },
+    "garita_control": {
+      "nombre": "Punto de Control Quebrada Manchay",
+      "lat": -12.1190,
+      "lon": -76.8855,
+      "horario_ingreso": "06:30 a 13:30",
+      "hora_limite_bajada": "16:15",
+      "ultimo_transporte_retorno": "17:30 (Combis hacia Musa / Av. La Molina)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Abra de Piedra Manchay (510 msnm)",
+        "lat": -12.1174,
+        "lon": -76.8839
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 2.5,
+      "guiado_grupal_pen": 35.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 4.0,
+      "asociacion": "Protectora Comunitaria Lomas de Manchay",
+      "whatsapp_contacto": "+51987654323"
+    }
   },
   {
     "id": "L4",
@@ -102,7 +242,43 @@
     "distancia_centro_min": 50,
     "transporte_principal": "Tren Eléctrico L1 (Est. Pirámide del Sol) + bus auxiliar a Mangomarca",
     "descripcion": "Espacio de más de 500 hectáreas que combina flora silvestre con el sitio arqueológico de la cultura Ruricancho.",
-    "temporada_optima": "Junio - Octubre"
+    "temporada_optima": "Junio - Octubre",
+    "patrimonio": true,
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 850,
+    "desnivel_positivo_m": 490,
+    "distancia_sendero_km": 6.1,
+    "pendiente_max_pct": 23,
+    "meses_verdor": [6, 7, 8, 9, 10],
+    "atractivos_principales": ["Arqueología", "Huaca Mangomarca", "Boca de Sapo", "Vistas Panorámicas", "Naturaleza"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 45,
+      "roca_granito_pct": 35,
+      "barro_arcilloso_pct": 20
+    },
+    "garita_control": {
+      "nombre": "Garita Lomas de Mangomarca (Final Av. Santuario)",
+      "lat": -12.0128,
+      "lon": -76.9845,
+      "horario_ingreso": "06:30 a 13:30",
+      "hora_limite_bajada": "16:30",
+      "ultimo_transporte_retorno": "18:00 (Buses línea 48 / mototaxis hacia Av. Próceres)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Mirador de la Cruz Mangomarca (460 msnm)",
+        "lat": -12.0108,
+        "lon": -76.9830
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 3.0,
+      "guiado_grupal_pen": 40.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 3.0,
+      "asociacion": "Red de Lomas de Mangomarca",
+      "whatsapp_contacto": "+51987654324"
+    }
   },
   {
     "id": "L5",
@@ -123,7 +299,43 @@
     "distancia_centro_min": 40,
     "transporte_principal": "Corredor Azul (Línea 301/303) hasta paradero Flor de Amancaes",
     "descripcion": "Loma emblemática de la historia limeña y hábitat natural de la flor de amancaes (Ismene amancaes), flor símbolo de Lima.",
-    "temporada_optima": "Junio - Septiembre"
+    "temporada_optima": "Junio - Septiembre",
+    "patrimonio": true,
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 710,
+    "desnivel_positivo_m": 380,
+    "distancia_sendero_km": 4.2,
+    "pendiente_max_pct": 19,
+    "meses_verdor": [6, 7, 8, 9],
+    "atractivos_principales": ["Flor de Amancaes", "Vistas Panorámicas", "Fotografía", "Naturaleza"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 50,
+      "roca_granito_pct": 25,
+      "barro_arcilloso_pct": 25
+    },
+    "garita_control": {
+      "nombre": "Caseta de Control ACR Lomas de Amancaes (Sector Horacio Zeballos)",
+      "lat": -12.0215,
+      "lon": -77.0412,
+      "horario_ingreso": "07:00 a 14:00",
+      "hora_limite_bajada": "16:30",
+      "ultimo_transporte_retorno": "18:30 (Alimentador Corredor Azul en paradero Flor de Amancaes)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Escalinata Mirador Amancaes (430 msnm)",
+        "lat": -12.0198,
+        "lon": -77.0401
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 2.5,
+      "guiado_grupal_pen": 35.0,
+      "max_personas_guia": 10,
+      "mototaxi_justo_pen": 3.0,
+      "asociacion": "Asociación Protectora Lomas de Amancaes PAFLA",
+      "whatsapp_contacto": "+51987654325"
+    }
   },
   {
     "id": "L6",
@@ -144,7 +356,43 @@
     "distancia_centro_min": 120,
     "transporte_principal": "Bus interprovincial Panamericana Norte km 105 + caminata de ingreso",
     "descripcion": "Reserva Nacional protegida por SERNANP. Ecosistema de condensación de nieblas con senderos interpretativos señalizados.",
-    "temporada_optima": "Junio - Noviembre"
+    "temporada_optima": "Junio - Noviembre",
+    "patrimonio": true,
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 750,
+    "desnivel_positivo_m": 340,
+    "distancia_sendero_km": 5.5,
+    "pendiente_max_pct": 15,
+    "meses_verdor": [6, 7, 8, 9, 10, 11],
+    "atractivos_principales": ["Reserva SERNANP", "Zorro Costero", "Aves y Fauna", "Tara y Mito", "Fotografía"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 65,
+      "roca_granito_pct": 25,
+      "barro_arcilloso_pct": 10
+    },
+    "garita_control": {
+      "nombre": "Puesto de Control SERNANP Reserva Nacional de Lachay (Km 105 Panamericana Norte)",
+      "lat": -11.3588,
+      "lon": -77.3670,
+      "horario_ingreso": "08:00 a 15:30",
+      "hora_limite_bajada": "17:00",
+      "ultimo_transporte_retorno": "17:30 (Buses interprovinciales en el cruce Km 105 hacia Lima Norte)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Centro de Interpretación SERNANP Lachay (380 msnm)",
+        "lat": -11.3615,
+        "lon": -77.3682
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 11.0,
+      "entrada_escolar_pen": 5.0,
+      "guiado_grupal_pen": 50.0,
+      "max_personas_guia": 10,
+      "mototaxi_justo_pen": 10.0,
+      "asociacion": "SERNANP Reserva Nacional de Lachay",
+      "whatsapp_contacto": "+51987654326"
+    }
   },
   {
     "id": "L7",
@@ -165,7 +413,43 @@
     "distancia_centro_min": 60,
     "transporte_principal": "Bus Panamericana Sur hasta puente Lurín + colectivo hacia Quebrada Verde",
     "descripcion": "Circuito ecoturístico pionero en Lima sur. Posee pinturas rupestres, farallones para escalada y servicios de guiado local.",
-    "temporada_optima": "Junio - Noviembre"
+    "temporada_optima": "Junio - Noviembre",
+    "patrimonio": true,
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 720,
+    "desnivel_positivo_m": 440,
+    "distancia_sendero_km": 6.0,
+    "pendiente_max_pct": 18,
+    "meses_verdor": [6, 7, 8, 9, 10, 11],
+    "atractivos_principales": ["Arqueología", "Pinturas Rupestres", "Farallones", "Flor de Amancaes", "Vistas Panorámicas"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 55,
+      "roca_granito_pct": 25,
+      "barro_arcilloso_pct": 20
+    },
+    "garita_control": {
+      "nombre": "Boletería Centro Poblado Rural Quebrada Verde (Lomas de Lúcumo)",
+      "lat": -12.2012,
+      "lon": -76.8805,
+      "horario_ingreso": "06:30 a 14:30",
+      "hora_limite_bajada": "16:45",
+      "ultimo_transporte_retorno": "18:00 (Colectivos desde Plaza de Quebrada Verde hacia Puente Lurín)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Sector Tara y Pinturas Rupestres (360 msnm)",
+        "lat": -12.1975,
+        "lon": -76.8820
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 10.0,
+      "entrada_escolar_pen": 5.5,
+      "guiado_grupal_pen": 50.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 4.0,
+      "asociacion": "Asociación Circuito Ecoturístico Lomas de Lúcumo",
+      "whatsapp_contacto": "+51987654327"
+    }
   },
   {
     "id": "L8",
@@ -186,7 +470,43 @@
     "distancia_centro_min": 30,
     "transporte_principal": "Metropolitano hasta Estación Matellini + alimentador o taxi al Morro",
     "descripcion": "Mirador panorámico de la bahía de Lima y monumento histórico con senderos costeros y rutas para trekking urbano y ciclismo.",
-    "temporada_optima": "Todo el año"
+    "temporada_optima": "Todo el año",
+    "patrimonio": true,
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 280,
+    "desnivel_positivo_m": 250,
+    "distancia_sendero_km": 4.8,
+    "pendiente_max_pct": 14,
+    "meses_verdor": [6, 7, 8, 9],
+    "atractivos_principales": ["Vistas Panorámicas", "Fotografía", "Arqueología", "Planetario"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 70,
+      "roca_granito_pct": 25,
+      "barro_arcilloso_pct": 5
+    },
+    "garita_control": {
+      "nombre": "Acceso Malecón Grau / Subida al Salto del Fraile",
+      "lat": -12.1685,
+      "lon": -77.0310,
+      "horario_ingreso": "06:00 a 17:30",
+      "hora_limite_bajada": "18:15",
+      "ultimo_transporte_retorno": "21:00 (Alimentadores hacia Estación Matellini)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Cobertura 4G continua en cumbre (Cruz del Morro)",
+        "lat": -12.1731,
+        "lon": -77.0342
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 0.0,
+      "entrada_escolar_pen": 0.0,
+      "guiado_grupal_pen": 30.0,
+      "max_personas_guia": 10,
+      "mototaxi_justo_pen": 4.0,
+      "asociacion": "Acceso Libre Municipal Chorrillos",
+      "whatsapp_contacto": "+51987654328"
+    }
   },
   {
     "id": "L9",
@@ -207,7 +527,43 @@
     "distancia_centro_min": 20,
     "transporte_principal": "Metropolitano (Estación Angamos) o Corredor Azul Tacna-Arequipa",
     "descripcion": "Complejo arqueológico de adobe de la cultura Lima (siglo V d.C.). Sitio urbano altamente saturado usado como punto de contraste en el AG.",
-    "temporada_optima": "Todo el año"
+    "temporada_optima": "Todo el año",
+    "patrimonio": true,
+    "es_loma_natural": false,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 95,
+    "desnivel_positivo_m": 25,
+    "distancia_sendero_km": 1.5,
+    "pendiente_max_pct": 6,
+    "meses_verdor": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "atractivos_principales": ["Arqueología", "Cultura Lima", "Fotografía"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 90,
+      "roca_granito_pct": 10,
+      "barro_arcilloso_pct": 0
+    },
+    "garita_control": {
+      "nombre": "Boletería Museo de Sitio Huaca Pucllana (Calle Gral. Borgoño cdra. 8)",
+      "lat": -12.1111,
+      "lon": -77.0336,
+      "horario_ingreso": "09:00 a 17:00",
+      "hora_limite_bajada": "17:00",
+      "ultimo_transporte_retorno": "23:00 (Metropolitano y Corredor Azul)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Cobertura 4G/5G continua en todo el recinto",
+        "lat": -12.1111,
+        "lon": -77.0336
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 15.0,
+      "entrada_escolar_pen": 7.5,
+      "guiado_grupal_pen": 0.0,
+      "max_personas_guia": 15,
+      "mototaxi_justo_pen": 0.0,
+      "asociacion": "Museo de Sitio Huaca Pucllana",
+      "whatsapp_contacto": "+51987654329"
+    }
   },
   {
     "id": "L10",
@@ -228,7 +584,43 @@
     "distancia_centro_min": 10,
     "transporte_principal": "Metropolitano (Estación Estadio Nacional)",
     "descripcion": "Parque histórico urbano y Circuito Mágico del Agua. Representa un punto verde céntrico de alta accesibilidad.",
-    "temporada_optima": "Todo el año"
+    "temporada_optima": "Todo el año",
+    "patrimonio": true,
+    "es_loma_natural": false,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 140,
+    "desnivel_positivo_m": 15,
+    "distancia_sendero_km": 2.2,
+    "pendiente_max_pct": 4,
+    "meses_verdor": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "atractivos_principales": ["Fotografía", "Naturaleza", "Tranquilidad"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 95,
+      "roca_granito_pct": 5,
+      "barro_arcilloso_pct": 0
+    },
+    "garita_control": {
+      "nombre": "Puerta 3 Parque de la Reserva (Av. Petit Thouars / Madre de Dios)",
+      "lat": -12.0697,
+      "lon": -77.0333,
+      "horario_ingreso": "15:00 a 22:00",
+      "hora_limite_bajada": "22:00",
+      "ultimo_transporte_retorno": "23:00 (Estación Estadio Nacional del Metropolitano)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Cobertura 4G/5G continua en todo el parque",
+        "lat": -12.0697,
+        "lon": -77.0333
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 5.0,
+      "guiado_grupal_pen": 0.0,
+      "max_personas_guia": 15,
+      "mototaxi_justo_pen": 0.0,
+      "asociacion": "EMILIMA Circuito Mágico del Agua",
+      "whatsapp_contacto": "+51987654330"
+    }
   },
   {
     "id": "L11",
@@ -249,7 +641,42 @@
     "distancia_centro_min": 60,
     "transporte_principal": "Bus interurbano Panamericana Norte hasta Ancón + colectivo local",
     "descripcion": "Zona reservada que protege ecosistemas desérticos y lomas costeras en el norte de Lima Metropolitana.",
-    "temporada_optima": "Julio - Octubre"
+    "temporada_optima": "Julio - Octubre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 780,
+    "desnivel_positivo_m": 430,
+    "distancia_sendero_km": 6.4,
+    "pendiente_max_pct": 17,
+    "meses_verdor": [7, 8, 9, 10],
+    "atractivos_principales": ["Tranquilidad", "Aves y Fauna", "Naturaleza", "Vistas Panorámicas"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 60,
+      "roca_granito_pct": 30,
+      "barro_arcilloso_pct": 10
+    },
+    "garita_control": {
+      "nombre": "Puesto de Control Zona Reservada Lomas de Ancón (Km 42 Panamericana Norte)",
+      "lat": -11.7625,
+      "lon": -77.1310,
+      "horario_ingreso": "07:00 a 13:30",
+      "hora_limite_bajada": "16:30",
+      "ultimo_transporte_retorno": "18:00 (Buses Los Chinos / Vipusa en Óvalo Chacas Ancón)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Pampa de Ingreso Km 42 (280 msnm)",
+        "lat": -11.7608,
+        "lon": -77.1288
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 8.0,
+      "entrada_escolar_pen": 4.0,
+      "guiado_grupal_pen": 45.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 5.0,
+      "asociacion": "SERNANP / Comité Local Lomas de Ancón",
+      "whatsapp_contacto": "+51987654331"
+    }
   },
   {
     "id": "L12",
@@ -270,7 +697,42 @@
     "distancia_centro_min": 60,
     "transporte_principal": "Bus Carretera Central hasta Huachipa + combi hacia quebrada",
     "descripcion": "Cañón seco con microclima singular y senderos de trekking rústico entre quebradas de Lima este.",
-    "temporada_optima": "Mayo - Noviembre"
+    "temporada_optima": "Mayo - Noviembre",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 910,
+    "desnivel_positivo_m": 470,
+    "distancia_sendero_km": 7.1,
+    "pendiente_max_pct": 21,
+    "meses_verdor": [5, 6, 7, 8, 9, 10, 11],
+    "atractivos_principales": ["Senderismo", "Vistas Panorámicas", "Tranquilidad", "Fotografía"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 55,
+      "roca_granito_pct": 35,
+      "barro_arcilloso_pct": 10
+    },
+    "garita_control": {
+      "nombre": "Punto de Inicio Quebrada Huaycoloro Sector Cajamarquilla",
+      "lat": -11.9740,
+      "lon": -76.8890,
+      "horario_ingreso": "06:30 a 13:00",
+      "hora_limite_bajada": "16:00",
+      "ultimo_transporte_retorno": "17:30 (Combis desde Av. Las Torres hacia Puente Huachipa)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Entrada al Cañón de Cajamarquilla (490 msnm)",
+        "lat": -11.9715,
+        "lon": -76.8872
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 5.0,
+      "entrada_escolar_pen": 3.0,
+      "guiado_grupal_pen": 40.0,
+      "max_personas_guia": 8,
+      "mototaxi_justo_pen": 4.5,
+      "asociacion": "Agrupación de Trekking Quebradas de Huachipa",
+      "whatsapp_contacto": "+51987654332"
+    }
   },
   {
     "id": "L13",
@@ -291,7 +753,42 @@
     "distancia_centro_min": 40,
     "transporte_principal": "Corredor Rojo o transporte a Carretera Central + colectivo",
     "descripcion": "Mirador natural con vista al valle del Rímac, vegetación estacional y rutas cortas de trekking periurbano.",
-    "temporada_optima": "Todo el año"
+    "temporada_optima": "Todo el año",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 640,
+    "desnivel_positivo_m": 260,
+    "distancia_sendero_km": 3.8,
+    "pendiente_max_pct": 16,
+    "meses_verdor": [6, 7, 8, 9],
+    "atractivos_principales": ["Vistas Panorámicas", "Senderismo", "Fotografía"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 65,
+      "roca_granito_pct": 25,
+      "barro_arcilloso_pct": 10
+    },
+    "garita_control": {
+      "nombre": "Acceso Santa Clara Sector Mirador de la Estrella",
+      "lat": -12.0480,
+      "lon": -76.9265,
+      "horario_ingreso": "06:30 a 15:00",
+      "hora_limite_bajada": "17:00",
+      "ultimo_transporte_retorno": "19:30 (Buses en Km 10.5 Carretera Central / Real Plaza Santa Clara)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Ladera Media Santa Clara (520 msnm)",
+        "lat": -12.0468,
+        "lon": -76.9254
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 3.0,
+      "entrada_escolar_pen": 2.0,
+      "guiado_grupal_pen": 30.0,
+      "max_personas_guia": 10,
+      "mototaxi_justo_pen": 3.0,
+      "asociacion": "Comité Ecológico Santa Clara Ate",
+      "whatsapp_contacto": "+51987654333"
+    }
   },
   {
     "id": "L14",
@@ -312,6 +809,41 @@
     "distancia_centro_min": 25,
     "transporte_principal": "Tren Eléctrico L1 (Est. Ayacucho) o Metropolitano + alimentador",
     "descripcion": "Parque ecológico urbano protegido de 4 hectáreas con senderos escalonados, arbolado denso y mirador.",
-    "temporada_optima": "Todo el año"
+    "temporada_optima": "Todo el año",
+    "es_loma_natural": true,
+    "pro_demo_gratis": false,
+    "altitud_max_msnm": 210,
+    "desnivel_positivo_m": 65,
+    "distancia_sendero_km": 2.4,
+    "pendiente_max_pct": 10,
+    "meses_verdor": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "atractivos_principales": ["Naturaleza", "Aves y Fauna", "Tranquilidad", "Vistas Panorámicas"],
+    "composicion_terreno": {
+      "tierra_compacta_pct": 80,
+      "roca_granito_pct": 15,
+      "barro_arcilloso_pct": 5
+    },
+    "garita_control": {
+      "nombre": "Caseta Serenazgo Parque Ecológico Loma Amarilla (Av. Monte de los Olivos)",
+      "lat": -12.1398,
+      "lon": -76.9950,
+      "horario_ingreso": "06:00 a 18:00",
+      "hora_limite_bajada": "18:00",
+      "ultimo_transporte_retorno": "22:00 (Tren Eléctrico Estación Ayacucho / Av. Caminos del Inca)",
+      "ultimo_punto_senal_4g": {
+        "nombre": "Cobertura 4G/5G continua en todo el circuito",
+        "lat": -12.1389,
+        "lon": -76.9942
+      }
+    },
+    "tarifario_oficial": {
+      "entrada_adulto_pen": 0.0,
+      "entrada_escolar_pen": 0.0,
+      "guiado_grupal_pen": 25.0,
+      "max_personas_guia": 10,
+      "mototaxi_justo_pen": 0.0,
+      "asociacion": "Municipalidad de Santiago de Surco",
+      "whatsapp_contacto": "+51987654334"
+    }
   }
 ]

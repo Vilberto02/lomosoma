@@ -1,5 +1,5 @@
 """
-Módulo de Objetos de Transferencia de Datos (DTOs).
+Modulo de Objetos de Transferencia de Datos (DTOs).
 Define los contratos de datos fuertemente tipados para el sistema.
 """
 
@@ -21,7 +21,7 @@ class UserPreferencesDTO:
     """Preferencias del usuario capturadas desde la UI o CLI."""
     dias_disponibles: int
     presupuesto_max: float
-    condicion_fisica: str = "Moderado"  # "Fácil", "Moderado", "Difícil"
+    condicion_fisica: str = "Moderado"
     nodo_base: CoordenadasDTO = field(default_factory=lambda: CoordenadasDTO(lat=-12.0464, lon=-77.0428))
     texto_usuario: Optional[str] = None
 
@@ -37,10 +37,10 @@ class UserPreferencesDTO:
 
 @dataclass
 class FuzzySemanticPreferencesDTO:
-    """Variables cualitativas extraídas por el LLM a partir del texto libre."""
+    """Variables cualitativas extraidas por el LLM a partir del texto libre."""
     clima_preferido: str = "Soleado"
     intereses: List[str] = field(default_factory=lambda: ["Naturaleza", "Senderismo"])
-    sensibilidad_saturacion: float = 1.0  # Multiplicador de aversión a multitudes [0.5 - 1.5]
+    sensibilidad_saturacion: float = 1.0
     sensibilidad_seguridad: float = 1.0
 
 
@@ -64,6 +64,8 @@ class OptimizationResultDTO:
     grafica_ascii: str
     historial: List[Dict[str, Any]] = field(default_factory=list)
     llm_provider: str = "fallback"
+    checklist_equipamiento: List[str] = field(default_factory=list)
+    afinidad_Destinos: Dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

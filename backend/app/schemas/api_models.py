@@ -11,18 +11,157 @@ class CoordenadasModel(BaseModel):
     lon: float = Field(..., description="Longitud en grados decimales")
 
 
+class PuntoSenal4GModel(BaseModel):
+    nombre: str
+    lat: float
+    lon: float
+
+
+class GaritaControlModel(BaseModel):
+    nombre: str
+    lat: float
+    lon: float
+    horario_ingreso: str
+    hora_limite_bajada: str
+    ultimo_transporte_retorno: str
+    ultimo_punto_senal_4g: Optional[PuntoSenal4GModel] = None
+
+
+class TarifarioOficialModel(BaseModel):
+    entrada_adulto_pen: float
+    entrada_escolar_pen: float = 0.0
+    guiado_grupal_pen: float = 40.0
+    max_personas_guia: int = 8
+    mototaxi_justo_pen: float = 4.0
+    asociacion: str
+    whatsapp_contacto: str = ""
+
+
+class ComposicionTerrenoModel(BaseModel):
+    tierra_compacta_pct: int = 50
+    roca_granito_pct: int = 30
+    barro_arcilloso_pct: int = 20
+
+
+class ModoTransporteModel(BaseModel):
+    modo: str
+    etiqueta: str
+    tiempo_estimado_min: int
+    costo_por_persona_pen: float
+    costo_grupal_4_pen: float
+    resumen_ruta: str
+    pasos: List[str]
+
+
+class LomaCastDayModel(BaseModel):
+    fecha: str
+    dia_nombre: str
+    temp_min_c: float
+    temp_max_c: float
+    humedad_pct: int
+    probabilidad_colchon_nubes_pct: int
+    ventana_colchon_nubes: str
+    golden_hour_am: str
+    golden_hour_pm: str
+    nivel_barro: str
+    epic_score: float
+
+
+class LomaCastReportModel(BaseModel):
+    loma_id: str
+    nombre_loma: str
+    actualizado_en: str
+    fuente_datos: str
+    temp_actual_c: float
+    humedad_actual_pct: int
+    indice_uv: float
+    viento_kmh: float
+    fase_floracion_index: int
+    fase_floracion_nombre: str
+    indice_verdor_actual: float
+    probabilidad_colchon_hoy_pct: int
+    ventana_optima_hoy: str
+    golden_hour_hoy: str
+    estado_sendero_barro: str
+    mejor_dia_semana: str
+    pronostico_7_dias: List[LomaCastDayModel] = Field(default_factory=list)
+
+
+class WaypointSenderoModel(BaseModel):
+    nombre: str
+    tipo: str
+    lat: float
+    lon: float
+    altitud_msnm: float
+
+
+class PuntoElevacionModel(BaseModel):
+    distancia_km: float
+    altitud_msnm: float
+    pendiente_pct: float
+    superficie: str
+
+
+class SenderoProfileModel(BaseModel):
+    loma_id: str
+    nombre_circuito: str
+    distancia_km: float
+    desnivel_positivo_m: float
+    altitud_min_msnm: float
+    altitud_max_msnm: float
+    coordenadas_3d: List[List[float]]
+    waypoints: List[WaypointSenderoModel]
+    perfil_elevacion: List[PuntoElevacionModel]
+    composicion_terreno: ComposicionTerrenoModel
+
+
+class ReporteCiudadanoCreateRequest(BaseModel):
+    autor: str = Field(default="Excursionista Anónimo")
+    estado_barro: str = Field(default="Húmedo con buen agarre")
+    flor_amancaes_vista: bool = Field(default=False)
+    colchon_nubes_visto: bool = Field(default=True)
+    comentario: str
+
+
+class ReporteCiudadanoModel(BaseModel):
+    id: str
+    loma_id: str
+    autor: str
+    fecha_iso: str
+    estado_barro: str
+    flor_amancaes_vista: bool
+    colchon_nubes_visto: bool
+    comentario: str
+
+
 class UserPreferencesRequest(BaseModel):
-    dias_disponibles: int = Field(default=3, ge=1, le=15, description="Cantidad de días disponibles para trekking")
-    presupuesto_max: float = Field(default=60.0, ge=10.0, description="Presupuesto máximo total en Soles (PEN)")
-    condicion_fisica: str = Field(default="Moderado", description="Condición física: 'Fácil', 'Moderado' o 'Difícil'")
+    dias_disponibles: int = Field(default=3, ge=1, le=15, description="Cantidad de dias disponibles para trekking")
+    presupuesto_max: float = Field(default=60.0, ge=10.0, description="Presupuesto maximo total en Soles PEN")
+    condicion_fisica: str = Field(default="Moderado", description="Condicion fisica Facil Moderado o Dificil")
     nodo_base: CoordenadasModel = Field(
         default_factory=lambda: CoordenadasModel(lat=-12.0464, lon=-77.0428),
-        description="Coordenadas del punto de partida o alojamiento (d0)"
+        description="Coordenadas del punto de partida o alojamiento"
     )
     texto_usuario: Optional[str] = Field(
         default=None,
-        description="Descripción cualitativa libre de preferencias (NLP/LLM)"
+        description="Descripcion cualitativa libre de preferencias"
     )
+
+
+class GuiaAccesoModel(BaseModel):
+    id: str
+    nombre: str
+    punto_partida_recomendado: str
+    medio_transporte: str
+    tiempo_total_min: int
+    costo_total_soles: float
+    pasos: List[str]
+    coordenadas_destino: CoordenadasModel
+    modos_transporte: List[ModoTransporteModel] = Field(default_factory=list)
+    geometria_vial: List[List[float]] = Field(default_factory=list)
+    tarifa_justa_mototaxi_pen: float = 4.0
+    ultimo_transporte_retorno: str = "17:30"
+    garita_nombre: str = ""
 
 
 class LomaSummaryModel(BaseModel):
@@ -42,22 +181,67 @@ class LomaSummaryModel(BaseModel):
     transporte_principal: str
     descripcion: str
     temporada_optima: str
-    score_difuso: float = Field(default=0.0, description="Score de riesgo 0-10 calculado por el sistema difuso Mamdani")
-
-
-class GuiaAccesoModel(BaseModel):
-    id: str
-    nombre: str
-    punto_partida_recomendado: str
-    medio_transporte: str
-    tiempo_total_min: int
-    costo_total_soles: float
-    pasos: List[str]
-    coordenadas_destino: CoordenadasModel
+    score_difuso: float = Field(default=0.0, description="Score de riesgo calculado por el sistema difuso Mamdani")
+    es_loma_natural: bool = True
+    pro_demo_gratis: bool = False
+    altitud_max_msnm: Optional[float] = None
+    desnivel_positivo_m: Optional[float] = None
+    distancia_sendero_km: Optional[float] = None
+    pendiente_max_pct: Optional[float] = None
+    atractivos_principales: List[str] = Field(default_factory=list)
+    composicion_terreno: Optional[ComposicionTerrenoModel] = None
+    garita_control: Optional[GaritaControlModel] = None
+    tarifario_oficial: Optional[TarifarioOficialModel] = None
+    lomacast_resumen: Optional[Dict[str, Any]] = None
 
 
 class LomaDetailModel(LomaSummaryModel):
     guia_acceso: Optional[GuiaAccesoModel] = None
+    lomacast: Optional[LomaCastReportModel] = None
+    sendero: Optional[SenderoProfileModel] = None
+    reportes_recientes: List[ReporteCiudadanoModel] = Field(default_factory=list)
+
+
+class OfflinePackResponseModel(BaseModel):
+    loma_id: str
+    version_pack: str
+    generado_en: str
+    loma: LomaDetailModel
+    lomacast: LomaCastReportModel
+    sendero: SenderoProfileModel
+    guia_acceso: GuiaAccesoModel
+    gpx_xml: str
+    checksum_sha256: str
+
+
+class BillingPlanModel(BaseModel):
+    plan_id: str
+    nombre: str
+    tipo_pago: str
+    precio_pen: float
+    precio_usd: float
+    descripcion: str
+    beneficios: List[str]
+
+
+class CheckoutRequestModel(BaseModel):
+    plan_id: str = Field(..., description="pack_lima_pro o loma_individual")
+    loma_id: Optional[str] = None
+    metodo_pago: str = Field(default="yape_plin", description="yape_plin o tarjeta")
+    email_cliente: str = Field(default="excursionista@lomosoma.pe")
+
+
+class CheckoutResponseModel(BaseModel):
+    orden_id: str
+    estado: str
+    plan_id: str
+    lomas_desbloqueadas: List[str]
+    acceso_total_lima: bool
+    monto_pagado_pen: float
+    metodo_pago: str
+    token_licencia: str
+    emitido_en: str
+    mensaje: str
 
 
 class PresetZonaModel(BaseModel):
@@ -83,4 +267,6 @@ class OptimizationResponse(BaseModel):
     metodo: str
     grafica_ascii: str
     historial: List[Dict[str, Any]] = []
-    llm_provider: str = Field(default="fallback", description="Proveedor del itinerario narrativo: 'gemini' o 'fallback'")
+    llm_provider: str = Field(default="fallback", description="Proveedor del itinerario narrativo gemini o fallback")
+    checklist_equipamiento: List[str] = Field(default_factory=list)
+    afinidad_destinos: Dict[str, float] = Field(default_factory=dict)

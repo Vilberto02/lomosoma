@@ -1,0 +1,391 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L0",
+        "nombre_circuito": "Circuito Integral Lomas del Paraíso y Cumbre Apu Siqay",
+        "distancia_km": 6.8,
+        "desnivel_positivo_m": 580,
+        "altitud_min_msnm": 435,
+        "altitud_max_msnm": 1015,
+        "waypoints": [
+          {"nombre": "Garita Comunitaria Edén del Manantial", "tipo": "garita", "lat": -12.1642, "lon": -76.9288, "altitud_msnm": 435},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.1661, "lon": -76.9265, "altitud_msnm": 480},
+          {"nombre": "Pradera de Flor de Amancaes", "tipo": "flora", "lat": -12.1678, "lon": -76.9250, "altitud_msnm": 690},
+          {"nombre": "Bifurcación Quebrada de Niebla", "tipo": "bifurcacion", "lat": -12.1689, "lon": -76.9241, "altitud_msnm": 845},
+          {"nombre": "Cumbre y Mirador Apu Siqay (Colchón de Nubes)", "tipo": "cumbre", "lat": -12.1697, "lon": -76.9234, "altitud_msnm": 1015}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.9288, -12.1642, 435],
+          [-76.9277, -12.1651, 455],
+          [-76.9265, -12.1661, 480],
+          [-76.9258, -12.1670, 585],
+          [-76.9250, -12.1678, 690],
+          [-76.9245, -12.1684, 770],
+          [-76.9241, -12.1689, 845],
+          [-76.9237, -12.1693, 935],
+          [-76.9234, -12.1697, 1015]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L1",
+        "nombre_circuito": "Ruta Colchón Ancestral y Zorro Místico (Carabayllo)",
+        "distancia_km": 7.4,
+        "desnivel_positivo_m": 510,
+        "altitud_min_msnm": 410,
+        "altitud_max_msnm": 920,
+        "waypoints": [
+          {"nombre": "Puesto de Control San Benito", "tipo": "garita", "lat": -11.8365, "lon": -77.0172, "altitud_msnm": 410},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -11.8348, "lon": -77.0151, "altitud_msnm": 495},
+          {"nombre": "Paso del Zorro Costero", "tipo": "bifurcacion", "lat": -11.8335, "lon": -77.0138, "altitud_msnm": 710},
+          {"nombre": "Cumbre Colchón Ancestral", "tipo": "cumbre", "lat": -11.8322, "lon": -77.0125, "altitud_msnm": 920}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0172, -11.8365, 410],
+          [-77.0161, -11.8356, 450],
+          [-77.0151, -11.8348, 495],
+          [-77.0144, -11.8341, 600],
+          [-77.0138, -11.8335, 710],
+          [-77.0131, -11.8328, 820],
+          [-77.0125, -11.8322, 920]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L2",
+        "nombre_circuito": "Sendero Interpretativo Lomas de Primavera",
+        "distancia_km": 4.5,
+        "desnivel_positivo_m": 320,
+        "altitud_min_msnm": 360,
+        "altitud_max_msnm": 680,
+        "waypoints": [
+          {"nombre": "Garita Lomas de Primavera", "tipo": "garita", "lat": -11.8682, "lon": -77.0320, "altitud_msnm": 360},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -11.8670, "lon": -77.0305, "altitud_msnm": 420},
+          {"nombre": "Mirador de Aves de Primavera", "tipo": "cumbre", "lat": -11.8654, "lon": -77.0289, "altitud_msnm": 680}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0320, -11.8682, 360],
+          [-77.0312, -11.8676, 390],
+          [-77.0305, -11.8670, 420],
+          [-77.0297, -11.8662, 550],
+          [-77.0289, -11.8654, 680]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L3",
+        "nombre_circuito": "Circuito de Formaciones Rocosas Lomas de Manchay",
+        "distancia_km": 5.2,
+        "desnivel_positivo_m": 410,
+        "altitud_min_msnm": 380,
+        "altitud_max_msnm": 790,
+        "waypoints": [
+          {"nombre": "Control Quebrada Manchay", "tipo": "garita", "lat": -12.1190, "lon": -76.8855, "altitud_msnm": 380},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.1174, "lon": -76.8839, "altitud_msnm": 510},
+          {"nombre": "Cumbre Rocosa de Manchay", "tipo": "cumbre", "lat": -12.1158, "lon": -76.8821, "altitud_msnm": 790}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.8855, -12.1190, 380],
+          [-76.8847, -12.1182, 440],
+          [-76.8839, -12.1174, 510],
+          [-76.8830, -12.1166, 650],
+          [-76.8821, -12.1158, 790]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L4",
+        "nombre_circuito": "Circuito Arqueológico y Boca de Sapo (Mangomarca)",
+        "distancia_km": 6.1,
+        "desnivel_positivo_m": 490,
+        "altitud_min_msnm": 360,
+        "altitud_max_msnm": 850,
+        "waypoints": [
+          {"nombre": "Garita Final Av. Santuario", "tipo": "garita", "lat": -12.0128, "lon": -76.9845, "altitud_msnm": 360},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.0108, "lon": -76.9830, "altitud_msnm": 460},
+          {"nombre": "Roca Boca de Sapo y Cumbre Mangomarca", "tipo": "cumbre", "lat": -12.0089, "lon": -76.9814, "altitud_msnm": 850}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.9845, -12.0128, 360],
+          [-76.9837, -12.0118, 410],
+          [-76.9830, -12.0108, 460],
+          [-76.9822, -12.0098, 660],
+          [-76.9814, -12.0089, 850]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L5",
+        "nombre_circuito": "Sendero Histórico de la Flor de Amancaes (Rímac)",
+        "distancia_km": 4.2,
+        "desnivel_positivo_m": 380,
+        "altitud_min_msnm": 330,
+        "altitud_max_msnm": 710,
+        "waypoints": [
+          {"nombre": "Caseta ACR Amancaes", "tipo": "garita", "lat": -12.0215, "lon": -77.0412, "altitud_msnm": 330},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.0198, "lon": -77.0401, "altitud_msnm": 430},
+          {"nombre": "Cumbre Santuario Flor de Amancaes", "tipo": "cumbre", "lat": -12.0181, "lon": -77.0392, "altitud_msnm": 710}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0412, -12.0215, 330],
+          [-77.0406, -12.0206, 380],
+          [-77.0401, -12.0198, 430],
+          [-77.0396, -12.0189, 570],
+          [-77.0392, -12.0181, 710]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L6",
+        "nombre_circuito": "Circuito de la Perdiz y Bosque de Tara (Reserva Nacional de Lachay)",
+        "distancia_km": 5.5,
+        "desnivel_positivo_m": 340,
+        "altitud_min_msnm": 410,
+        "altitud_max_msnm": 750,
+        "waypoints": [
+          {"nombre": "Control SERNANP Lachay", "tipo": "garita", "lat": -11.3588, "lon": -77.3670, "altitud_msnm": 410},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -11.3615, "lon": -77.3682, "altitud_msnm": 480},
+          {"nombre": "Mirador Cumbre Puquio de Lachay", "tipo": "cumbre", "lat": -11.3653, "lon": -77.3694, "altitud_msnm": 750}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.3670, -11.3588, 410],
+          [-77.3676, -11.3601, 445],
+          [-77.3682, -11.3615, 480],
+          [-77.3688, -11.3634, 615],
+          [-77.3694, -11.3653, 750]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L7",
+        "nombre_circuito": "Circuito Farallones y Pinturas Rupestres (Lomas de Lúcumo)",
+        "distancia_km": 6.0,
+        "desnivel_positivo_m": 440,
+        "altitud_min_msnm": 280,
+        "altitud_max_msnm": 720,
+        "waypoints": [
+          {"nombre": "Boletería Quebrada Verde", "tipo": "garita", "lat": -12.2012, "lon": -76.8805, "altitud_msnm": 280},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.1975, "lon": -76.8820, "altitud_msnm": 360},
+          {"nombre": "Farallones y Cumbre de Lúcumo", "tipo": "cumbre", "lat": -12.1936, "lon": -76.8833, "altitud_msnm": 720}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.8805, -12.2012, 280],
+          [-76.8812, -12.1994, 320],
+          [-76.8820, -12.1975, 360],
+          [-76.8827, -12.1955, 540],
+          [-76.8833, -12.1936, 720]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L8",
+        "nombre_circuito": "Circuito Costero y Cruz del Morro Solar",
+        "distancia_km": 4.8,
+        "desnivel_positivo_m": 250,
+        "altitud_min_msnm": 30,
+        "altitud_max_msnm": 280,
+        "waypoints": [
+          {"nombre": "Ingreso Malecón Grau", "tipo": "garita", "lat": -12.1685, "lon": -77.0310, "altitud_msnm": 30},
+          {"nombre": "Cobertura 4G Continua", "tipo": "senal_4g", "lat": -12.1710, "lon": -77.0326, "altitud_msnm": 150},
+          {"nombre": "Cruz y Planetario del Morro Solar", "tipo": "cumbre", "lat": -12.1731, "lon": -77.0342, "altitud_msnm": 280}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0310, -12.1685, 30],
+          [-77.0326, -12.1710, 150],
+          [-77.0342, -12.1731, 280]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L9",
+        "nombre_circuito": "Recorrido Cultural Huaca Pucllana",
+        "distancia_km": 1.5,
+        "desnivel_positivo_m": 25,
+        "altitud_min_msnm": 70,
+        "altitud_max_msnm": 95,
+        "waypoints": [
+          {"nombre": "Boletería Huaca Pucllana", "tipo": "garita", "lat": -12.1118, "lon": -77.0342, "altitud_msnm": 70},
+          {"nombre": "Pirámide Mayor Huaca Pucllana", "tipo": "cumbre", "lat": -12.1111, "lon": -77.0336, "altitud_msnm": 95}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0342, -12.1118, 70],
+          [-77.0339, -12.1114, 82],
+          [-77.0336, -12.1111, 95]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L10",
+        "nombre_circuito": "Circuito Peatonal Parque de la Reserva",
+        "distancia_km": 2.2,
+        "desnivel_positivo_m": 15,
+        "altitud_min_msnm": 125,
+        "altitud_max_msnm": 140,
+        "waypoints": [
+          {"nombre": "Puerta 3 Parque de la Reserva", "tipo": "garita", "lat": -12.0710, "lon": -77.0340, "altitud_msnm": 125},
+          {"nombre": "Fuente de la Fantasía", "tipo": "cumbre", "lat": -12.0697, "lon": -77.0333, "altitud_msnm": 140}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.0340, -12.0710, 125],
+          [-77.0336, -12.0703, 132],
+          [-77.0333, -12.0697, 140]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L11",
+        "nombre_circuito": "Circuito Desierto y Niebla Lomas de Ancón",
+        "distancia_km": 6.4,
+        "desnivel_positivo_m": 430,
+        "altitud_min_msnm": 350,
+        "altitud_max_msnm": 780,
+        "waypoints": [
+          {"nombre": "Puesto Km 42 Ancón", "tipo": "garita", "lat": -11.7625, "lon": -77.1310, "altitud_msnm": 350},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -11.7608, "lon": -77.1288, "altitud_msnm": 460},
+          {"nombre": "Cumbre Guardia de Ancón", "tipo": "cumbre", "lat": -11.7589, "lon": -77.1264, "altitud_msnm": 780}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-77.1310, -11.7625, 350],
+          [-77.1299, -11.7616, 405],
+          [-77.1288, -11.7608, 460],
+          [-77.1276, -11.7598, 620],
+          [-77.1264, -11.7589, 780]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L12",
+        "nombre_circuito": "Ruta Cañón de Huaycoloro",
+        "distancia_km": 7.1,
+        "desnivel_positivo_m": 470,
+        "altitud_min_msnm": 440,
+        "altitud_max_msnm": 910,
+        "waypoints": [
+          {"nombre": "Inicio Cajamarquilla", "tipo": "garita", "lat": -11.9740, "lon": -76.8890, "altitud_msnm": 440},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -11.9715, "lon": -76.8872, "altitud_msnm": 520},
+          {"nombre": "Mirador Alto Huaycoloro", "tipo": "cumbre", "lat": -11.9689, "lon": -76.8856, "altitud_msnm": 910}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.8890, -11.9740, 440],
+          [-76.8881, -11.9728, 480],
+          [-76.8872, -11.9715, 520],
+          [-76.8864, -11.9702, 715],
+          [-76.8856, -11.9689, 910]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L13",
+        "nombre_circuito": "Sendero Mirador Cerro de la Estrella",
+        "distancia_km": 3.8,
+        "desnivel_positivo_m": 260,
+        "altitud_min_msnm": 380,
+        "altitud_max_msnm": 640,
+        "waypoints": [
+          {"nombre": "Acceso Santa Clara", "tipo": "garita", "lat": -12.0480, "lon": -76.9265, "altitud_msnm": 380},
+          {"nombre": "Último Punto con Señal 4G", "tipo": "senal_4g", "lat": -12.0468, "lon": -76.9254, "altitud_msnm": 510},
+          {"nombre": "Cumbre Cerro de la Estrella", "tipo": "cumbre", "lat": -12.0456, "lon": -76.9242, "altitud_msnm": 640}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.9265, -12.0480, 380],
+          [-76.9254, -12.0468, 510],
+          [-76.9242, -12.0456, 640]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "loma_id": "L14",
+        "nombre_circuito": "Sendero Escalonado Parque Loma Amarilla",
+        "distancia_km": 2.4,
+        "desnivel_positivo_m": 65,
+        "altitud_min_msnm": 145,
+        "altitud_max_msnm": 210,
+        "waypoints": [
+          {"nombre": "Ingreso Av. Monte de los Olivos", "tipo": "garita", "lat": -12.1398, "lon": -76.9950, "altitud_msnm": 145},
+          {"nombre": "Mirador Central Loma Amarilla", "tipo": "cumbre", "lat": -12.1389, "lon": -76.9942, "altitud_msnm": 210}
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.9950, -12.1398, 145],
+          [-76.9946, -12.1393, 178],
+          [-76.9942, -12.1389, 210]
+        ]
+      }
+    }
+  ]
+}
