@@ -23,10 +23,10 @@ class LomaCastService:
         "Fase 1: Reposo Estival",
         "Fase 2: Primeros Brotes de Niebla",
         "Fase 3: Alfombra Verde Activa",
-        "Fase 4: Floracion Plena de Amancaes",
-        "Fase 5: Semillado y Transicion",
+        "Fase 4: Floración Plena de Amancaes",
+        "Fase 5: Semillado y Transición",
     )
-    DIAS = ("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo")
+    DIAS = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
 
     def __init__(self, catalogo=None, usar_red=None, ahora=None):
         if catalogo is None:
