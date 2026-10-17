@@ -209,30 +209,30 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     15;
 
   const containerClass = isEmbedded
-    ? "flex flex-col h-full w-full overflow-hidden bg-card"
+    ? "flex flex-col h-full w-full overflow-hidden bg-white"
     : "absolute top-20 right-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[760px] flex flex-col animate-in slide-in-from-right-4 fade-in-50 duration-200";
 
   const cardClass = isEmbedded
-    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden"
-    : "border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden";
+    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
+    : "border border-slate-200 shadow-panel bg-white rounded-2xl flex flex-col h-full overflow-hidden";
 
   return (
     <div className={containerClass}>
       <Card className={cardClass}>
         {/* Cabecera Principal */}
-        <div className="p-4 border-b border-border bg-card flex-shrink-0 relative">
-          <div className="flex items-center justify-between mb-2">
+        <div className="p-4 border-b border-slate-200 bg-white flex-shrink-0 relative">
+          <div className="flex items-center justify-between mb-2.5">
             <button
               onClick={onClose}
-              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-1.5 rounded-lg hover:bg-primary/10"
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
               title="Volver al catalogo de lomas"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-4 h-4" />
               <span>Volver al catalogo</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -246,43 +246,43 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   ? "warning"
                   : "destructive"
               }
-              className="text-xs font-semibold"
+              className="text-xs font-semibold px-2.5 py-0.5"
             >
               {currentLoma.dificultad}
             </Badge>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <span className="text-xs sm:text-sm text-slate-500 flex items-center gap-1 font-medium">
               <MapPin className="w-3.5 h-3.5 text-primary" />
               {currentLoma.distrito}
             </span>
             {isUnlocked && (
-              <Badge variant="outline" className="text-emerald-600 border-emerald-500/40 text-[10px] gap-1">
-                <ShieldCheck className="w-3 h-3" />
+              <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-300 text-xs font-semibold gap-1 px-2 py-0.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 PRO Desbloqueado
               </Badge>
             )}
           </div>
-          <CardTitle className="text-lg font-bold text-foreground leading-snug">
+          <CardTitle className="text-xl font-bold text-slate-900 leading-snug">
             {currentLoma.nombre}
           </CardTitle>
-          <div className="text-xs text-muted-foreground font-mono mt-1">
+          <div className="text-xs text-slate-400 font-mono mt-1">
             {currentLoma.coordenadas.lat.toFixed(4)}, {currentLoma.coordenadas.lon.toFixed(4)}
           </div>
         </div>
 
         {/* Pestañas de Alto Valor */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-          <div className="px-4 pt-2 border-b border-border bg-secondary/30">
-            <TabsList className="grid grid-cols-4 w-full h-9">
-              <TabsTrigger value="lomacast" className="text-xs py-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 bg-white">
+          <div className="px-4 pt-2 border-b border-slate-200 bg-slate-50">
+            <TabsList className="grid grid-cols-4 w-full h-10">
+              <TabsTrigger value="lomacast" className="text-xs sm:text-sm font-semibold py-1.5">
                 LomaCast
               </TabsTrigger>
-              <TabsTrigger value="sendero" className="text-xs py-1">
+              <TabsTrigger value="sendero" className="text-xs sm:text-sm font-semibold py-1.5">
                 Sendero
               </TabsTrigger>
-              <TabsTrigger value="acceso" className="text-xs py-1">
+              <TabsTrigger value="acceso" className="text-xs sm:text-sm font-semibold py-1.5">
                 3 Modos
               </TabsTrigger>
-              <TabsTrigger value="grupo" className="text-xs py-1">
+              <TabsTrigger value="grupo" className="text-xs sm:text-sm font-semibold py-1.5">
                 Grupo & Sello
               </TabsTrigger>
             </TabsList>
@@ -292,50 +292,50 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
             {/* PESTAÑA 1: LOMACAST 7D */}
             <TabsContent value="lomacast" className="space-y-4 m-0">
               {!isUnlocked && currentLoma.id !== "L0" ? (
-                <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-center space-y-3">
+                <div className="p-4 rounded-xl border border-primary/30 bg-emerald-50/40 text-center space-y-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
                     <Lock className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-foreground">
+                    <div className="text-sm font-bold text-slate-900">
                       LomaCast 7D Exclusivo de Lomosoma PRO
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1">
                       Desbloquea la prediccion de colchon de nubes a 7 dias, medidor de floracion y estado del barro con un pago unico vitalicio.
                     </p>
                   </div>
                   <Button
                     onClick={() => openUpgradeModal(currentLoma.id)}
-                    className="w-full text-xs font-bold h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="w-full text-xs sm:text-sm font-bold h-10 bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    <Sparkles className="w-4 h-4 mr-1.5" />
                     Desbloquear Loma (S/ 4.90) o Pack Lima (S/ 19.90)
                   </Button>
                 </div>
               ) : null}
 
               {/* Medidor de Flor de Amancaes en 5 Fases */}
-              <div className="p-3.5 rounded-xl border border-border bg-secondary/20 space-y-2">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Mountain className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Mountain className="w-4 h-4 text-primary" />
                     Fase Flor de Amancaes
                   </span>
-                  <Badge variant="outline" className="text-[11px] font-mono text-primary border-primary/30">
+                  <Badge variant="outline" className="text-xs font-mono font-bold text-primary border-primary/30 px-2 py-0.5">
                     Fase {lomacast?.fase_floracion_index ?? 3} / 5
                   </Badge>
                 </div>
-                <div className="text-sm font-bold text-foreground">
+                <div className="text-sm sm:text-base font-bold text-slate-900">
                   {lomacast?.fase_floracion_nombre ?? "Fase 3: Alfombra Verde Activa"}
                 </div>
-                <div className="grid grid-cols-5 gap-1 pt-1">
+                <div className="grid grid-cols-5 gap-1.5 pt-1">
                   {[1, 2, 3, 4, 5].map((f) => (
                     <div
                       key={f}
-                      className={`h-2 rounded-full transition-all ${
+                      className={`h-2.5 rounded-full transition-all ${
                         f <= (lomacast?.fase_floracion_index ?? 3)
                           ? "bg-emerald-600"
-                          : "bg-border"
+                          : "bg-slate-200"
                       }`}
                     />
                   ))}
@@ -343,27 +343,27 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               </div>
 
               {/* Colchon de Nubes y Golden Hour */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-3 rounded-xl border border-border bg-secondary/20">
-                  <div className="text-[11px] text-muted-foreground uppercase font-semibold">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
+                  <div className="text-xs text-slate-500 uppercase font-semibold">
                     Colchon de Nubes
                   </div>
-                  <div className="text-lg font-black text-primary mt-0.5">
+                  <div className="text-2xl font-black text-primary font-mono mt-0.5">
                     {lomacast?.probabilidad_colchon_hoy_pct ?? 85}%
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                  <div className="text-xs text-slate-600 mt-1">
                     Ventana: {lomacast?.ventana_optima_hoy ?? "06:00 a 08:30"}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl border border-border bg-secondary/20">
-                  <div className="text-[11px] text-muted-foreground uppercase font-semibold">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
+                  <div className="text-xs text-slate-500 uppercase font-semibold">
                     Golden Hour Hoy
                   </div>
-                  <div className="text-xs font-bold text-foreground mt-1">
+                  <div className="text-sm font-bold text-slate-900 mt-1">
                     {lomacast?.golden_hour_hoy ?? "06:15 AM / 17:35 PM"}
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-1">
+                  <div className="text-xs text-slate-600 mt-1">
                     Barro: {lomacast?.estado_sendero_barro ?? "Firme"}
                   </div>
                 </div>
@@ -371,28 +371,28 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
               {/* Tabla de Pronostico 7 Dias */}
               {lomacast?.pronostico_7_dias && lomacast.pronostico_7_dias.length > 0 && (
-                <div className="space-y-2">
-                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <div className="space-y-2.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
                     Pronostico LomaCast 7 Dias
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {lomacast.pronostico_7_dias.map((d, idx) => (
                       <div
                         key={idx}
-                        className="p-2.5 rounded-xl border border-border bg-card flex items-center justify-between text-xs"
+                        className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between text-xs sm:text-sm"
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                           <CloudSun className="w-4 h-4 text-primary shrink-0" />
                           <div>
-                            <span className="font-bold text-foreground">{d.dia_nombre}</span>
-                            <span className="text-muted-foreground ml-1.5">{d.fecha}</span>
+                            <span className="font-bold text-slate-900">{d.dia_nombre}</span>
+                            <span className="text-slate-400 ml-1.5 text-xs">{d.fecha}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-muted-foreground">
+                          <span className="text-slate-500 font-medium">
                             {d.temp_min_c}C - {d.temp_max_c}C
                           </span>
-                          <span className="font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">
+                          <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
                             {d.probabilidad_colchon_nubes_pct}% nubes
                           </span>
                         </div>
@@ -406,19 +406,19 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
             {/* PESTAÑA 2: SENDERO Y SIN SENAL */}
             <TabsContent value="sendero" className="space-y-4 m-0">
               {/* Boton Maletin Offline */}
-              <div className="p-3.5 rounded-xl border border-border bg-secondary/20 space-y-2.5">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
                       <Download className="w-4 h-4 text-primary" />
                       Maletin Offline Zero Signal
                     </div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-xs text-slate-500 mt-0.5">
                       Mapas, sendero 3D y waypoints para navegar sin conexion
                     </div>
                   </div>
                   {isOfflineSaved && (
-                    <Badge variant="default" className="bg-emerald-600 text-white text-[10px]">
+                    <Badge variant="default" className="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5">
                       Descargado
                     </Badge>
                   )}
@@ -427,9 +427,9 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   onClick={handleDownloadPack}
                   disabled={isDownloadingPack}
                   variant={isOfflineSaved ? "outline" : "default"}
-                  className="w-full text-xs font-bold h-9 flex items-center justify-center gap-1.5"
+                  className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <Download className="w-4 h-4" />
                   {isDownloadingPack
                     ? "Descargando maletin..."
                     : isOfflineSaved
@@ -439,9 +439,9 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               </div>
 
               {/* Grafico SVG de Perfil de Elevacion */}
-              <div className="p-3.5 rounded-xl border border-border bg-card space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="font-bold uppercase tracking-wider text-slate-500">
                     Perfil de Elevacion
                   </span>
                   <span className="font-mono text-primary font-bold">
@@ -449,7 +449,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-900 rounded-xl p-3 relative overflow-hidden">
+                <div className="w-full bg-slate-900 rounded-xl p-3.5 relative overflow-hidden shadow-inner">
                   <svg
                     viewBox={`0 0 ${svgWidth} ${svgHeight}`}
                     className="w-full h-28 overflow-visible"
@@ -463,7 +463,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                       points={svgPoints}
                     />
                   </svg>
-                  <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
+                  <div className="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
                     <span>{minEle} msnm</span>
                     <span>Max {maxEle} msnm</span>
                     <span>{maxDist} km</span>
@@ -472,26 +472,26 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               </div>
 
               {/* Composicion de Superficie Estilo Komoot */}
-              <div className="p-3.5 rounded-xl border border-border bg-secondary/20 space-y-2">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Composicion de Terreno
                 </div>
-                <div className="h-3 rounded-full flex overflow-hidden border border-border/80">
+                <div className="h-3 rounded-full flex overflow-hidden border border-slate-300">
                   <div style={{ width: `${compTierra}%` }} className="bg-amber-600" title="Tierra compacta" />
                   <div style={{ width: `${compRoca}%` }} className="bg-slate-500" title="Roca granito" />
                   <div style={{ width: `${compBarro}%` }} className="bg-emerald-700" title="Barro arcilloso" />
                 </div>
-                <div className="flex justify-between text-[11px] text-foreground font-medium pt-1">
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-amber-600 inline-block" />
+                <div className="flex justify-between text-xs text-slate-700 font-semibold pt-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />
                     Tierra {compTierra}%
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-slate-500 inline-block" />
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block" />
                     Roca {compRoca}%
                   </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-700 inline-block" />
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-700 inline-block" />
                     Barro {compBarro}%
                   </span>
                 </div>
@@ -501,7 +501,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               <a
                 href={downloadGpxUrl(currentLoma.id)}
                 download={`${currentLoma.id}_sendero.gpx`}
-                className="w-full py-2.5 px-3 rounded-xl border border-border bg-card hover:bg-secondary text-xs font-bold text-foreground flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs sm:text-sm font-bold text-slate-900 flex items-center justify-center gap-2 transition-colors shadow-sm"
               >
                 <Compass className="w-4 h-4 text-primary" />
                 <span>Descargar Archivo GPX (Garmin / Apple Watch)</span>
@@ -510,61 +510,61 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
             {/* PESTAÑA 3: ULTIMA MILLA 3 MODOS */}
             <TabsContent value="acceso" className="space-y-4 m-0">
-              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Comparador Ultima Milla (Citymapper)
               </div>
 
               {guia?.modos_transporte && guia.modos_transporte.length > 0 ? (
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {guia.modos_transporte.map((m, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl border border-border bg-card space-y-1.5"
+                      className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-2 shadow-sm"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                          {m.modo === "mochilero" && <Footprints className="w-3.5 h-3.5 text-primary" />}
-                          {m.modo === "smart" && <Navigation className="w-3.5 h-3.5 text-blue-600" />}
-                          {m.modo === "directo" && <Car className="w-3.5 h-3.5 text-emerald-600" />}
+                        <span className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          {m.modo === "mochilero" && <Footprints className="w-4 h-4 text-primary" />}
+                          {m.modo === "smart" && <Navigation className="w-4 h-4 text-blue-600" />}
+                          {m.modo === "directo" && <Car className="w-4 h-4 text-emerald-600" />}
                           {m.etiqueta}
                         </span>
-                        <Badge variant="outline" className="text-xs font-mono font-bold">
+                        <Badge variant="outline" className="text-xs font-mono font-bold px-2 py-0.5">
                           {m.tiempo_estimado_min} min
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-500">
                         <span>Por persona: S/ {m.costo_por_persona_pen}</span>
                         <span>Grupo 4: S/ {m.costo_grupal_4_pen}</span>
                       </div>
-                      <p className="text-[11px] text-foreground/80 leading-relaxed bg-secondary/30 p-2 rounded-lg">
+                      <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                         {m.resumen_ruta}
                       </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-secondary/30 border border-border text-xs text-foreground/80 space-y-1">
-                  <div className="font-bold">Transporte sugerido:</div>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-1">
+                  <div className="font-bold text-slate-900">Transporte sugerido:</div>
                   <p>{currentLoma.transporte_principal}</p>
                 </div>
               )}
 
               {/* Tarifario Justo Anti Estafa */}
-              <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2 text-xs">
-                <div className="font-bold text-amber-900 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-amber-600" />
+              <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50/60 space-y-2 text-xs">
+                <div className="font-bold text-amber-900 flex items-center gap-2 text-xs sm:text-sm">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                   Tarifario Oficial y Alerta Anti Estafa
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-foreground">
+                <div className="grid grid-cols-2 gap-2 text-xs text-slate-800">
                   <div>
-                    <span className="text-muted-foreground">Mototaxi justo garita:</span>
-                    <div className="font-bold text-foreground">
+                    <span className="text-slate-500">Mototaxi justo garita:</span>
+                    <div className="font-bold text-slate-900 text-sm">
                       S/ {guia?.tarifa_justa_mototaxi_pen ?? tarifario?.mototaxi_justo_pen ?? 6}
                     </div>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Ultimo retorno:</span>
-                    <div className="font-bold text-foreground">
+                    <span className="text-slate-500">Ultimo retorno:</span>
+                    <div className="font-bold text-slate-900 text-sm">
                       {guia?.ultimo_transporte_retorno ?? "18:30 PM"}
                     </div>
                   </div>
@@ -576,7 +576,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   href={`https://wa.me/${tarifario.whatsapp_contacto.replace(/[^0-9]/g, "")}?text=Hola,%20quisiera%20informacion%20sobre%20el%20acceso%20a%20${encodeURIComponent(currentLoma.nombre)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span>Contactar Asociacion Comunal (WhatsApp)</span>
@@ -587,13 +587,13 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
             {/* PESTAÑA 4: GRUPO Y PASAPORTE */}
             <TabsContent value="grupo" className="space-y-4 m-0">
               {/* Calculadora Chancha Grupal */}
-              <div className="p-3.5 rounded-xl border border-border bg-secondary/20 space-y-3">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-primary" />
                     Chancha Grupal (Splitwise)
                   </div>
-                  <Badge variant="outline" className="text-xs font-mono font-bold">
+                  <Badge variant="outline" className="text-xs font-mono font-bold px-2 py-0.5">
                     {groupCount} Personas
                   </Badge>
                 </div>
@@ -603,10 +603,10 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                     <button
                       key={num}
                       onClick={() => setGroupCount(num)}
-                      className={`flex-1 py-1 text-xs rounded-lg font-bold transition-all ${
+                      className={`flex-1 py-1.5 text-xs sm:text-sm rounded-lg font-bold transition-all ${
                         groupCount === num
                           ? "bg-primary text-primary-foreground shadow-sm"
-                          : "bg-card border border-border text-foreground hover:bg-secondary"
+                          : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
                       }`}
                     >
                       {num}
@@ -614,68 +614,68 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   ))}
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-card border border-border text-xs space-y-1">
-                  <div className="flex justify-between text-muted-foreground">
+                <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm space-y-1.5">
+                  <div className="flex justify-between text-slate-500">
                     <span>Guia comunitario ({tarifario?.asociacion ?? "Comunal"}):</span>
-                    <span className="font-mono">S/ {costGuia}</span>
+                    <span className="font-mono font-semibold text-slate-800">S/ {costGuia}</span>
                   </div>
-                  <div className="flex justify-between text-muted-foreground">
+                  <div className="flex justify-between text-slate-500">
                     <span>Entradas ({groupCount} pers):</span>
-                    <span className="font-mono">S/ {costEntrada}</span>
+                    <span className="font-mono font-semibold text-slate-800">S/ {costEntrada}</span>
                   </div>
-                  <div className="flex justify-between text-muted-foreground">
+                  <div className="flex justify-between text-slate-500">
                     <span>Transporte ({mototaxisNeeded} motos ida y vuelta):</span>
-                    <span className="font-mono">S/ {costTransporte}</span>
+                    <span className="font-mono font-semibold text-slate-800">S/ {costTransporte}</span>
                   </div>
-                  <div className="flex justify-between text-foreground font-bold pt-1 border-t border-border/60">
+                  <div className="flex justify-between text-slate-900 font-bold pt-1.5 border-t border-slate-100">
                     <span>Cuota por persona:</span>
-                    <span className="text-primary font-black text-sm">S/ {cuotaPorPersona}</span>
+                    <span className="text-primary font-black text-base">S/ {cuotaPorPersona}</span>
                   </div>
                 </div>
 
                 <Button
                   onClick={handleCopyChancha}
                   variant="outline"
-                  className="w-full text-xs font-bold h-9 flex items-center justify-center gap-2"
+                  className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <Share2 className="w-4 h-4" />
                   <span>Copiar Desglose para WhatsApp / Yape</span>
                 </Button>
               </div>
 
               {/* Sello de Cumbre */}
-              <div className="p-3.5 rounded-xl border border-border bg-card space-y-2">
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <span className="font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                     <Award className="w-4 h-4 text-emerald-600" />
                     Pasaporte Digital de Cumbres
                   </span>
                   {summitStamp ? (
-                    <Badge variant="default" className="bg-emerald-600 text-white text-[10px]">
+                    <Badge variant="default" className="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5">
                       Cumbre Sellada
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-muted-foreground text-[10px]">
+                    <Badge variant="outline" className="text-slate-400 text-xs px-2 py-0.5">
                       Pendiente
                     </Badge>
                   )}
                 </div>
 
                 {summitStamp ? (
-                  <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1 text-foreground">
-                    <div className="font-bold text-emerald-800 flex items-center gap-1.5">
+                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 text-xs sm:text-sm space-y-1 text-slate-900">
+                    <div className="font-bold text-emerald-800 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       Cumbre Verificada a {summitStamp.altitud_msnm} msnm
                     </div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-xs text-slate-500">
                       Sellado el {new Date(summitStamp.fecha_iso).toLocaleDateString()} a {summitStamp.distancia_cumbre_m}m de la cumbre
                     </div>
-                    <div className="text-[10px] font-mono text-muted-foreground truncate">
+                    <div className="text-xs font-mono text-slate-400 truncate">
                       SHA256: {summitStamp.hash_firma_sha256}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                     Llega a menos de 60m de la cumbre y activa el Fog Guardian para sellar tu pasaporte digital de cumbres.
                   </div>
                 )}
@@ -683,30 +683,30 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
               {/* Muro de Reportes Ciudadanos */}
               <div className="space-y-3 pt-1">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Muro de Reportes Ciudadanos
                 </div>
 
-                <form onSubmit={handleSendReport} className="p-3 rounded-xl border border-border bg-secondary/20 space-y-2 text-xs">
+                <form onSubmit={handleSendReport} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5 text-xs">
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       placeholder="Tu nombre"
                       value={reportAuthor}
                       onChange={(e) => setReportAuthor(e.target.value)}
-                      className="p-2 rounded-lg border border-border bg-card"
+                      className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
                     />
                     <select
                       value={reportBarro}
                       onChange={(e) => setReportBarro(e.target.value)}
-                      className="p-2 rounded-lg border border-border bg-card text-xs"
+                      className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
                     >
                       <option value="Optimo y Seco">Optimo y Seco</option>
                       <option value="Humedo / Resbaloso">Humedo / Resbaloso</option>
                       <option value="Muy Embarrado">Muy Embarrado</option>
                     </select>
                   </div>
-                  <div className="flex items-center gap-4 text-[11px]">
+                  <div className="flex items-center gap-4 text-xs font-medium text-slate-700">
                     <label className="flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
@@ -729,14 +729,14 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                     placeholder="Reporte breve sobre el sendero y clima hoy..."
                     value={reportComment}
                     onChange={(e) => setReportComment(e.target.value)}
-                    className="w-full p-2 rounded-lg border border-border bg-card text-xs"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
                   />
                   <Button
                     type="submit"
                     disabled={isSubmittingReport}
-                    className="w-full text-xs font-bold h-8 bg-primary text-primary-foreground"
+                    className="w-full text-xs sm:text-sm font-bold h-9 bg-primary text-primary-foreground"
                   >
-                    <Send className="w-3 h-3 mr-1.5" />
+                    <Send className="w-3.5 h-3.5 mr-1.5" />
                     {isSubmittingReport ? "Publicando..." : "Enviar Reporte Ciudadano"}
                   </Button>
                 </form>
@@ -744,18 +744,18 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                 {currentLoma.reportes_recientes && currentLoma.reportes_recientes.length > 0 && (
                   <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                     {currentLoma.reportes_recientes.map((rep) => (
-                      <div key={rep.id} className="p-2.5 rounded-lg border border-border bg-card text-xs space-y-1">
-                        <div className="flex items-center justify-between text-muted-foreground">
-                          <span className="font-bold text-foreground">{rep.autor}</span>
-                          <span className="text-[10px]">
+                      <div key={rep.id} className="p-3 rounded-xl border border-slate-200 bg-white text-xs space-y-1">
+                        <div className="flex items-center justify-between text-slate-500">
+                          <span className="font-bold text-slate-900 text-xs sm:text-sm">{rep.autor}</span>
+                          <span className="text-xs text-slate-400">
                             {new Date(rep.fecha_iso).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-[11px] text-foreground/80">{rep.comentario}</p>
-                        <div className="flex items-center gap-2 text-[10px] text-emerald-700">
+                        <p className="text-xs sm:text-sm text-slate-700">{rep.comentario}</p>
+                        <div className="flex items-center gap-2 text-xs text-emerald-700 font-semibold pt-0.5">
                           {rep.flor_amancaes_vista && <span>Amancaes visible</span>}
                           {rep.colchon_nubes_visto && <span>Colchon visible</span>}
-                          <span className="text-muted-foreground">{rep.estado_barro}</span>
+                          <span className="text-slate-400 font-normal">{rep.estado_barro}</span>
                         </div>
                       </div>
                     ))}
@@ -766,18 +766,18 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
           </CardContent>
 
           {/* Botones de Accion Fijos */}
-          <div className="p-3.5 border-t border-border bg-card flex-shrink-0 space-y-2">
+          <div className="p-3.5 border-t border-slate-200 bg-white flex-shrink-0 space-y-2">
             <Button
               onClick={() => onSetAsStartPoint(currentLoma.coordenadas)}
               variant="outline"
-              className="w-full text-xs font-semibold h-9 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center justify-center gap-1.5"
+              className="w-full text-xs sm:text-sm font-bold h-10 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center justify-center gap-2"
             >
               <span>Usar como punto de partida</span>
             </Button>
             <Button
               onClick={() => onFocusMap(currentLoma.coordenadas)}
               variant="secondary"
-              className="w-full text-xs font-semibold h-9 flex items-center justify-center gap-1.5"
+              className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
             >
               <span>Centrar en el mapa</span>
             </Button>

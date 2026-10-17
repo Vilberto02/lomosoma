@@ -93,43 +93,43 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
   if (!isOpen) return null;
 
   const containerClass = isEmbedded
-    ? "flex flex-col h-full w-full overflow-hidden bg-card"
+    ? "flex flex-col h-full w-full overflow-hidden bg-white"
     : "absolute top-20 left-4 z-20 w-[92vw] sm:w-[420px] max-w-[420px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200";
 
   const cardClass = isEmbedded
     ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
-    : "border border-border shadow-panel bg-card/98 backdrop-blur-md rounded-2xl flex flex-col h-full overflow-hidden bg-white";
+    : "border border-slate-200 shadow-panel bg-white rounded-2xl flex flex-col h-full overflow-hidden";
 
   return (
     <div className={containerClass}>
       <Card className={cardClass}>
         {/* Header Limpio y Minimalista */}
-        <CardHeader className="p-4 border-b border-border bg-card flex-shrink-0">
-          <div className="flex items-center justify-between mb-2">
+        <CardHeader className="p-4 border-b border-slate-200 bg-white flex-shrink-0">
+          <div className="flex items-center justify-between mb-2.5">
             <button
               onClick={onClose}
-              className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-1.5 rounded-lg hover:bg-primary/10"
+              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
               title="Volver al catalogo de lomas"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-4 h-4" />
               <span>Volver al catalogo</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <CardTitle className="text-base font-semibold text-foreground">
+              <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
                 Planificador de rutas
               </CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                 Optimiza tu itinerario de trekking con IA
               </p>
             </div>
@@ -140,13 +140,13 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
         <CardContent className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-white">
           <form onSubmit={handleSubmit} id="route-planner-form" className="space-y-5">
             {/* 1. Días disponibles */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" />
                   Días disponibles
                 </label>
-                <Badge variant="default" className="text-xs font-semibold">
+                <Badge variant="default" className="text-xs sm:text-sm font-bold font-mono px-2.5 py-0.5">
                   {dias} {dias === 1 ? "día" : "días"}
                 </Badge>
               </div>
@@ -157,7 +157,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
                 max={10}
                 step={1}
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-xs font-medium text-slate-400">
                 <span>1 día</span>
                 <span>5 días</span>
                 <span>10 días</span>
@@ -165,13 +165,13 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
             </div>
 
             {/* 2. Presupuesto Máximo */}
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Wallet className="w-3.5 h-3.5 text-primary" />
+                <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-primary" />
                   Presupuesto máximo
                 </label>
-                <Badge variant="default" className="text-xs font-semibold">
+                <Badge variant="default" className="text-xs sm:text-sm font-bold font-mono px-2.5 py-0.5">
                   S/ {presupuesto}.00
                 </Badge>
               </div>
@@ -182,7 +182,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
                 max={250}
                 step={5}
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-xs font-medium text-slate-400">
                 <span>S/ 15</span>
                 <span>S/ 120</span>
                 <span>S/ 250</span>
@@ -190,9 +190,9 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
             </div>
 
             {/* 3. Condición física */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-primary" />
+            <div className="space-y-2.5">
+              <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
                 Condición física
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -201,10 +201,10 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
                     key={nivel}
                     type="button"
                     onClick={() => setCondicion(nivel)}
-                    className={`py-2 px-3 rounded-lg text-xs font-medium transition-all border ${
+                    className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all border ${
                       condicion === nivel
                         ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                        : "bg-secondary text-secondary-foreground border-transparent hover:bg-secondary/80"
+                        : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
                     }`}
                   >
                     {nivel}
@@ -214,21 +214,21 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
             </div>
 
             {/* 4. Punto de Partida */}
-            <div className="p-3.5 rounded-xl border border-border bg-secondary/40 space-y-2.5">
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                  <Navigation className="w-3.5 h-3.5 text-destructive" />
+                <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                  <Navigation className="w-4 h-4 text-destructive" />
                   Punto de partida
                 </span>
-                <span className="text-xs font-mono text-muted-foreground bg-background px-2 py-0.5 rounded-md border border-border">
+                <span className="text-xs font-mono font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                   {userCoords.lat.toFixed(4)}, {userCoords.lon.toFixed(4)}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
                 Arrastra el <b>marcador rojo</b> en el mapa o elige una zona rápida:
               </p>
               <Select value={selectedPreset} onValueChange={handleApplyPreset}>
-                <SelectTrigger className="w-full h-9 text-xs bg-background">
+                <SelectTrigger className="w-full h-10 text-xs sm:text-sm bg-white border border-slate-200">
                   <SelectValue placeholder="Seleccionar zona de Lima" />
                 </SelectTrigger>
                 <SelectContent>
@@ -242,18 +242,18 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
             </div>
 
             {/* 5. Preferencias de experiencia */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <div className="space-y-2.5">
+              <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
                 ¿Qué tipo de experiencia buscas?
               </label>
               <Textarea
                 value={textoUsuario}
                 onChange={(e) => setTextoUsuario(e.target.value)}
                 placeholder="Ejemplo: 'Senderos con miradores, clima soleado y poco concurrido...'"
-                className="w-full min-h-24 text-xs p-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 resize-none"
+                className="w-full min-h-24 text-xs sm:text-sm p-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
               />
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {[
                   "Soleado y verde",
                   "Arqueología y miradores",
@@ -264,7 +264,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
                     key={sug}
                     type="button"
                     onClick={() => handleApplyPromptSuggestion(sug)}
-                    className="text-xs bg-secondary hover:bg-primary/10 hover:text-primary text-secondary-foreground px-2.5 py-1 rounded-full transition-colors border border-transparent"
+                    className="text-xs sm:text-sm font-medium bg-slate-100 hover:bg-primary/10 hover:text-primary text-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-200/60"
                   >
                     + {sug}
                   </button>
@@ -276,33 +276,33 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
 
         {/* Indicador de etapas del pipeline */}
         {showStages && (
-          <div className="p-4 border-t border-border bg-card rounded-l-xl rounded-r-xl">
+          <div className="p-4 border-t border-slate-200 bg-white">
             <Collapsible open={!finished}>
-              <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-semibold text-foreground">
+              <CollapsibleTrigger className="flex w-full items-center justify-between text-xs sm:text-sm font-semibold text-slate-900">
                 <span className="flex items-center gap-2">
                   {finished ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                    <Check className="w-4 h-4 text-emerald-600" />
                   ) : (
-                    <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
                   )}
                   {finished ? "Pipeline completado" : "Procesando tu ruta..."}
                 </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform ${finished ? "-rotate-90" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${finished ? "-rotate-90" : ""}`} />
               </CollapsibleTrigger>
-              <CollapsibleContent className="mt-2 space-y-1.5">
+              <CollapsibleContent className="mt-2.5 space-y-2">
                 {PIPELINE_STAGES.map((stage, i) => {
                   const done = finished || i < stageIndex;
                   const running = !finished && i === stageIndex;
                   return (
-                    <div key={stage} className="flex items-center gap-2 text-xs text-foreground/80">
+                    <div key={stage} className="flex items-center gap-2 text-xs sm:text-sm text-slate-700">
                       {done ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                       ) : running ? (
-                        <Loader2 className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
+                        <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
                       ) : (
-                        <span className="w-3.5 h-3.5 rounded-full border border-border shrink-0" />
+                        <span className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
                       )}
-                      <span className={done ? "text-foreground/60 line-through decoration-emerald-600/40" : ""}>
+                      <span className={done ? "text-slate-400 line-through decoration-emerald-600/40" : ""}>
                         {stage}
                       </span>
                     </div>
@@ -314,12 +314,12 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
         )}
 
         {/* Footer Fijo con Botón de Acción Principal */}
-        <div className="p-4 border-t border-border bg-card flex-shrink-0">
+        <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
           <Button
             type="submit"
             form="route-planner-form"
             disabled={isLoading}
-            className="w-full h-11 text-sm font-semibold shadow-sm"
+            className="w-full h-11 text-sm sm:text-base font-bold shadow-sm"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
