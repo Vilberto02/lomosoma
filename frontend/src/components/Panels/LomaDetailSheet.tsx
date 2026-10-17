@@ -66,7 +66,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
   // Formulario nuevo reporte ciudadano
   const [reportAuthor, setReportAuthor] = useState<string>("");
   const [reportComment, setReportComment] = useState<string>("");
-  const [reportBarro, setReportBarro] = useState<string>("Optimo y Seco");
+  const [reportBarro, setReportBarro] = useState<string>("Óptimo y Seco");
   const [reportAmancaes, setReportAmancaes] = useState<boolean>(true);
   const [reportColchon, setReportColchon] = useState<boolean>(true);
   const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
@@ -135,7 +135,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     const text = `CHANCHA LOMOSOMA PARA ${currentLoma.nombre.toUpperCase()}:\n` +
       `Grupo: ${groupCount} excursionistas\n` +
       `Entradas (${groupCount}x S/ ${tarifario?.entrada_adulto_pen ?? 10}): S/ ${costEntrada}\n` +
-      `Guia comunitario: S/ ${costGuia}\n` +
+      `Guía comunitario: S/ ${costGuia}\n` +
       `Transporte mototaxi (${mototaxisNeeded} motos ida y vuelta): S/ ${costTransporte}\n` +
       `TOTAL: S/ ${totalChancha}\n` +
       `CUOTA POR PERSONA: S/ ${cuotaPorPersona}\n` +
@@ -169,9 +169,9 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
         return { ...prev, reportes_recientes: list };
       });
       setReportComment("");
-      toast.success("Reporte ciudadano publicado con exito");
+      toast.success("Reporte ciudadano publicado con éxito");
     } catch {
-      toast.error("No se pudo publicar el reporte. Verifica tu conexion.");
+      toast.error("No se pudo publicar el reporte. Verifica tu conexión.");
     } finally {
       setIsSubmittingReport(false);
     }
@@ -225,10 +225,10 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
             <button
               onClick={onClose}
               className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catalogo de lomas"
+              title="Volver al catálogo de lomas"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catalogo</span>
+              <span>Volver al catálogo</span>
             </button>
             <button
               onClick={onClose}
@@ -301,7 +301,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                       LomaCast 7D Exclusivo de Lomosoma PRO
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                      Desbloquea la prediccion de colchon de nubes a 7 dias, medidor de floracion y estado del barro con un pago unico vitalicio.
+                      Desbloquea la predicción de colchón de nubes a 7 días, medidor de floración y estado del barro con un pago único vitalicio.
                     </p>
                   </div>
                   <Button
@@ -346,7 +346,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
                   <div className="text-xs text-slate-500 uppercase font-semibold">
-                    Colchon de Nubes
+                    Colchón de Nubes
                   </div>
                   <div className="text-2xl font-black text-primary font-mono mt-0.5">
                     {lomacast?.probabilidad_colchon_hoy_pct ?? 85}%
@@ -373,7 +373,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               {lomacast?.pronostico_7_dias && lomacast.pronostico_7_dias.length > 0 && (
                 <div className="space-y-2.5">
                   <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Pronostico LomaCast 7 Dias
+                    Pronóstico LomaCast 7 Días
                   </div>
                   <div className="space-y-2">
                     {lomacast.pronostico_7_dias.map((d, idx) => (
@@ -411,10 +411,10 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                   <div>
                     <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
                       <Download className="w-4 h-4 text-primary" />
-                      Maletin Offline Zero Signal
+                      Maletín Offline Zero Signal
                     </div>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      Mapas, sendero 3D y waypoints para navegar sin conexion
+                      Mapas, sendero 3D y waypoints para navegar sin conexión
                     </div>
                   </div>
                   {isOfflineSaved && (
@@ -431,10 +431,10 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                 >
                   <Download className="w-4 h-4" />
                   {isDownloadingPack
-                    ? "Descargando maletin..."
+                    ? "Descargando maletín..."
                     : isOfflineSaved
-                    ? "Actualizar Maletin Offline"
-                    : "Descargar Maletin Offline (Sin Senal)"}
+                    ? "Actualizar Maletín Offline"
+                    : "Descargar Maletín Offline (Sin Señal)"}
                 </Button>
               </div>
 
@@ -442,7 +442,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
                 <div className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="font-bold uppercase tracking-wider text-slate-500">
-                    Perfil de Elevacion
+                    Perfil de Elevación
                   </span>
                   <span className="font-mono text-primary font-bold">
                     +{sendero?.desnivel_positivo_m ?? currentLoma.desnivel_positivo_m ?? 580} m desnivel
@@ -474,7 +474,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               {/* Composicion de Superficie Estilo Komoot */}
               <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5">
                 <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Composicion de Terreno
+                  Composición de Terreno
                 </div>
                 <div className="h-3 rounded-full flex overflow-hidden border border-slate-300">
                   <div style={{ width: `${compTierra}%` }} className="bg-amber-600" title="Tierra compacta" />
@@ -511,7 +511,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
             {/* PESTAÑA 3: ULTIMA MILLA 3 MODOS */}
             <TabsContent value="acceso" className="space-y-4 m-0">
               <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Comparador Ultima Milla (Citymapper)
+                Comparador Última Milla (Citymapper)
               </div>
 
               {guia?.modos_transporte && guia.modos_transporte.length > 0 ? (
@@ -553,7 +553,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
               <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50/60 space-y-2 text-xs">
                 <div className="font-bold text-amber-900 flex items-center gap-2 text-xs sm:text-sm">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                  Tarifario Oficial y Alerta Anti Estafa
+                  Tarifario oficial
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs text-slate-800">
                   <div>
@@ -563,7 +563,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Ultimo retorno:</span>
+                    <span className="text-slate-500">Último retorno:</span>
                     <div className="font-bold text-slate-900 text-sm">
                       {guia?.ultimo_transporte_retorno ?? "18:30 PM"}
                     </div>
@@ -573,13 +573,13 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
               {tarifario?.whatsapp_contacto && (
                 <a
-                  href={`https://wa.me/${tarifario.whatsapp_contacto.replace(/[^0-9]/g, "")}?text=Hola,%20quisiera%20informacion%20sobre%20el%20acceso%20a%20${encodeURIComponent(currentLoma.nombre)}`}
+                  href={`https://wa.me/${tarifario.whatsapp_contacto.replace(/[^0-9]/g, "")}?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20el%20acceso%20a%20${encodeURIComponent(currentLoma.nombre)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  <span>Contactar Asociacion Comunal (WhatsApp)</span>
+                  <span>Contactar Asociación Comunal (WhatsApp)</span>
                 </a>
               )}
             </TabsContent>
@@ -616,8 +616,8 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
                 <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm space-y-1.5">
                   <div className="flex justify-between text-slate-500">
-                    <span>Guia comunitario ({tarifario?.asociacion ?? "Comunal"}):</span>
-                    <span className="font-mono font-semibold text-slate-800">S/ {costGuia}</span>
+                    <span>Guía comunitario ({tarifario?.asociacion ?? "Comunal"}):</span>
+                    <span className="font-mono font-semibold text-slate-800 whitespace-nowrap">S/ {costGuia}</span>
                   </div>
                   <div className="flex justify-between text-slate-500">
                     <span>Entradas ({groupCount} pers):</span>
@@ -701,8 +701,8 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                       onChange={(e) => setReportBarro(e.target.value)}
                       className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
                     >
-                      <option value="Optimo y Seco">Optimo y Seco</option>
-                      <option value="Humedo / Resbaloso">Humedo / Resbaloso</option>
+                      <option value="Óptimo y Seco">Óptimo y Seco</option>
+                      <option value="Húmedo / Resbaloso">Húmedo / Resbaloso</option>
                       <option value="Muy Embarrado">Muy Embarrado</option>
                     </select>
                   </div>
@@ -721,7 +721,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                         checked={reportColchon}
                         onChange={(e) => setReportColchon(e.target.checked)}
                       />
-                      <span>Colchon de nubes</span>
+                      <span>Colchón de nubes</span>
                     </label>
                   </div>
                   <textarea
@@ -754,7 +754,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
                         <p className="text-xs sm:text-sm text-slate-700">{rep.comentario}</p>
                         <div className="flex items-center gap-2 text-xs text-emerald-700 font-semibold pt-0.5">
                           {rep.flor_amancaes_vista && <span>Amancaes visible</span>}
-                          {rep.colchon_nubes_visto && <span>Colchon visible</span>}
+                          {rep.colchon_nubes_visto && <span>Colchón visible</span>}
                           <span className="text-slate-400 font-normal">{rep.estado_barro}</span>
                         </div>
                       </div>

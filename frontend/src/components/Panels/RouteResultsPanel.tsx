@@ -90,10 +90,10 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
             <button
               onClick={onClose}
               className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catalogo de lomas"
+              title="Volver al catálogo de lomas"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catalogo</span>
+              <span>Volver al catálogo</span>
             </button>
             <div className="flex items-center gap-1">
               <button
@@ -273,12 +273,12 @@ const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
                       S/ {((result.costo_total * 4 * 0.72) / 4).toFixed(0)} / pers
                     </div>
                     <div className="text-xs text-emerald-700 font-semibold mt-0.5">
-                      Ahorro compartiendo guia y transporte
+                      Ahorro compartiendo guía y transporte
                     </div>
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 italic">
-                  Total estimado para 4 personas: S/ {(result.costo_total * 4 * 0.72).toFixed(0)} (entradas completas, 1 guia compartido y taxis divididos).
+                  Total estimado para 4 personas: S/ {(result.costo_total * 4 * 0.72).toFixed(0)} (entradas completas, 1 guía compartido y taxis divididos).
                 </div>
               </AccordionContent>
             </AccordionItem>

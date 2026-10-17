@@ -63,7 +63,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
 
       if (selectedPlan === "pack_lima_pro") {
         unlockFullLimaPack();
-        toast.success("Pack Vitalicio Todo Lima PRO activado con exito.");
+        toast.success("Pack Vitalicio Todo Lima PRO activado con éxito.");
       } else {
         unlockLoma(selectedLomaId);
         toast.success(`Loma ${targetLoma?.nombre || selectedLomaId} desbloqueada de por vida.`);
@@ -80,7 +80,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
 
   return (
     <Dialog open={isUpgradeModalOpen} onOpenChange={(open) => !open && closeUpgradeModal()}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl bg-card border border-border shadow-panel">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 rounded-2xl bg-card border border-border shadow-panel">
         <DialogHeader className="p-5 pb-3 border-b border-border bg-gradient-to-r from-primary/10 via-emerald-500/10 to-teal-500/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                   Lomosoma PRO y Pasaporte
                 </DialogTitle>
                 <p className="text-xs text-muted-foreground">
-                  Modelo Komoot de Pago Unico sin suscripciones mensuales
+                  Modelo Komoot de Pago Único sin suscripciones mensuales
                 </p>
               </div>
             </div>
@@ -144,10 +144,10 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                      Mas Popular
+                      Más Popular
                     </span>
                     <Badge variant="outline" className="text-xs font-mono">
-                      Pago Unico
+                      Pago Único
                     </Badge>
                   </div>
                   <div className="text-base font-bold text-foreground">Pack Todo Lima PRO</div>
@@ -162,7 +162,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Navegacion sin senal en neblina</span>
+                      <span>Navegación sin señal en neblina</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -184,10 +184,10 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                       Loma Individual
                     </span>
                     <Badge variant="outline" className="text-xs font-mono">
-                      Pago Unico
+                      Pago Único
                     </Badge>
                   </div>
-                  <div className="text-base font-bold text-foreground">Circuito Especifico</div>
+                  <div className="text-base font-bold text-foreground">Circuito Específico</div>
                   <div className="text-2xl font-black text-foreground mt-1">S/ 4.90</div>
                   <p className="text-xs text-muted-foreground mt-1">
                     Acceso vitalicio al sendero y LomaCast de una sola loma.
@@ -214,7 +214,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
 
               <div className="bg-secondary/30 p-3.5 rounded-xl border border-border space-y-3">
                 <div className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                  Metodo de Pago Seguro
+                  Método de Pago Seguro
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -254,7 +254,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                     </div>
                     <div className="text-xs text-foreground space-y-0.5">
                       <div className="font-bold">Escanear con Yape o Plin</div>
-                      <div className="text-muted-foreground">Numero Oficial: 987 654 321</div>
+                      <div className="text-muted-foreground">Número Oficial: 987 654 321</div>
                       <div className="text-[11px] text-primary font-medium">
                         Titular: Lomosoma Ecoturismo SAC
                       </div>
@@ -264,7 +264,7 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                   <div className="space-y-2 text-xs">
                     <input
                       type="text"
-                      placeholder="Numero de Tarjeta (4242 ...)"
+                      placeholder="Número de Tarjeta (4242 ...)"
                       className="w-full p-2.5 rounded-lg border border-border bg-background"
                       defaultValue="4242 •••• •••• 4242"
                     />
@@ -317,11 +317,11 @@ export const ProUpgradeModal: React.FC<ProUpgradeModalProps> = ({ lomas }) => {
                 <div className="text-center py-8 text-muted-foreground space-y-2 bg-secondary/20 rounded-xl border border-dashed border-border p-6">
                   <Compass className="w-8 h-8 mx-auto text-muted-foreground/60" />
                   <div className="text-sm font-semibold text-foreground">
-                    Aun no tienes sellos registrados
+                    Aún no tienes sellos registrados
                   </div>
                   <p className="text-xs max-w-sm mx-auto">
                     Visita las lomas de Lima, llega a menos de 60m de la cumbre y pulsa Sellar
-                    Pasaporte en el Guardian Anti Neblina para registrar tu hito con firma SHA256.
+                    Pasaporte en el Guardián Anti Neblina para registrar tu hito con firma SHA256.
                   </p>
                 </div>
               ) : (

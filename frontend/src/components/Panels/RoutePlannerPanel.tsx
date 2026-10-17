@@ -109,10 +109,10 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
             <button
               onClick={onClose}
               className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catalogo de lomas"
+              title="Volver al catálogo de lomas"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catalogo</span>
+              <span>Volver al catálogo</span>
             </button>
             <button
               onClick={onClose}
