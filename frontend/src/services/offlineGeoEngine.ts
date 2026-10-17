@@ -401,6 +401,6 @@ export function buildEmergencySmsHref(
   altitudeMsnm?: number
 ): string {
   const altText = altitudeMsnm ? ` Altitud: ~${Math.round(altitudeMsnm)} msnm.` : "";
-  const message = `SOS LOMOSOMA: Asistencia requerida en ${lomaNombre}. Mi ubicacion GPS es Lat ${userCoords.lat.toFixed(5)}, Lon ${userCoords.lon.toFixed(5)}.${altText} Mapa: https://maps.google.com/?q=${userCoords.lat.toFixed(5)},${userCoords.lon.toFixed(5)}`;
+  const message = `SOS LOMOSOMA: Asistencia requerida en ${lomaNombre}. Mi ubicación GPS es Lat ${userCoords.lat.toFixed(5)}, Lon ${userCoords.lon.toFixed(5)}.${altText} Mapa: https://maps.google.com/?q=${userCoords.lat.toFixed(5)},${userCoords.lon.toFixed(5)}`;
   return `sms:?body=${encodeURIComponent(message)}`;
 }

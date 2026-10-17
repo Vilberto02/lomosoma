@@ -100,7 +100,7 @@ export async function fetchSenderoProfile(id: string): Promise<SenderoProfile> {
 export async function downloadOfflinePack(id: string): Promise<OfflineLomaPack> {
   const res = await fetch(`${API_BASE_URL}/lomas/${id}/offline-pack`);
   if (!res.ok) {
-    throw new Error(`Error al descargar maletin offline: ${res.statusText}`);
+    throw new Error(`Error al descargar maletín offline: ${res.statusText}`);
   }
   const pack: OfflineLomaPack = await res.json();
   await saveOfflinePack(pack);
@@ -149,8 +149,8 @@ export async function fetchBillingPlans(): Promise<BillingPlan[]> {
       descripcion: "Acceso vitalicio a las 15 lomas de Lima Metropolitana sin suscripciones.",
       beneficios: [
         "Descarga ilimitada de maletines offline para todas las lomas",
-        "LomaCast 7D completo y prediccion colchon de nubes",
-        "Navegacion Guardian GPS sin conexion",
+        "LomaCast 7D completo y predicción colchón de nubes",
+        "Navegación Guardián GPS sin conexión",
         "Pasaporte digital de cumbres verificado con SHA256",
         "Archivos GPX para Garmin, Suunto y Apple Watch",
       ],
@@ -161,9 +161,9 @@ export async function fetchBillingPlans(): Promise<BillingPlan[]> {
       tipo_pago: "pago_unico",
       precio_pen: 4.9,
       precio_usd: 1.35,
-      descripcion: "Desbloqueo vitalicio para una loma especifica de tu eleccion.",
+      descripcion: "Desbloqueo vitalicio para una loma específica de tu elección.",
       beneficios: [
-        "Maletin offline de la loma seleccionada",
+        "Maletín offline de la loma seleccionada",
         "LomaCast 7D para este circuito",
         "Sello de cumbre para tu pasaporte digital",
       ],
@@ -205,7 +205,7 @@ export async function checkoutPlan(req: CheckoutRequest): Promise<CheckoutRespon
     metodo_pago: req.metodo_pago,
     token_licencia: `tok_${Math.random().toString(36).substring(2)}${Date.now()}`,
     emitido_en: new Date().toISOString(),
-    mensaje: "Pago procesado con exito. Disfruta tu experiencia Lomosoma PRO vitalicia.",
+    mensaje: "Pago procesado con éxito. Disfruta tu experiencia Lomosoma PRO vitalicia.",
   };
 }
 
@@ -231,7 +231,7 @@ export async function optimizeRoute(
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(
-      errorData.detail || `Error en la optimizacion: ${res.statusText}`
+      errorData.detail || `Error en la optimización: ${res.statusText}`
     );
   }
   return res.json();

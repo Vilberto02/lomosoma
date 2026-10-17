@@ -135,13 +135,13 @@ export const ProProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const downloadOfflinePackForLoma = useCallback(
     async (lomaId: string): Promise<boolean> => {
       try {
-        toast.loading("Descargando maletin offline...", { id: `download-${lomaId}` });
+        toast.loading("Descargando maletín offline...", { id: `download-${lomaId}` });
         await downloadOfflinePack(lomaId);
         await refreshOfflinePacks();
-        toast.success("Maletin offline descargado con exito", { id: `download-${lomaId}` });
+        toast.success("Maletín offline descargado con éxito", { id: `download-${lomaId}` });
         return true;
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Error al descargar maletin";
+        const message = err instanceof Error ? err.message : "Error al descargar maletín";
         toast.error(message, { id: `download-${lomaId}` });
         return false;
       }
