@@ -117,7 +117,7 @@ const GoogleStyleMapComponent: React.FC<GoogleStyleMapProps> = ({
         }
       },
       (error) => {
-        alert("No se pudo obtener tu ubicacion actual: " + error.message);
+        alert("No se pudo obtener tu ubicación actual: " + error.message);
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
@@ -220,7 +220,7 @@ const GoogleStyleMapComponent: React.FC<GoogleStyleMapProps> = ({
 
         <button
           onClick={handleLocateMe}
-          title="Usar mi ubicacion GPS actual"
+          title="Usar mi ubicación GPS actual"
           className="w-10 h-10 bg-background hover:bg-secondary text-primary rounded-xl shadow-control flex items-center justify-center border border-border transition-all active:scale-95"
         >
           <Locate className="w-4 h-4" />

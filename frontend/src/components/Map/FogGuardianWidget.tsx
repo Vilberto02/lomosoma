@@ -88,7 +88,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
       const controller = playRescueWhistle3000Hz(3500);
       setWhistleController(controller);
       setIsWhistling(true);
-      toast.success("Silbato acustico 3000Hz activado");
+      toast.success("Silbato acústico 3000Hz activado");
       setTimeout(() => {
         setIsWhistling(false);
         setWhistleController(null);
@@ -121,14 +121,14 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
       lon: userCoords.lon + offset,
     };
     onUserCoordsChange(deviatedCoords);
-    toast.error("Simulando desvio en neblina (>45m fuera del sendero)");
+    toast.error("Simulando desvío en neblina (>45m fuera del sendero)");
   }, [sendero, userCoords, onUserCoordsChange]);
 
   const handleSimulateSummit = useCallback(() => {
     if (!selectedLoma) return;
     const summit = findSummitCoordinates(selectedLoma, sendero ?? undefined);
     onUserCoordsChange({ lat: summit.lat, lon: summit.lon });
-    toast.success("Posicion establecida en la Cumbre (distancia 0m)");
+    toast.success("Posición establecida en la Cumbre (distancia 0m)");
   }, [selectedLoma, sendero, onUserCoordsChange]);
 
   const handleStampSummit = useCallback(() => {
@@ -138,7 +138,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
       addSummitStamp(stamp);
       toast.success("Cumbre conquistada. Pasaporte digital sellado con hash SHA256.");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "No puedes sellar el pasaporte aqui";
+      const msg = err instanceof Error ? err.message : "No puedes sellar el pasaporte aquí";
       toast.error(msg);
     }
   }, [selectedLoma, userCoords, sendero, addSummitStamp]);
@@ -179,7 +179,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
               </div>
               <div className="text-xs sm:text-sm text-slate-300 truncate mt-0.5">
                 {isOffTrail ? (
-                  <span className="text-amber-300 font-bold">Desvio: {deviation}m</span>
+                  <span className="text-amber-300 font-bold">Desvío: {deviation}m</span>
                 ) : (
                   <span className="font-medium">En sendero ({deviation}m) · {altitud} msnm</span>
                 )}
@@ -202,7 +202,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
             <button
               onClick={() => setIsMinimized(!isMinimized)}
               className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title={isMinimized ? "Abrir HUD Tactico completo" : "Minimizar"}
+              title={isMinimized ? "Abrir HUD Táctico completo" : "Minimizar"}
             >
               {isMinimized ? (
                 <ChevronUp className="w-4 h-4" />
@@ -214,7 +214,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
-                title="Cerrar Guardian"
+                title="Cerrar Guardián"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -225,7 +225,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
         {isOffTrail && (
           <div className="px-4 py-2 bg-amber-500 text-slate-950 text-xs sm:text-sm font-bold flex items-center gap-2 animate-pulse">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>Alerta: Desvio del sendero mayor a 35m ({deviation}m)</span>
+            <span>Alerta: Desvío del sendero mayor a 35m ({deviation}m)</span>
           </div>
         )}
 
@@ -234,7 +234,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
             <div className="grid grid-cols-3 gap-2.5 text-center">
               <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700">
                 <div className="text-xs uppercase font-semibold text-slate-400">
-                  Desviacion
+                  Desviación
                 </div>
                 <div
                   className={`text-base font-black font-mono mt-0.5 ${
@@ -264,7 +264,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
                 Rumbo al sendero: {trailEval ? `${trailEval.bearingToTrailDeg} deg` : "0 deg"}
               </span>
               <span className="text-xs font-mono text-emerald-400 font-semibold">
-                {isPackOffline ? "Maletin Offline Activo" : "Modo Local GPS"}
+                {isPackOffline ? "Maletín Offline Activo" : "Modo Local GPS"}
               </span>
             </div>
 
@@ -287,7 +287,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
                   title="Desplazar al usuario 50m fuera de la ruta"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Desvio</span>
+                  <span>Desvío</span>
                 </button>
                 <button
                   onClick={handleSimulateSummit}

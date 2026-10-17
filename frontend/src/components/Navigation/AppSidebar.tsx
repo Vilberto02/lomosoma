@@ -143,7 +143,7 @@ export const AppSidebar = memo(function AppSidebar({
   }
 
   return (
-    <aside className="absolute top-3 left-3 bottom-3 z-30 w-[94vw] sm:w-[420px] md:w-[440px] max-w-[440px] flex flex-col bg-white border border-slate-200/90 rounded-2xl shadow-panel overflow-hidden transition-all duration-200 pointer-events-auto">
+    <aside className="absolute top-3 left-3 bottom-3 z-30 w-[94vw] sm:w-[420px] md:w-[464px] max-w-[496px] flex flex-col bg-white border border-slate-200/90 rounded-2xl shadow-panel overflow-hidden transition-all duration-200 pointer-events-auto">
       {/* Barra de Marca y Estado Superior */}
       <header className="px-4 py-3.5 border-b border-slate-200 flex items-center justify-between bg-white flex-shrink-0">
         <div className="flex items-center gap-2.5">
@@ -169,7 +169,7 @@ export const AppSidebar = memo(function AppSidebar({
               />
               <span>
                 {!isBrowserOnline
-                  ? "Modo Sin Senal"
+                  ? "Modo Sin Señal"
                   : backendOnline
                   ? "Servidor Conectado"
                   : "Modo Local"}
@@ -245,7 +245,7 @@ export const AppSidebar = memo(function AppSidebar({
                 <button
                   onClick={() => setSearchTerm("")}
                   className="absolute right-3 p-1 text-slate-400 hover:text-slate-700"
-                  title="Limpiar busqueda"
+                  title="Limpiar búsqueda"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -269,7 +269,7 @@ export const AppSidebar = memo(function AppSidebar({
                   variant="outline"
                   onClick={() => onChangeView("results")}
                   className="h-9 text-xs sm:text-sm font-semibold border-primary/40 text-primary hover:bg-primary/10 rounded-xl gap-1.5"
-                  title="Ver ultima ruta calculada"
+                  title="Ver última ruta calculada"
                 >
                   <Route className="w-4 h-4" />
                   <span>Ruta Activa</span>

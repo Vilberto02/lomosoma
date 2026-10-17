@@ -48,11 +48,11 @@ function AppContent() {
   useEffect(() => {
     const handleOnline = () => {
       setIsBrowserOnline(true);
-      toast.success("Conexion a internet restablecida");
+      toast.success("Conexión a internet restablecida");
     };
     const handleOffline = () => {
       setIsBrowserOnline(false);
-      toast.error("Sin conexion a internet. Modo Zero Signal activado.");
+      toast.error("Sin conexión a internet. Modo Zero Signal activado.");
     };
 
     window.addEventListener("online", handleOnline);
@@ -123,7 +123,7 @@ function AppContent() {
         setOptimizationResult(result);
         setActiveView("results");
         setIsSidebarCollapsed(false);
-        toast.success("Ruta optima calculada con exito");
+        toast.success("Ruta óptima calculada con éxito");
 
         if (result.ruta_ids.length > 0) {
           const firstLoma = lomasById.get(result.ruta_ids[0]);
@@ -132,11 +132,11 @@ function AppContent() {
           }
         }
       } catch (err: unknown) {
-        console.error("Error en optimizacion:", err);
+        console.error("Error en optimización:", err);
         const msg =
           err instanceof Error
             ? err.message
-            : "Ocurrio un error al calcular la ruta.";
+            : "Ocurrió un error al calcular la ruta.";
         toast.error(msg);
       } finally {
         setIsLoading(false);
