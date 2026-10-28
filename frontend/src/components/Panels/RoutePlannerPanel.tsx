@@ -1,25 +1,19 @@
 import React, { useState, useCallback, useEffect, memo } from "react";
 import type { UserPreferencesRequest, Coordenadas, PresetZona } from "../../types";
-import { X, Sparkles, Navigation, Calendar, Wallet, Activity, Check, Loader2, ChevronDown, ArrowLeft } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Slider } from "../ui/slider";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Textarea } from "../ui/textarea";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+  Sparkles,
+  Check,
+  ArrowLeft,
+  Compass,
+  Plus,
+} from "lucide-react";
+import { Slider } from "../ui/slider";
 
 const PIPELINE_STAGES = [
   "Extrayendo preferencias con LLM",
   "Evaluando lomas con lógica difusa",
   "Optimizando ruta con algoritmo genético",
-  "Generando itinerario con LLM",
+  "Generando itinerario narrativo",
 ];
 
 interface RoutePlannerPanelProps {
@@ -41,7 +35,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
   presets,
   onOptimize,
   isLoading,
-  isEmbedded = false,
+  isEmbedded: _isEmbedded = false,
 }) => {
   const [dias, setDias] = useState<number>(3);
   const [presupuesto, setPresupuesto] = useState<number>(60);
@@ -55,7 +49,7 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
       setStageIndex(0);
       const interval = setInterval(() => {
         setStageIndex((prev) => (prev < PIPELINE_STAGES.length - 1 ? prev + 1 : prev));
-      }, 1100);
+      }, 1000);
       return () => clearInterval(interval);
     }
   }, [isLoading]);
@@ -63,9 +57,6 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
   useEffect(() => {
     if (!isOpen) setStageIndex(-1);
   }, [isOpen]);
-
-  const finished = !isLoading && stageIndex >= 0;
-  const showStages = isLoading || finished;
 
   const handleApplyPreset = useCallback((val: string) => {
     setSelectedPreset(val);
@@ -92,168 +83,195 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
 
   if (!isOpen) return null;
 
-  const containerClass = isEmbedded
-    ? "flex flex-col h-full w-full overflow-hidden bg-white"
-    : "absolute top-20 left-4 z-20 w-[92vw] sm:w-[420px] max-w-[420px] h-[calc(100vh-140px)] max-h-[720px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200";
-
-  const cardClass = isEmbedded
-    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
-    : "border border-slate-200 shadow-panel bg-white rounded-2xl flex flex-col h-full overflow-hidden";
-
   return (
-    <div className={containerClass}>
-      <Card className={cardClass}>
-        {/* Header Limpio y Minimalista */}
-        <CardHeader className="p-4 border-b border-slate-200 bg-white flex-shrink-0">
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              onClick={onClose}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catálogo de lomas"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catálogo</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
-                Planificador de rutas
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Optimiza tu itinerario de trekking con IA
-              </p>
-            </div>
-          </div>
-        </CardHeader>
+    <div className="flex flex-col h-full w-full overflow-hidden bg-white">
+      {/* 1. CABECERA: Introducción del planificador (kEcBf en Pencil) */}
+      <div className="p-5 border-b border-[#E4E9DE] bg-white flex-shrink-0 flex flex-col gap-2">
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1.5 text-[15px] font-bold text-[#3E5238] hover:text-[#203B2E] transition-colors py-1 px-2 rounded-lg hover:bg-[#F3F5F0] -ml-2 self-start"
+        >
+          <ArrowLeft className="w-4 h-4 text-[#546349]" />
+          <span>Todas las lomas</span>
+        </button>
 
-        {/* Contenido con Scroll Interno Controlado */}
-        <CardContent className="flex-1 min-h-0 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-white">
-          <form onSubmit={handleSubmit} id="route-planner-form" className="space-y-5">
-            {/* 1. Días disponibles */}
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  Días disponibles
-                </label>
-                <Badge variant="default" className="text-xs sm:text-sm font-bold font-mono px-2.5 py-0.5">
+        <div>
+          <h2 className="text-[26px] font-black text-[#203B2E] tracking-tight">
+            Una ruta a tu medida.
+          </h2>
+          <p className="text-[15px] text-[#3E5238] font-semibold mt-0.5">
+            Tú eliges el ritmo. La IA conecta el camino.
+          </p>
+        </div>
+      </div>
+
+      {/* 2. SI ESTÁ PROCESANDO: VISTA DE CARGA SEGÚN FRAME 08 (hmhyb en Pencil) */}
+      {isLoading ? (
+        <div className="flex-1 p-6 flex flex-col items-center justify-center gap-5 bg-white text-center animate-in fade-in duration-200">
+          <div className="relative flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#F0F5ED] border-2 border-[#CAD9BE] animate-ping opacity-40 absolute" />
+            <div className="w-16 h-16 rounded-full bg-[#F0F5ED] border-2 border-[#2E6540] flex items-center justify-center text-[#2E6540] shadow-sm">
+              <Sparkles className="w-7 h-7 animate-pulse text-[#2E6540]" />
+            </div>
+          </div>
+
+          <div className="max-w-[320px]">
+            <h3 className="text-[20px] font-black text-[#203B2E]">
+              Optimizando tu itinerario
+            </h3>
+            <p className="text-sm text-[#3E5238] font-medium mt-1 leading-relaxed">
+              Algoritmo genético multiobjetivo evaluando accesibilidad, clima y floración en tiempo real.
+            </p>
+          </div>
+
+          {/* Etapas del pipeline animadas */}
+          <div className="w-full max-w-[340px] bg-[#F3F5F0] border border-[#E4E9DE] rounded-xl p-4 flex flex-col gap-3 text-left">
+            {PIPELINE_STAGES.map((stg, idx) => {
+              const isPast = idx < stageIndex;
+              const isCurrent = idx === stageIndex;
+              return (
+                <div key={idx} className="flex items-center gap-2.5 text-[15px]">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-black transition-all ${
+                      isPast
+                        ? "bg-[#2E6540] text-white"
+                        : isCurrent
+                        ? "bg-[#243C2D] text-white animate-pulse"
+                        : "bg-[#E4E9DE] text-[#546349]"
+                    }`}
+                  >
+                    {isPast ? <Check className="w-3.5 h-3.5" /> : idx + 1}
+                  </div>
+                  <span
+                    className={`font-semibold ${
+                      isCurrent
+                        ? "text-[#203B2E] font-bold"
+                        : isPast
+                        ? "text-[#3E5238]"
+                        : "text-[#546349]"
+                    }`}
+                  >
+                    {stg}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* 3. FORMULARIO DE PREFERENCIAS (Frames 06 y 07 en Pencil) */
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-hidden">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col gap-5">
+            
+            {/* Duración (j5smYC en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-[15px]">
+                <span className="font-extrabold text-[#203B2E]">Días disponibles</span>
+                <span className="font-black text-[16px] text-[#2E6540] bg-[#F0F5ED] px-2.5 py-0.5 rounded-lg border border-[#CAD9BE]">
                   {dias} {dias === 1 ? "día" : "días"}
-                </Badge>
+                </span>
               </div>
+
               <Slider
-                value={[dias]}
-                onValueChange={([val]) => setDias(val)}
                 min={1}
                 max={10}
                 step={1}
+                value={[dias]}
+                onValueChange={(val) => setDias(val[0])}
+                className="py-1"
               />
-              <div className="flex justify-between text-xs font-medium text-slate-400">
+
+              <div className="flex items-center justify-between text-sm text-[#3E5238] font-semibold">
                 <span>1 día</span>
                 <span>5 días</span>
                 <span>10 días</span>
               </div>
             </div>
 
-            {/* 2. Presupuesto Máximo */}
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-primary" />
-                  Presupuesto máximo
-                </label>
-                <Badge variant="default" className="text-xs sm:text-sm font-bold font-mono px-2.5 py-0.5">
-                  S/ {presupuesto}.00
-                </Badge>
+            {/* Presupuesto (EjcZJ en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-[15px]">
+                <span className="font-extrabold text-[#203B2E]">Presupuesto máximo</span>
+                <span className="font-black text-[16px] text-[#203B2E] bg-[#F3F5F0] px-2.5 py-0.5 rounded-lg border border-[#E4E9DE]">
+                  S/ {presupuesto.toFixed(2)}
+                </span>
               </div>
+
               <Slider
-                value={[presupuesto]}
-                onValueChange={([val]) => setPresupuesto(val)}
                 min={15}
                 max={250}
                 step={5}
+                value={[presupuesto]}
+                onValueChange={(val) => setPresupuesto(val[0])}
+                className="py-1"
               />
-              <div className="flex justify-between text-xs font-medium text-slate-400">
+
+              <div className="flex items-center justify-between text-sm text-[#3E5238] font-semibold">
                 <span>S/ 15</span>
                 <span>S/ 120</span>
                 <span>S/ 250</span>
               </div>
             </div>
 
-            {/* 3. Condición física */}
-            <div className="space-y-2.5">
-              <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-primary" />
-                Condición física
-              </label>
+            {/* Condición física (e0uHq en Pencil) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[15px] font-extrabold text-[#203B2E]">Tu condición física</label>
               <div className="grid grid-cols-3 gap-2">
-                {(["Fácil", "Moderado", "Difícil"] as const).map((nivel) => (
+                {(["Fácil", "Moderado", "Difícil"] as const).map((lvl) => (
                   <button
-                    key={nivel}
+                    key={lvl}
                     type="button"
-                    onClick={() => setCondicion(nivel)}
-                    className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all border ${
-                      condicion === nivel
-                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                        : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200"
+                    onClick={() => setCondicion(lvl)}
+                    className={`h-11 rounded-xl text-[15px] font-extrabold transition-all flex items-center justify-center gap-1.5 ${
+                      condicion === lvl
+                        ? "bg-[#243C2D] text-white shadow-sm"
+                        : "bg-[#F3F5F0] text-[#3E5238] hover:bg-[#E4E9DE] border border-[#E4E9DE]"
                     }`}
                   >
-                    {nivel}
+                    <span>{lvl}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* 4. Punto de Partida */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-destructive" />
-                  Punto de partida
-                </span>
-                <span className="text-xs font-mono font-medium text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+            {/* Punto de partida (czzA2 en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-[15px]">
+                <span className="font-extrabold text-[#203B2E]">¿Desde dónde sales?</span>
+                <span className="text-[13px] font-mono font-semibold text-[#546349]">
                   {userCoords.lat.toFixed(4)}, {userCoords.lon.toFixed(4)}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                Arrastra el <b>marcador rojo</b> en el mapa o elige una zona rápida:
-              </p>
-              <Select value={selectedPreset} onValueChange={handleApplyPreset}>
-                <SelectTrigger className="w-full h-10 text-xs sm:text-sm bg-white border border-slate-200">
-                  <SelectValue placeholder="Seleccionar zona de Lima" />
-                </SelectTrigger>
-                <SelectContent>
-                  {presets.map((p) => (
-                    <SelectItem key={p.nombre} value={p.nombre}>
-                      {p.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+              <select
+                value={selectedPreset}
+                onChange={(e) => handleApplyPreset(e.target.value)}
+                className="w-full h-11 px-3 bg-[#F3F5F0] border border-[#E4E9DE] rounded-lg text-[15px] font-semibold text-[#203B2E] focus:outline-none focus:border-[#2E6540]"
+              >
+                <option value="">Seleccionar zona de Lima...</option>
+                {presets.map((p) => (
+                  <option key={p.nombre} value={p.nombre}>
+                    {p.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* 5. Preferencias de experiencia */}
-            <div className="space-y-2.5">
-              <label className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                ¿Qué tipo de experiencia buscas?
+            {/* Tipo de experiencia y preferencias naturales (d5ozo en Pencil) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[15px] font-extrabold text-[#203B2E]">
+                ¿Qué te gustaría descubrir?
               </label>
-              <Textarea
+              <textarea
+                rows={2}
                 value={textoUsuario}
                 onChange={(e) => setTextoUsuario(e.target.value)}
-                placeholder="Ejemplo: 'Senderos con miradores, clima soleado y poco concurrido...'"
-                className="w-full min-h-24 text-xs sm:text-sm p-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                placeholder="Miradores, paisajes verdes, poco concurrido…"
+                className="w-full p-3 bg-[#F3F5F0] border border-[#E4E9DE] rounded-xl text-[15px] font-medium text-[#203B2E] placeholder-[#546349] focus:outline-none focus:border-[#2E6540] resize-none"
               />
-              <div className="flex flex-wrap gap-2">
+
+              {/* Sugerencias Rápidas */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
                 {[
                   "Soleado y verde",
                   "Arqueología y miradores",
@@ -264,74 +282,29 @@ const RoutePlannerPanelComponent: React.FC<RoutePlannerPanelProps> = ({
                     key={sug}
                     type="button"
                     onClick={() => handleApplyPromptSuggestion(sug)}
-                    className="text-xs sm:text-sm font-medium bg-slate-100 hover:bg-primary/10 hover:text-primary text-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-200/60"
+                    className="h-9 px-3.5 bg-white border border-[#CAD9BE] hover:bg-[#F0F5ED] text-[#2E6540] text-sm font-bold rounded-lg flex items-center gap-1 transition-all"
                   >
-                    + {sug}
+                    <Plus className="w-4 h-4 text-[#2E6540]" />
+                    <span>{sug}</span>
                   </button>
                 ))}
               </div>
             </div>
-          </form>
-        </CardContent>
-
-        {/* Indicador de etapas del pipeline */}
-        {showStages && (
-          <div className="p-4 border-t border-slate-200 bg-white">
-            <Collapsible open={!finished}>
-              <CollapsibleTrigger className="flex w-full items-center justify-between text-xs sm:text-sm font-semibold text-slate-900">
-                <span className="flex items-center gap-2">
-                  {finished ? (
-                    <Check className="w-4 h-4 text-emerald-600" />
-                  ) : (
-                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                  )}
-                  {finished ? "Pipeline completado" : "Procesando tu ruta..."}
-                </span>
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${finished ? "-rotate-90" : ""}`} />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-2.5 space-y-2">
-                {PIPELINE_STAGES.map((stage, i) => {
-                  const done = finished || i < stageIndex;
-                  const running = !finished && i === stageIndex;
-                  return (
-                    <div key={stage} className="flex items-center gap-2 text-xs sm:text-sm text-slate-700">
-                      {done ? (
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                      ) : running ? (
-                        <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
-                      ) : (
-                        <span className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
-                      )}
-                      <span className={done ? "text-slate-400 line-through decoration-emerald-600/40" : ""}>
-                        {stage}
-                      </span>
-                    </div>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
           </div>
-        )}
 
-        {/* Footer Fijo con Botón de Acción Principal */}
-        <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
-          <Button
-            type="submit"
-            form="route-planner-form"
-            disabled={isLoading}
-            className="w-full h-11 text-sm sm:text-base font-bold shadow-sm"
-          >
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Optimizando rutas...</span>
-              </span>
-            ) : (
-              <span>Generar ruta óptima</span>
-            )}
-          </Button>
-        </div>
-      </Card>
+          {/* 4. PIE DE PANEL · GENERAR MI RUTA (u3rLd1 en Pencil) */}
+          <div className="p-4 border-t border-[#E4E9DE] bg-white flex flex-col gap-2 flex-shrink-0">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="h-12 w-full bg-[#243C2D] hover:bg-[#192b20] active:scale-[0.99] text-white text-[15px] font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Generar mi ruta</span>
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, memo } from "react";
 import type { Loma, Coordenadas, SenderoProfile } from "../../types";
 import {
   evaluateTrailPosition,
@@ -15,15 +15,10 @@ import {
   Volume2,
   VolumeX,
   PhoneCall,
-  Play,
-  RotateCcw,
-  Compass,
-  Mountain,
   ChevronDown,
   ChevronUp,
   X,
   Award,
-  AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -34,13 +29,13 @@ interface FogGuardianWidgetProps {
   onClose?: () => void;
 }
 
-export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
+const FogGuardianWidgetComponent: React.FC<FogGuardianWidgetProps> = ({
   selectedLoma,
   userCoords,
   onUserCoordsChange,
   onClose,
 }) => {
-  const { offlinePackIds, addSummitStamp, summitStamps } = usePro();
+  const { offlinePackIds, addSummitStamp, summitStamps, isLomaProUnlocked } = usePro();
   const [sendero, setSendero] = useState<SenderoProfile | null>(
     selectedLoma?.sendero ?? null
   );
@@ -54,14 +49,14 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
   useEffect(() => {
     if (selectedLoma?.sendero) {
       setSendero(selectedLoma.sendero);
-    } else if (selectedLoma?.id) {
+    } else if (selectedLoma?.id && isLomaProUnlocked(selectedLoma.id)) {
       fetchSenderoProfile(selectedLoma.id)
         .then((s) => setSendero(s))
         .catch(() => setSendero(null));
     } else {
       setSendero(null);
     }
-  }, [selectedLoma]);
+  }, [selectedLoma, isLomaProUnlocked]);
 
   const trailEval = useMemo(() => {
     if (!sendero) return null;
@@ -136,7 +131,7 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
     try {
       const stamp = verifyAndCreateSummitStamp(userCoords, selectedLoma, sendero ?? undefined);
       addSummitStamp(stamp);
-      toast.success("Cumbre conquistada. Pasaporte digital sellado con hash SHA256.");
+      toast.success("¡Cumbre conquistada! Pasaporte digital sellado con SHA-256.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "No puedes sellar el pasaporte aquí";
       toast.error(msg);
@@ -153,202 +148,200 @@ export const FogGuardianWidget: React.FC<FogGuardianWidgetProps> = ({
   const emergencySmsUrl = buildEmergencySmsHref(userCoords, selectedLoma.nombre, altitud);
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 sm:left-[456px] sm:translate-x-0 z-20 w-[94vw] sm:w-[420px] max-w-[430px] transition-all duration-200 pointer-events-auto">
-      <div
-        className={`rounded-2xl border shadow-2xl transition-all overflow-hidden ${
-          isOffTrail
-            ? "bg-amber-950 border-2 border-amber-500 shadow-amber-500/20 text-white"
-            : "bg-slate-900 border border-slate-700/80 text-white shadow-2xl"
-        }`}
-      >
-        <div className="p-3.5 flex items-center justify-between border-b border-white/10">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {isOffTrail ? (
-              <ShieldAlert className="w-5 h-5 text-amber-400 shrink-0 animate-bounce" />
-            ) : (
-              <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-            )}
-            <div className="min-w-0">
-              <div className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-white">
-                <span>Fog Guardian GPS</span>
+    <div className="absolute bottom-4 left-[480px] z-30 transition-all duration-200 pointer-events-auto">
+      {/* 1. MODO COMPACTO: GPS / Compact (fY6o9 en Pencil) */}
+      {isMinimized ? (
+        <div
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lomo-control transition-all ${
+            isOffTrail
+              ? "bg-[#F8F3E7] border-[#E4D8BB] text-[#82642F] animate-pulse"
+              : "bg-white border-[#E4E9DE] text-[#203B2E]"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                isOffTrail
+                  ? "bg-[#82642F] text-white"
+                  : "bg-[#F0F5ED] text-[#2E6540]"
+              }`}
+            >
+              {isOffTrail ? (
+                <ShieldAlert className="w-4 h-4" />
+              ) : (
+                <ShieldCheck className="w-4 h-4" />
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[15px] font-black leading-tight">
+                  {isOffTrail ? "Fog Guardian · Aviso de desvío" : "Fog Guardian"}
+                </span>
+                <span className="text-sm font-semibold text-[#546349]">
+                  · {altitud} msnm
+                </span>
                 {isPackOffline && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/25 text-emerald-300 font-mono font-semibold">
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[#F0F5ED] text-[#2E6540] font-bold">
                     Offline
                   </span>
                 )}
               </div>
-              <div className="text-xs sm:text-sm text-slate-300 truncate mt-0.5">
-                {isOffTrail ? (
-                  <span className="text-amber-300 font-bold">Desvío: {deviation}m</span>
-                ) : (
-                  <span className="font-medium">En sendero ({deviation}m) · {altitud} msnm</span>
-                )}
+
+              <div className="flex items-center gap-1.5 text-sm font-bold">
+                <div
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isOffTrail ? "bg-[#82642F]" : "bg-[#2E6540] animate-ping"
+                  }`}
+                />
+                <span className={isOffTrail ? "text-[#82642F]" : "text-[#3E5238]"}>
+                  {isOffTrail
+                    ? `Fuera del sendero (${deviation} m · límite 35 m)`
+                    : `En el sendero · desvío de ${deviation} m`}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 ml-2 border-l border-[#E4E9DE] pl-2">
             <button
               onClick={handleToggleWhistle}
-              className={`p-2 rounded-lg text-xs font-bold transition-all ${
+              className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
                 isWhistling
-                  ? "bg-red-600 text-white animate-pulse"
-                  : "bg-white/10 hover:bg-white/20 text-white"
+                  ? "bg-rose-600 text-white animate-pulse"
+                  : "hover:bg-[#F3F5F0] text-[#546349]"
               }`}
-              title="Silbato de rescate 3000Hz"
+              title="Silbato acústico 3000Hz"
             >
-              {isWhistling ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+              {isWhistling ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
+
             <button
-              onClick={() => setIsMinimized(!isMinimized)}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title={isMinimized ? "Abrir HUD Táctico completo" : "Minimizar"}
+              onClick={() => setIsMinimized(false)}
+              className="p-1.5 rounded-lg text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] transition-colors"
+              title="Expandir panel táctico"
             >
-              {isMinimized ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
+              <ChevronUp className="w-4 h-4" />
             </button>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
-                title="Cerrar Guardián"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
           </div>
         </div>
-
-        {isOffTrail && (
-          <div className="px-4 py-2 bg-amber-500 text-slate-950 text-xs sm:text-sm font-bold flex items-center gap-2 animate-pulse">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>Alerta: Desvío del sendero mayor a 35m ({deviation}m)</span>
-          </div>
-        )}
-
-        {!isMinimized && (
-          <div className="p-4 space-y-3.5 bg-slate-900 text-white">
-            <div className="grid grid-cols-3 gap-2.5 text-center">
-              <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700">
-                <div className="text-xs uppercase font-semibold text-slate-400">
-                  Desviación
-                </div>
-                <div
-                  className={`text-base font-black font-mono mt-0.5 ${
-                    isOffTrail ? "text-amber-400" : "text-emerald-400"
-                  }`}
-                >
-                  {deviation}m
-                </div>
+      ) : (
+        /* 2. MODO EXPANDIDO: HUD Táctico Completo */
+        <div className="w-[384px] bg-white border border-[#CAD9BE] rounded-2xl shadow-lomo-panel p-4 flex flex-col gap-3.5 animate-in zoom-in-95">
+          {/* Cabecera */}
+          <div className="flex items-center justify-between pb-2.5 border-b border-[#E4E9DE]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#F0F5ED] text-[#2E6540] flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4" />
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700">
-                <div className="text-xs uppercase font-semibold text-slate-400">
-                  Avance
-                </div>
-                <div className="text-base font-black font-mono text-white mt-0.5">{progress}%</div>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-800/90 border border-slate-700">
-                <div className="text-xs uppercase font-semibold text-slate-400">
-                  Altitud
-                </div>
-                <div className="text-base font-black font-mono text-white mt-0.5">{altitud} m</div>
+              <div>
+                <h4 className="text-[16px] font-black text-[#203B2E]">Fog Guardian · GPS Táctico</h4>
+                <p className="text-sm font-semibold text-[#546349]">{selectedLoma.nombre}</p>
               </div>
             </div>
 
-            <div className="text-xs sm:text-sm text-slate-300 flex items-center justify-between border-t border-slate-800 pt-2.5">
-              <span className="flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-emerald-400" />
-                Rumbo al sendero: {trailEval ? `${trailEval.bearingToTrailDeg} deg` : "0 deg"}
-              </span>
-              <span className="text-xs font-mono text-emerald-400 font-semibold">
-                {isPackOffline ? "Maletín Offline Activo" : "Modo Local GPS"}
-              </span>
-            </div>
-
-            <div className="space-y-2 pt-1">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Simulador de Campo en Vivo
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  onClick={handleSimulateAdvance}
-                  className="px-2.5 py-2 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all flex items-center justify-center gap-1.5"
-                  title="Mover usuario al siguiente punto del sendero"
-                >
-                  <Play className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Avanzar</span>
-                </button>
-                <button
-                  onClick={handleSimulateDeviation}
-                  className="px-2.5 py-2 text-xs font-bold rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all flex items-center justify-center gap-1.5"
-                  title="Desplazar al usuario 50m fuera de la ruta"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Desvío</span>
-                </button>
-                <button
-                  onClick={handleSimulateSummit}
-                  className="px-2.5 py-2 text-xs font-bold rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all flex items-center justify-center gap-1.5"
-                  title="Mover al usuario a la cumbre exacta"
-                >
-                  <Mountain className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Cumbre</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5 pt-1.5 border-t border-slate-800">
+            <div className="flex items-center gap-1">
               <button
-                onClick={handleToggleWhistle}
-                className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${
-                  isWhistling
-                    ? "bg-red-600 text-white animate-pulse"
-                    : "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                }`}
+                onClick={() => setIsMinimized(true)}
+                className="p-1.5 text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] rounded-lg"
               >
-                {isWhistling ? (
-                  <>
-                    <VolumeX className="w-4 h-4" />
-                    <span>Detener SOS</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-4 h-4 text-emerald-400" />
-                    <span>Silbato 3kHz</span>
-                  </>
-                )}
+                <ChevronDown className="w-4 h-4" />
               </button>
-
-              <a
-                href={emergencySmsUrl}
-                className="py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all flex items-center justify-center gap-2 text-center"
-              >
-                <PhoneCall className="w-4 h-4 text-emerald-400" />
-                <span>SMS Lifeline</span>
-              </a>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="p-1.5 text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
+          </div>
 
+          {/* Métricas en vivo */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2.5 bg-[#F3F5F0] rounded-xl border border-[#E4E9DE]">
+              <span className="text-xs font-extrabold text-[#546349] block">DESVÍO</span>
+              <span className={`text-[17px] font-black tabular-nums ${isOffTrail ? "text-[#82642F]" : "text-[#2E6540]"}`}>
+                {deviation} m
+              </span>
+            </div>
+            <div className="p-2.5 bg-[#F3F5F0] rounded-xl border border-[#E4E9DE]">
+              <span className="text-xs font-extrabold text-[#546349] block">ALTITUD</span>
+              <span className="text-[17px] font-black tabular-nums text-[#203B2E]">{altitud} msnm</span>
+            </div>
+            <div className="p-2.5 bg-[#F3F5F0] rounded-xl border border-[#E4E9DE]">
+              <span className="text-xs font-extrabold text-[#546349] block">AVANCE</span>
+              <span className="text-[17px] font-black tabular-nums text-[#2E6540]">{progress}%</span>
+            </div>
+          </div>
+
+          {/* Acciones de Emergencia */}
+          <div className="flex gap-2">
             <button
-              onClick={handleStampSummit}
-              className={`w-full py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                hasSummitStamp
-                  ? "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40"
-                  : "bg-emerald-600 hover:bg-emerald-500 text-white"
+              onClick={handleToggleWhistle}
+              className={`flex-1 h-11 rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-all ${
+                isWhistling
+                  ? "bg-rose-600 text-white animate-pulse"
+                  : "bg-[#F3F5F0] hover:bg-[#E4E9DE] text-[#203B2E] border border-[#E4E9DE]"
               }`}
             >
-              <Award className="w-4 h-4" />
-              <span>
-                {hasSummitStamp
-                  ? "Cumbre Ya Sellada en Pasaporte"
-                  : "Sellar Pasaporte en Cumbre (<60m)"}
-              </span>
+              <Volume2 className="w-4 h-4" />
+              <span>{isWhistling ? "Silbato Activo" : "Silbato 3000Hz"}</span>
             </button>
+
+            <a
+              href={emergencySmsUrl}
+              className="flex-1 h-11 rounded-lg text-sm font-bold bg-[#F8F3E7] hover:bg-[#E4D8BB] text-[#82642F] border border-[#E4D8BB] flex items-center justify-center gap-1.5 transition-all"
+            >
+              <PhoneCall className="w-4 h-4" />
+              <span>SMS Auxilio</span>
+            </a>
           </div>
-        )}
-      </div>
+
+          {/* Simulador GPS para pruebas de senderismo */}
+          <div className="pt-2.5 border-t border-[#E4E9DE] flex flex-col gap-2">
+            <span className="text-xs font-extrabold text-[#546349] uppercase tracking-[0.05em]">
+              SIMULADOR DE RUTA
+            </span>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                onClick={handleSimulateAdvance}
+                className="h-9 bg-[#F3F5F0] hover:bg-[#E4E9DE] text-sm font-bold text-[#203B2E] rounded-lg border border-[#E4E9DE]"
+              >
+                Avanzar +1
+              </button>
+              <button
+                onClick={handleSimulateDeviation}
+                className="h-9 bg-[#F8F3E7] hover:bg-[#E4D8BB] text-sm font-bold text-[#82642F] rounded-lg border border-[#E4D8BB]"
+              >
+                Desviar &gt;35m
+              </button>
+              <button
+                onClick={handleSimulateSummit}
+                className="h-9 bg-[#F0F5ED] hover:bg-[#CAD9BE] text-sm font-bold text-[#2E6540] rounded-lg border border-[#CAD9BE]"
+              >
+                Ir a Cumbre
+              </button>
+            </div>
+          </div>
+
+          {/* Sello de cumbre digital */}
+          <button
+            onClick={handleStampSummit}
+            className={`h-11 w-full rounded-lg text-[15px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm ${
+              hasSummitStamp
+                ? "bg-[#F0F5ED] text-[#2E6540] border border-[#CAD9BE]"
+                : "bg-[#243C2D] hover:bg-[#192b20] text-white"
+            }`}
+          >
+            <Award className="w-4 h-4" />
+            <span>{hasSummitStamp ? "Cumbre sellada (SHA-256)" : "Sellar cumbre digital"}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
+
+export const FogGuardianWidget = memo(FogGuardianWidgetComponent);

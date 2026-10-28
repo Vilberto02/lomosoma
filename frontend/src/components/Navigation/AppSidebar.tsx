@@ -11,17 +11,16 @@ import {
   Search,
   X,
   Sparkles,
-  ChevronLeft,
   ChevronRight,
-  Calendar,
-  Download,
-  MapPin,
-  Route,
+  SlidersHorizontal,
   Cloud,
-  Flower2,
+  ChevronDown,
+  Bookmark,
+  Route,
+  ArrowRight,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { usePro } from "../../context/ProContext";
 import { LomaDetailSheet } from "../Panels/LomaDetailSheet";
 import { RoutePlannerPanel } from "../Panels/RoutePlannerPanel";
@@ -31,7 +30,7 @@ export type QuickFilterType =
   | "temporada"
   | "demo_pro"
   | "offline"
-  | "naturales"
+  | "dificultad"
   | null;
 
 export type SidebarView = "catalog" | "detail" | "planner" | "results";
@@ -59,6 +58,8 @@ interface AppSidebarProps {
   onChangeView: (view: SidebarView) => void;
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
+  isGuardianVisible?: boolean;
+  onToggleGuardian?: () => void;
 }
 
 export const AppSidebar = memo(function AppSidebar({
@@ -74,8 +75,8 @@ export const AppSidebar = memo(function AppSidebar({
   isLoading,
   lastPrefs,
   onNewSearch,
-  backendOnline,
-  isBrowserOnline,
+  backendOnline: _backendOnline,
+  isBrowserOnline: _isBrowserOnline,
   activeFilter,
   onFilterChange,
   onFocusMap,
@@ -84,17 +85,34 @@ export const AppSidebar = memo(function AppSidebar({
   onChangeView,
   isSidebarCollapsed,
   onToggleSidebar,
+  isGuardianVisible = false,
+  onToggleGuardian,
 }: AppSidebarProps) {
-  const { openUpgradeModal, offlinePackIds } = usePro();
+  const { openUpgradeModal } = usePro();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<"explorar" | "guardados" | "rutas">("explorar");
+  const [savedLomaIds, setSavedLomaIds] = useState<string[]>(["L0"]);
+  const [sortOrder, setSortOrder] = useState<"recomendadas" | "altitud" | "nombre">("recomendadas");
+  const [showDificultadMenu, setShowDificultadMenu] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
 
-  const toggleFilter = (filter: QuickFilterType) => {
-    const next = activeFilter === filter ? null : filter;
-    onFilterChange(next);
+  const toggleSaveById = (id: string) => {
+    setSavedLomaIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSaveLoma = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSaveById(id);
   };
 
   const filteredLomas = useMemo(() => {
     let result = lomas;
+
+    if (activeTab === "guardados") {
+      result = result.filter(l => savedLomaIds.includes(l.id));
+    }
 
     if (activeFilter === "temporada") {
       result = result.filter(
@@ -105,94 +123,89 @@ export const AppSidebar = memo(function AppSidebar({
           l.temporada_optima?.toLowerCase().includes("sep") ||
           l.temporada_optima?.toLowerCase().includes("oct")
       );
-    } else if (activeFilter === "demo_pro") {
-      result = result.filter((l) => l.id === "L0" || l.pro_demo_gratis);
-    } else if (activeFilter === "offline") {
-      result = result.filter((l) => offlinePackIds.includes(l.id));
-    } else if (activeFilter === "naturales") {
-      result = result.filter((l) => l.es_loma_natural !== false);
     }
 
-    if (!searchTerm.trim()) return result;
+    if (selectedDifficulty) {
+      result = result.filter(
+        (l) => l.dificultad.toLowerCase().includes(selectedDifficulty.toLowerCase())
+      );
+    }
 
-    const term = searchTerm.toLowerCase();
-    return result.filter(
-      (l) =>
-        l.nombre.toLowerCase().includes(term) ||
-        l.distrito.toLowerCase().includes(term) ||
-        l.dificultad.toLowerCase().includes(term)
-    );
-  }, [lomas, searchTerm, activeFilter, offlinePackIds]);
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (l) =>
+          l.nombre.toLowerCase().includes(term) ||
+          l.distrito.toLowerCase().includes(term) ||
+          l.dificultad.toLowerCase().includes(term)
+      );
+    }
+
+    if (sortOrder === "altitud") {
+      result = [...result].sort((a, b) => (b.altitud_max_msnm ?? 0) - (a.altitud_max_msnm ?? 0));
+    } else if (sortOrder === "nombre") {
+      result = [...result].sort((a, b) => a.nombre.localeCompare(b.nombre));
+    }
+
+    return result;
+  }, [lomas, searchTerm, activeFilter, selectedDifficulty, activeTab, savedLomaIds, sortOrder]);
+
+  // Solo se muestra como seleccionada cuando el usuario elige explícitamente una loma
+  const effectiveSelectedLoma = selectedLoma;
 
   if (isSidebarCollapsed) {
     return (
-      <div className="absolute top-4 left-4 z-30 flex items-center gap-2 pointer-events-auto">
+      <div className="absolute top-4 left-4 z-30 pointer-events-auto">
         <button
           onClick={onToggleSidebar}
-          className="h-11 px-4 bg-white border border-slate-200 shadow-md rounded-2xl flex items-center gap-2.5 text-slate-900 hover:bg-slate-50 transition-all active:scale-95 group"
+          className="h-12 px-4 bg-white border border-[#E4E9DE] shadow-lomo-panel rounded-2xl flex items-center gap-2.5 text-[#203B2E] hover:bg-[#F3F5F0] transition-all active:scale-95 group"
           title="Abrir explorador de lomas"
         >
-          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+          <div className="w-8 h-8 rounded-lg bg-[#2E6540] flex items-center justify-center text-white">
             <Mountain className="w-4 h-4" />
           </div>
-          <span className="text-sm font-bold tracking-tight text-slate-900">Lomosoma</span>
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 transition-transform group-hover:translate-x-0.5" />
+          <span className="text-base font-extrabold tracking-tight text-[#203B2E]">lomosoma</span>
+          <PanelLeft className="w-4 h-4 text-[#546349] group-hover:text-[#203B2E] transition-colors ml-1" />
         </button>
       </div>
     );
   }
 
   return (
-    <aside className="absolute top-3 left-3 bottom-3 z-30 w-[94vw] sm:w-[420px] md:w-[464px] max-w-[496px] flex flex-col bg-white border border-slate-200/90 rounded-2xl shadow-panel overflow-hidden transition-all duration-200 pointer-events-auto">
-      {/* Barra de Marca y Estado Superior */}
-      <header className="px-4 py-3.5 border-b border-slate-200 flex items-center justify-between bg-white flex-shrink-0">
+    <aside className="absolute top-4 bottom-4 left-4 z-30 w-[94vw] sm:w-[448px] max-w-[448px] flex flex-col bg-white border border-[#E4E9DE] rounded-[20px] shadow-lomo-panel overflow-hidden transition-all duration-200 pointer-events-auto">
+      
+      {/* 01 · Cabecera / App (ChnVo: 392x64 px) */}
+      <header className="h-16 px-6 border-b border-[#E4E9DE] flex items-center justify-between bg-white flex-shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm">
-            <Mountain className="w-4 h-4" />
+          {/* Símbolo Lomosoma (wYYgT: 32x32 px, radius 8) */}
+          <div className="w-8 h-8 rounded-lg bg-[#2E6540] flex items-center justify-center shadow-sm text-white">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+            </svg>
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-bold tracking-tight text-slate-900">
-                Lomosoma
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-primary/10 text-primary">
-                2.0
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  backendOnline && isBrowserOnline
-                    ? "bg-primary animate-pulse"
-                    : "bg-destructive"
-                }`}
-              />
-              <span>
-                {!isBrowserOnline
-                  ? "Modo Sin Señal"
-                  : backendOnline
-                  ? "Servidor Conectado"
-                  : "Modo Local"}
-              </span>
-            </div>
-          </div>
+          {/* Marca (jQnN6: text-20 weight-800) */}
+          <span className="text-[22px] font-black tracking-tight text-[#203B2E] lowercase select-none">
+            lomosoma
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          {/* Acceso PRO (jyTG4: fill $lomo-surface-inset, radius 8) */}
           <button
             onClick={() => openUpgradeModal()}
-            className="px-3 py-1.5 text-xs font-bold text-amber-900 bg-amber-400 hover:bg-amber-300 rounded-full transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-            title="Ver Planes PRO y Pasaporte de Cumbres"
+            className="px-3 py-1.5 text-sm font-bold tracking-wider text-[#3E5238] bg-[#F3F5F0] hover:bg-[#E4E9DE] rounded-lg transition-all flex items-center gap-1.5 active:scale-95 border border-[#E4E9DE]"
+            title="Suscripción y Acceso Pro"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-4 h-4 text-[#2E6540]" />
             <span>PRO</span>
           </button>
+          
           <button
             onClick={onToggleSidebar}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            title="Colapsar panel lateral"
+            className="p-1.5 rounded-lg text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] transition-colors"
+            title="Minimizar panel"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <PanelLeftClose className="w-4 h-4" />
           </button>
         </div>
       </header>
@@ -205,6 +218,10 @@ export const AppSidebar = memo(function AppSidebar({
           onClose={onBackToCatalog}
           onSetAsStartPoint={onSetAsStartPoint}
           onFocusMap={onFocusMap}
+          isSaved={savedLomaIds.includes(selectedLoma.id)}
+          onToggleSave={() => toggleSaveById(selectedLoma.id)}
+          isGuardianActive={isGuardianVisible}
+          onToggleGuardian={onToggleGuardian}
         />
       ) : activeView === "planner" ? (
         <RoutePlannerPanel
@@ -229,214 +246,350 @@ export const AppSidebar = memo(function AppSidebar({
           onNewSearch={onNewSearch}
         />
       ) : (
+        /* VISTA 1: Lomosoma · Explorar / navegación */
         <div className="flex-1 min-h-0 flex flex-col bg-white">
-          {/* Cabecera de Busqueda y Accion */}
-          <div className="p-3.5 space-y-3 border-b border-slate-200 bg-white flex-shrink-0">
-            <div className="relative flex items-center">
-              <Search className="w-4 h-4 absolute left-3.5 text-slate-400 pointer-events-none" />
+          
+          {/* Navegación principal (LHsTS: 392x44 px, tabs con border-b) */}
+          <nav className="h-12 px-6 border-b border-[#E4E9DE] flex items-center flex-shrink-0 bg-white">
+            <button
+              onClick={() => setActiveTab("explorar")}
+              className={`flex-1 h-full flex items-center justify-center text-[15px] tracking-tight transition-colors border-b-2 ${
+                activeTab === "explorar"
+                  ? "border-[#2E6540] text-[#2E6540] font-extrabold"
+                  : "border-transparent text-[#546349] font-semibold hover:text-[#203B2E]"
+              }`}
+            >
+              Explorar
+            </button>
+            <button
+              onClick={() => setActiveTab("guardados")}
+              className={`flex-1 h-full flex items-center justify-center text-[15px] tracking-tight transition-colors border-b-2 ${
+                activeTab === "guardados"
+                  ? "border-[#2E6540] text-[#2E6540] font-extrabold"
+                  : "border-transparent text-[#546349] font-semibold hover:text-[#203B2E]"
+              }`}
+            >
+              Guardados
+            </button>
+            <button
+              onClick={() => {
+                if (optimizationResult) {
+                  onChangeView("results");
+                } else {
+                  onChangeView("planner");
+                }
+              }}
+              className="flex-1 h-full flex items-center justify-center text-[15px] font-semibold tracking-tight text-[#546349] hover:text-[#203B2E] transition-colors border-b-2 border-transparent"
+            >
+              Mis rutas
+            </button>
+          </nav>
+
+          {/* Buscar una escapada (XObx7: padding [16, 24, 12, 24]) */}
+          <div className="px-6 pt-4 pb-3 flex flex-col gap-3 flex-shrink-0 bg-white">
+            
+            {/* Título y contexto (n1jvM) */}
+            <div className="flex flex-col gap-0.5">
+              <h2 className="text-[26px] font-extrabold tracking-[-0.025em] text-[#203B2E] leading-tight">
+                Tu próxima escapada.
+              </h2>
+              <p className="text-[15px] text-[#3E5238] font-semibold">
+                Descubre las lomas de Lima.
+              </p>
+            </div>
+
+            {/* Input Buscar lomas o distritos (MEwxM: h-46, fill $lomo-surface-inset, radius 12) */}
+            <div className="h-12 px-4 bg-[#F3F5F0] border border-[#E4E9DE] rounded-xl flex items-center gap-2.5 focus-within:border-[#2E6540] focus-within:ring-2 focus-within:ring-[#2E6540]/15 transition-all">
+              <Search className="w-5 h-5 text-[#546349] flex-shrink-0" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por loma o distrito..."
-                className="w-full pl-10 pr-9 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-900 placeholder:text-slate-400 transition-all font-medium"
+                placeholder="Busca una loma o distrito"
+                className="w-full bg-transparent border-none text-base font-medium text-[#203B2E] placeholder:text-[#546349] focus:outline-none"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="absolute right-3 p-1 text-slate-400 hover:text-slate-700"
-                  title="Limpiar búsqueda"
+                  className="p-1 text-[#546349] hover:text-[#203B2E]"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {/* Botones de Accion Rapida */}
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                onClick={() => onChangeView("planner")}
-                className="flex-1 h-9 text-xs sm:text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl gap-2 shadow-sm"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Planificar Ruta con IA</span>
-              </Button>
-
-              {optimizationResult && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onChangeView("results")}
-                  className="h-9 text-xs sm:text-sm font-semibold border-primary/40 text-primary hover:bg-primary/10 rounded-xl gap-1.5"
-                  title="Ver última ruta calculada"
-                >
-                  <Route className="w-4 h-4" />
-                  <span>Ruta Activa</span>
-                </Button>
-              )}
-            </div>
-
-            {/* Chips de Filtro Rapido */}
-            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1 text-xs">
+            {/* Filtros visibles (h-40 px chips) */}
+            <div className="flex items-center gap-2 relative">
+              {/* En temporada */}
               <button
-                onClick={() => toggleFilter("temporada")}
-                className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap active:scale-95 ${
+                onClick={() => onFilterChange(activeFilter === "temporada" ? null : "temporada")}
+                className={`h-10 px-3.5 rounded-lg border text-sm font-bold flex items-center gap-2 transition-all active:scale-95 ${
                   activeFilter === "temporada"
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-[#F0F5ED] text-[#2E6540] border-[#CAD9BE]"
+                    : "bg-[#F3F5F0] text-[#3E5238] border-transparent hover:border-[#E4E9DE]"
                 }`}
               >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>En Temporada</span>
+                <Sparkles className="w-4 h-4 text-[#546349]" />
+                <span>En temporada</span>
               </button>
+
+              {/* Dificultad Dropdown Chip */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowDificultadMenu(prev => !prev)}
+                  className={`h-10 px-3.5 rounded-lg border text-sm font-bold flex items-center gap-2 transition-all active:scale-95 ${
+                    selectedDifficulty
+                      ? "bg-[#F0F5ED] text-[#2E6540] border-[#CAD9BE]"
+                      : "bg-white text-[#3E5238] border-[#E4E9DE] hover:bg-[#F3F5F0]"
+                  }`}
+                >
+                  <Mountain className="w-4 h-4 text-[#546349]" />
+                  <span>{selectedDifficulty || "Dificultad"}</span>
+                </button>
+
+                {showDificultadMenu && (
+                  <div className="absolute left-0 top-12 z-50 bg-white border border-[#E4E9DE] rounded-xl shadow-lomo-panel p-1.5 min-w-[150px] flex flex-col gap-1">
+                    <button
+                      onClick={() => { setSelectedDifficulty(null); setShowDificultadMenu(false); }}
+                      className="text-left text-sm px-3 py-2 rounded-lg hover:bg-[#F3F5F0] text-[#203B2E] font-semibold"
+                    >
+                      Todas
+                    </button>
+                    <button
+                      onClick={() => { setSelectedDifficulty("Fácil"); setShowDificultadMenu(false); }}
+                      className="text-left text-sm px-3 py-2 rounded-lg hover:bg-[#F3F5F0] text-[#2E6540] font-bold"
+                    >
+                      Fácil
+                    </button>
+                    <button
+                      onClick={() => { setSelectedDifficulty("Moderado"); setShowDificultadMenu(false); }}
+                      className="text-left text-sm px-3 py-2 rounded-lg hover:bg-[#F3F5F0] text-[#82642F] font-bold"
+                    >
+                      Moderado
+                    </button>
+                    <button
+                      onClick={() => { setSelectedDifficulty("Difícil"); setShowDificultadMenu(false); }}
+                      className="text-left text-sm px-3 py-2 rounded-lg hover:bg-[#F3F5F0] text-rose-700 font-bold"
+                    >
+                      Difícil
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Más filtros */}
               <button
-                onClick={() => toggleFilter("demo_pro")}
-                className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap active:scale-95 ${
-                  activeFilter === "demo_pro"
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-                }`}
+                onClick={() => {
+                  setSortOrder(prev => prev === "recomendadas" ? "altitud" : prev === "altitud" ? "nombre" : "recomendadas");
+                }}
+                className="w-10 h-10 rounded-lg border border-[#E4E9DE] bg-white flex items-center justify-center text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] transition-colors ml-auto"
+                title={`Ordenar por: ${sortOrder}`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Demo Gratis</span>
-              </button>
-              <button
-                onClick={() => toggleFilter("offline")}
-                className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap active:scale-95 ${
-                  activeFilter === "offline"
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Offline ({offlinePackIds.length})</span>
-              </button>
-              <button
-                onClick={() => toggleFilter("naturales")}
-                className={`px-3 py-1.5 rounded-xl border font-semibold flex items-center gap-1.5 transition-all whitespace-nowrap active:scale-95 ${
-                  activeFilter === "naturales"
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
-                }`}
-              >
-                <Mountain className="w-3.5 h-3.5" />
-                <span>Naturales</span>
+                <SlidersHorizontal className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Contador de Resultados */}
-          <div className="px-4 py-2.5 flex items-center justify-between text-xs font-medium text-slate-500 bg-slate-50 border-b border-slate-200/80 flex-shrink-0">
-            <span>
-              Mostrando {filteredLomas.length} de {lomas.length} lomas
-            </span>
-            {activeFilter && (
+          {/* Resultados de lomas (S0SZT) */}
+          <div className="flex-1 min-h-0 flex flex-col px-4">
+            
+            {/* Conteo y orden (ur3sI) */}
+            <div className="px-2 py-2 flex items-center justify-between text-sm text-[#3E5238] font-semibold flex-shrink-0">
+              <span>{filteredLomas.length} lomas para explorar</span>
               <button
-                onClick={() => onFilterChange(null)}
-                className="text-xs font-semibold text-primary hover:underline"
+                type="button"
+                onClick={() =>
+                  setSortOrder((prev) =>
+                    prev === "recomendadas"
+                      ? "altitud"
+                      : prev === "altitud"
+                      ? "nombre"
+                      : "recomendadas"
+                  )
+                }
+                className="flex items-center gap-1 text-[#3E5238] hover:text-[#203B2E] font-bold"
               >
-                Limpiar filtro
+                <span>
+                  {sortOrder === "recomendadas"
+                    ? "Recomendadas"
+                    : sortOrder === "altitud"
+                    ? "Por altitud"
+                    : "Alfabético"}
+                </span>
+                <ChevronDown className="w-4 h-4 text-[#546349]" />
               </button>
-            )}
-          </div>
+            </div>
 
-          {/* Lista de Tarjetas de Lomas */}
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-3 space-y-2.5 bg-slate-50/40">
-            {filteredLomas.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 space-y-2.5">
-                <Mountain className="w-10 h-10 mx-auto opacity-30" />
-                <p className="text-sm font-medium">No se encontraron lomas con este filtro.</p>
-                <button
-                  onClick={() => {
-                    setSearchTerm("");
-                    onFilterChange(null);
-                  }}
-                  className="text-xs sm:text-sm text-primary font-bold hover:underline"
-                >
-                  Restablecer filtros
-                </button>
-              </div>
-            ) : (
-              filteredLomas.map((loma) => {
-                const isSelected = selectedLoma?.id === loma.id;
-                const isOffline = offlinePackIds.includes(loma.id);
-                const colchon = loma.lomacast_resumen?.probabilidad_colchon_hoy_pct;
-                const floracion = loma.lomacast_resumen?.fase_floracion_nombre;
-
-                return (
-                  <div
-                    key={loma.id}
-                    onClick={() => onSelectLoma(loma)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer group ${
-                      isSelected
-                        ? "bg-emerald-50/70 border-2 border-primary shadow-sm"
-                        : "bg-white border-slate-200 hover:border-primary/50 hover:bg-slate-50/60 shadow-sm"
-                    }`}
+            {/* Listado con scrollbar */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2.5 pb-3 pr-0.5">
+              {filteredLomas.length === 0 ? (
+                <div className="py-12 text-center text-[#546349] space-y-2">
+                  <Mountain className="w-8 h-8 mx-auto opacity-30 text-[#203B2E]" />
+                  <p className="text-[15px] font-semibold">No se encontraron lomas con estos filtros.</p>
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedDifficulty(null);
+                      onFilterChange(null);
+                    }}
+                    className="text-[15px] text-[#2E6540] font-bold underline"
                   >
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-primary transition-colors truncate">
-                            {loma.nombre}
-                          </h4>
-                          {loma.id === "L0" && (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 border border-amber-500/30">
-                              Demo Gratis
-                            </span>
-                          )}
-                          {isOffline && (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
-                              Offline
-                            </span>
-                          )}
+                    Restablecer búsqueda
+                  </button>
+                </div>
+              ) : (
+                filteredLomas.map((loma, idx) => {
+                  const isSelected = effectiveSelectedLoma?.id === loma.id;
+                  const isSaved = savedLomaIds.includes(loma.id);
+                  const colchon = loma.lomacast_resumen?.probabilidad_colchon_hoy_pct ?? 67;
+
+                  if (isSelected) {
+                    /* CARD SELECCIONADA (Seleccionada · Lomas del Paraíso) */
+                    return (
+                      <div
+                        key={loma.id}
+                        className="p-4 bg-[#F0F5ED] border border-[#CAD9BE] rounded-2xl flex flex-col gap-2.5 transition-all shadow-sm"
+                      >
+                        {/* Selección y guardar */}
+                        <div className="flex items-center justify-between text-xs font-extrabold tracking-wider text-[#3E5238]">
+                          <span className="tabular-nums">
+                            {String(idx + 1).padStart(2, "0")} &nbsp;/&nbsp; SELECCIONADA
+                          </span>
+                          <div className="flex items-center gap-0.5">
+                            <button
+                              type="button"
+                              onClick={(e) => toggleSaveLoma(loma.id, e)}
+                              className="p-1 rounded-md text-[#546349] hover:text-[#203B2E] hover:bg-white/60 transition-colors"
+                              title={isSaved ? "Quitar de guardados" : "Guardar loma"}
+                              aria-label={isSaved ? "Quitar de guardados" : "Guardar loma"}
+                            >
+                              <Bookmark
+                                className={`w-4 h-4 ${
+                                  isSaved ? "fill-[#2E6540] text-[#2E6540]" : ""
+                                }`}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onBackToCatalog();
+                              }}
+                              className="p-1 rounded-md text-[#546349] hover:text-[#203B2E] hover:bg-white/60 transition-colors"
+                              title="Cerrar selección"
+                              aria-label="Cerrar selección"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 mt-1">
-                          <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <span className="truncate">{loma.distrito}</span>
-                          <span>·</span>
-                          <span className="font-mono font-medium">{loma.altitud_max_msnm} msnm</span>
+
+                        {/* Nombre y Distrito */}
+                        <div>
+                          <h3 className="text-[19px] font-extrabold text-[#203B2E] leading-tight">
+                            {loma.nombre}
+                          </h3>
+                          <p className="text-[15px] text-[#3E5238] font-semibold mt-0.5">
+                            {loma.distrito} {loma.id === "L0" ? "· Apu Siqay" : ""}
+                          </p>
+                        </div>
+
+                        {/* Altitud y Dificultad */}
+                        <div className="flex items-center gap-3 text-sm font-semibold text-[#3E5238] mt-1 tabular-nums">
+                          <div className="flex items-center gap-1">
+                            <Mountain className="w-4 h-4 text-[#546349]" />
+                            <span>{(loma.altitud_max_msnm ?? 0).toLocaleString()} msnm</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 font-bold text-[#82642F] bg-[#F8F3E7] px-2.5 py-0.5 rounded-md border border-[#E4D8BB]">
+                            <span>{loma.dificultad}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Cloud className="w-4 h-4 text-[#546349]" />
+                            <span>{colchon}% nubes</span>
+                          </div>
+                        </div>
+
+                        {/* Acciones de loma */}
+                        <div className="flex items-center gap-2 mt-2 pt-2.5 border-t border-[#CAD9BE]/60">
+                          <button
+                            onClick={() => {
+                              onSelectLoma(loma);
+                              onChangeView("detail");
+                            }}
+                            className="flex-1 h-11 bg-[#243C2D] hover:bg-[#192b20] text-white text-[15px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.98] shadow-sm"
+                          >
+                            <span>Ver ficha</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </button>
+
+                          <button
+                            onClick={() => onFocusMap(loma.coordenadas)}
+                            className="h-11 px-4 bg-white border border-[#CAD9BE] hover:bg-[#F3F5F0] text-[#3E5238] text-[15px] font-bold rounded-lg transition-all"
+                          >
+                            Centrar
+                          </button>
                         </div>
                       </div>
+                    );
+                  }
 
-                      <Badge
-                        variant={
-                          loma.dificultad === "Facil" || loma.dificultad === "Fácil"
-                            ? "success"
+                  /* CARD NORMAL */
+                  return (
+                    <div
+                      key={loma.id}
+                      onClick={() => onSelectLoma(loma)}
+                      className="p-4 bg-white border border-[#E4E9DE] hover:border-[#CAD9BE] hover:bg-[#F3F5F0]/60 rounded-xl transition-all cursor-pointer group flex flex-col gap-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[17px] font-extrabold text-[#203B2E] group-hover:text-[#2E6540] transition-colors truncate">
+                          {loma.nombre}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-[#546349] group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+                      </div>
+
+                      <div className="text-sm font-semibold text-[#3E5238] tabular-nums">
+                        {loma.distrito} · {loma.altitud_max_msnm} msnm
+                      </div>
+
+                      <div className="flex items-center justify-between text-sm pt-1 tabular-nums">
+                        <span className={`font-bold ${
+                          loma.dificultad === "Fácil" || loma.dificultad === "Facil"
+                            ? "text-[#2E6540]"
                             : loma.dificultad === "Moderado"
-                            ? "warning"
-                            : "destructive"
-                        }
-                        className="text-xs px-2.5 py-0.5 shrink-0 font-semibold"
-                      >
-                        {loma.dificultad}
-                      </Badge>
-                    </div>
+                            ? "text-[#82642F]"
+                            : "text-rose-700"
+                        }`}>
+                          {loma.dificultad}
+                        </span>
 
-                    {/* Chips de Condiciones en Vivo */}
-                    <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex-wrap">
-                      {colchon !== undefined && (
-                        <span className="flex items-center gap-1.5 font-mono text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
-                          <Cloud className="w-3 h-3 text-emerald-600" />
+                        <div className="flex items-center gap-1 font-semibold text-[#3E5238]">
+                          <Cloud className="w-4 h-4 text-[#546349]" />
                           <span>{colchon}% nubes</span>
-                        </span>
-                      )}
-                      {floracion && (
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 truncate max-w-[200px]">
-                          <Flower2 className="w-3 h-3 text-amber-600 shrink-0" />
-                          <span className="truncate">{floracion}</span>
-                        </span>
-                      )}
-                      <span className="ml-auto text-xs sm:text-sm text-primary group-hover:translate-x-0.5 transition-transform flex items-center font-bold">
-                        Ver ficha
-                        <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
-                      </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
+                  );
+                })
+              )}
+            </div>
           </div>
+
+          {/* Pie de panel · Planificar mi ruta (vXJpX: ref F58bX) */}
+          <footer className="px-6 py-4 border-t border-[#E4E9DE] bg-white flex flex-col gap-1.5 flex-shrink-0">
+            <button
+              onClick={() => onChangeView("planner")}
+              className="h-12 w-full bg-[#243C2D] hover:bg-[#192b20] active:scale-[0.99] text-white text-[15px] font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <Route className="w-4 h-4 text-[#D8E7C9]" />
+              <span>Planificar mi ruta</span>
+            </button>
+            <p className="text-sm text-center text-[#3E5238] font-semibold">
+              Una ruta a tu ritmo, con ayuda de IA.
+            </p>
+          </footer>
+
         </div>
       )}
     </aside>

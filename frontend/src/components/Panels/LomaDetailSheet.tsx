@@ -9,18 +9,13 @@ import {
 } from "../../services/api";
 import {
   X,
-  MapPin,
-  Compass,
   Mountain,
   Download,
   ShieldCheck,
   Lock,
   Sparkles,
-  Share2,
-  CheckCircle2,
   Send,
   CloudSun,
-  AlertCircle,
   MessageCircle,
   Navigation,
   Car,
@@ -28,11 +23,17 @@ import {
   Users,
   Award,
   ArrowLeft,
+  Sun,
+  Compass,
+  WifiOff,
+  Copy,
+  Clock,
+  Bus,
+  Bike,
+  Check,
+  FileDown,
+  Bookmark,
 } from "lucide-react";
-import { Card, CardTitle, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import toast from "react-hot-toast";
 
 interface LomaDetailSheetProps {
@@ -41,6 +42,10 @@ interface LomaDetailSheetProps {
   onSetAsStartPoint: (coords: Coordenadas) => void;
   onFocusMap: (coords: Coordenadas) => void;
   isEmbedded?: boolean;
+  isSaved?: boolean;
+  onToggleSave?: () => void;
+  isGuardianActive?: boolean;
+  onToggleGuardian?: () => void;
 }
 
 const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
@@ -48,7 +53,11 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
   onClose,
   onSetAsStartPoint,
   onFocusMap,
-  isEmbedded = false,
+  isEmbedded: _isEmbedded = false,
+  isSaved = false,
+  onToggleSave,
+  isGuardianActive = false,
+  onToggleGuardian,
 }) => {
   const {
     isLomaProUnlocked,
@@ -58,15 +67,16 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     summitStamps,
   } = usePro();
 
-  const [activeTab, setActiveTab] = useState<string>("lomacast");
+  const [activeTab, setActiveTab] = useState<"lomacast" | "sendero" | "transporte" | "grupo">("lomacast");
   const [lomaDetails, setLomaDetails] = useState<Loma | null>(loma);
   const [groupCount, setGroupCount] = useState<number>(4);
   const [isDownloadingPack, setIsDownloadingPack] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
 
   // Formulario nuevo reporte ciudadano
   const [reportAuthor, setReportAuthor] = useState<string>("");
   const [reportComment, setReportComment] = useState<string>("");
-  const [reportBarro, setReportBarro] = useState<string>("Óptimo y Seco");
+  const [reportBarro, setReportBarro] = useState<string>("Moderado");
   const [reportAmancaes, setReportAmancaes] = useState<boolean>(true);
   const [reportColchon, setReportColchon] = useState<boolean>(true);
   const [isSubmittingReport, setIsSubmittingReport] = useState<boolean>(false);
@@ -75,7 +85,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     setLomaDetails(loma);
     if (!loma) return;
 
-    if (!loma.lomacast) {
+    if (!loma.lomacast && isLomaProUnlocked(loma.id)) {
       fetchLomaCast(loma.id)
         .then((cast) => {
           setLomaDetails((prev) => (prev ? { ...prev, lomacast: cast } : prev));
@@ -83,14 +93,14 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
         .catch(() => {});
     }
 
-    if (!loma.sendero) {
+    if (!loma.sendero && isLomaProUnlocked(loma.id)) {
       fetchSenderoProfile(loma.id)
         .then((profile) => {
           setLomaDetails((prev) => (prev ? { ...prev, sendero: profile } : prev));
         })
         .catch(() => {});
     }
-  }, [loma]);
+  }, [loma, isLomaProUnlocked]);
 
   const currentLoma = lomaDetails || loma;
 
@@ -111,7 +121,6 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
 
   if (!currentLoma) return null;
 
-  const lomacast = currentLoma.lomacast;
   const sendero = currentLoma.sendero;
   const guia = currentLoma.guia_acceso;
   const tarifario = currentLoma.tarifario_oficial;
@@ -123,6 +132,7 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     setIsDownloadingPack(false);
   };
 
+  // Cálculos de Chancha
   const costGuia = tarifario?.guiado_grupal_pen ?? 35;
   const costEntrada = (tarifario?.entrada_adulto_pen ?? 10) * groupCount;
   const mototaxiUnit = guia?.tarifa_justa_mototaxi_pen ?? tarifario?.mototaxi_justo_pen ?? 6;
@@ -169,7 +179,8 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
         return { ...prev, reportes_recientes: list };
       });
       setReportComment("");
-      toast.success("Reporte ciudadano publicado con éxito");
+      setShowReportModal(false);
+      toast.success("¡Reporte ciudadano publicado con éxito!");
     } catch {
       toast.error("No se pudo publicar el reporte. Verifica tu conexión.");
     } finally {
@@ -177,613 +188,798 @@ const LomaDetailSheetComponent: React.FC<LomaDetailSheetProps> = ({
     }
   };
 
+  // Curva de elevación SVG
   const elevationPoints = sendero?.perfil_elevacion ?? [];
   const minEle = sendero?.altitud_min_msnm ?? 200;
-  const maxEle = sendero?.altitud_max_msnm ?? 1000;
+  const maxEle = sendero?.altitud_max_msnm ?? (currentLoma.altitud_max_msnm ?? 1000);
   const maxDist = sendero?.distancia_km ?? currentLoma.distancia_sendero_km ?? 6;
 
   const svgWidth = 320;
-  const svgHeight = 120;
+  const svgHeight = 90;
   const svgPoints = elevationPoints.length > 1
     ? elevationPoints
         .map((p) => {
           const x = (p.distancia_km / Math.max(0.1, maxDist)) * (svgWidth - 20) + 10;
           const y =
-            svgHeight - 15 - ((p.altitud_msnm - minEle) / Math.max(1, maxEle - minEle)) * (svgHeight - 30);
+            svgHeight - 12 - ((p.altitud_msnm - minEle) / Math.max(1, maxEle - minEle)) * (svgHeight - 24);
           return `${x.toFixed(1)},${y.toFixed(1)}`;
         })
         .join(" ")
-    : `10,${svgHeight - 15} ${svgWidth / 2},${svgHeight / 2} ${svgWidth - 10},15`;
+    : `10,${svgHeight - 10} 70,${svgHeight - 35} 160,${svgHeight - 55} 240,${svgHeight - 75} ${svgWidth - 10},15`;
 
   const compTierra =
     sendero?.composicion_terreno?.tierra_compacta_pct ??
     currentLoma.composicion_terreno?.tierra_compacta_pct ??
-    60;
+    45;
   const compRoca =
     sendero?.composicion_terreno?.roca_granito_pct ??
     currentLoma.composicion_terreno?.roca_granito_pct ??
-    25;
+    30;
   const compBarro =
     sendero?.composicion_terreno?.barro_arcilloso_pct ??
     currentLoma.composicion_terreno?.barro_arcilloso_pct ??
-    15;
+    25;
 
-  const containerClass = isEmbedded
-    ? "flex flex-col h-full w-full overflow-hidden bg-white"
-    : "absolute top-20 right-4 z-20 w-[92vw] sm:w-[440px] max-w-[440px] h-[calc(100vh-140px)] max-h-[760px] flex flex-col animate-in slide-in-from-right-4 fade-in-50 duration-200";
-
-  const cardClass = isEmbedded
-    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
-    : "border border-slate-200 shadow-panel bg-white rounded-2xl flex flex-col h-full overflow-hidden";
+  const colchonPct =
+    currentLoma.lomacast?.probabilidad_colchon_hoy_pct ??
+    currentLoma.lomacast_resumen?.probabilidad_colchon_hoy_pct ??
+    67;
+  const florFase =
+    currentLoma.lomacast?.fase_floracion_nombre ??
+    currentLoma.lomacast_resumen?.fase_floracion_nombre ??
+    "Semillado y transición";
+  const florIndex = Math.max(
+    1,
+    Math.min(5, currentLoma.lomacast?.fase_floracion_index ?? 5)
+  );
+  const ventanaHoy = currentLoma.lomacast?.ventana_optima_hoy ?? "06:00–08:30";
+  const goldenHourRaw = currentLoma.lomacast?.golden_hour_hoy ?? "05:36 · 17:22";
+  const [goldenAm, goldenPm] = goldenHourRaw.includes("·")
+    ? goldenHourRaw.split("·").map((s) => s.trim())
+    : ["05:36", "17:22"];
+  const barroEstado =
+    currentLoma.lomacast?.estado_sendero_barro ??
+    currentLoma.lomacast_resumen?.estado_sendero_barro ??
+    "Moderado";
 
   return (
-    <div className={containerClass}>
-      <Card className={cardClass}>
-        {/* Cabecera Principal */}
-        <div className="p-4 border-b border-slate-200 bg-white flex-shrink-0 relative">
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              onClick={onClose}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catálogo de lomas"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catálogo</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <Badge
-              variant={
-                currentLoma.dificultad === "Facil" || currentLoma.dificultad === "Fácil"
-                  ? "success"
-                  : currentLoma.dificultad === "Moderado"
-                  ? "warning"
-                  : "destructive"
-              }
-              className="text-xs font-semibold px-2.5 py-0.5"
-            >
-              {currentLoma.dificultad}
-            </Badge>
-            <span className="text-xs sm:text-sm text-slate-500 flex items-center gap-1 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-primary" />
-              {currentLoma.distrito}
-            </span>
-            {isUnlocked && (
-              <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-300 text-xs font-semibold gap-1 px-2 py-0.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                PRO Desbloqueado
-              </Badge>
-            )}
-          </div>
-          <CardTitle className="text-xl font-bold text-slate-900 leading-snug">
-            {currentLoma.nombre}
-          </CardTitle>
-          <div className="text-xs text-slate-400 font-mono mt-1">
-            {currentLoma.coordenadas.lat.toFixed(4)}, {currentLoma.coordenadas.lon.toFixed(4)}
-          </div>
+    <div className="flex flex-col h-full w-full overflow-hidden bg-white">
+      {/* 1. CABECERA: Identidad y navegación de la loma (bBDGl en Pencil) */}
+      <div className="p-5 border-b border-[#E4E9DE] bg-white flex-shrink-0 flex flex-col gap-3">
+        {/* Fila volver y guardar */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-[15px] font-bold text-[#3E5238] hover:text-[#203B2E] transition-colors py-1 px-2 rounded-lg hover:bg-[#F3F5F0] -ml-2"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#546349]" />
+            <span>Todas las lomas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onToggleSave?.();
+              toast.success(
+                isSaved ? "Loma quitada de tus guardados" : "Loma guardada en tus favoritas"
+              );
+            }}
+            className="p-1.5 rounded-lg text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0] transition-colors"
+            title={isSaved ? "Quitar de guardados" : "Guardar loma"}
+            aria-label={isSaved ? "Quitar de guardados" : "Guardar loma"}
+          >
+            <Bookmark
+              className={`w-4 h-4 ${isSaved ? "fill-[#2E6540] text-[#2E6540]" : ""}`}
+            />
+          </button>
         </div>
 
-        {/* Pestañas de Alto Valor */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 bg-white">
-          <div className="px-4 pt-2 border-b border-slate-200 bg-slate-50">
-            <TabsList className="grid grid-cols-4 w-full h-10">
-              <TabsTrigger value="lomacast" className="text-xs sm:text-sm font-semibold py-1.5">
-                LomaCast
-              </TabsTrigger>
-              <TabsTrigger value="sendero" className="text-xs sm:text-sm font-semibold py-1.5">
-                Sendero
-              </TabsTrigger>
-              <TabsTrigger value="acceso" className="text-xs sm:text-sm font-semibold py-1.5">
-                3 Modos
-              </TabsTrigger>
-              <TabsTrigger value="grupo" className="text-xs sm:text-sm font-semibold py-1.5">
-                Grupo & Sello
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        {/* Nombre y Ubicación */}
+        <div>
+          <h2 className="text-[26px] font-extrabold text-[#203B2E] leading-tight tracking-[-0.02em]">
+            {currentLoma.nombre}
+          </h2>
+          <p className="text-[15px] text-[#3E5238] font-semibold mt-0.5">
+            {currentLoma.distrito} {currentLoma.id === "L0" ? "· Apu Siqay" : ""}
+          </p>
+        </div>
 
-          <CardContent className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white">
-            {/* PESTAÑA 1: LOMACAST 7D */}
-            <TabsContent value="lomacast" className="space-y-4 m-0">
-              {!isUnlocked && currentLoma.id !== "L0" ? (
-                <div className="p-4 rounded-xl border border-primary/30 bg-emerald-50/40 text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                    <Lock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900">
-                      LomaCast 7D Exclusivo de Lomosoma PRO
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                      Desbloquea la predicción de colchón de nubes a 7 días, medidor de floración y estado del barro con un pago único vitalicio.
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => openUpgradeModal(currentLoma.id)}
-                    className="w-full text-xs sm:text-sm font-bold h-10 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Sparkles className="w-4 h-4 mr-1.5" />
-                    Desbloquear Loma (S/ 4.90) o Pack Lima (S/ 19.90)
-                  </Button>
-                </div>
-              ) : null}
+        {/* Badges de Dificultad y Acceso PRO */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-bold border ${
+            currentLoma.dificultad === "Fácil" || currentLoma.dificultad === "Facil"
+              ? "bg-[#F0F5ED] text-[#2E6540] border-[#CAD9BE]"
+              : currentLoma.dificultad === "Moderado"
+              ? "bg-[#F8F3E7] text-[#82642F] border-[#E4D8BB]"
+              : "bg-rose-50 text-rose-700 border-rose-200"
+          }`}>
+            <Mountain className="w-4 h-4 text-[#546349]" />
+            <span>{currentLoma.dificultad}</span>
+          </span>
 
-              {/* Medidor de Flor de Amancaes en 5 Fases */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Mountain className="w-4 h-4 text-primary" />
-                    Fase Flor de Amancaes
-                  </span>
-                  <Badge variant="outline" className="text-xs font-mono font-bold text-primary border-primary/30 px-2 py-0.5">
-                    Fase {lomacast?.fase_floracion_index ?? 3} / 5
-                  </Badge>
-                </div>
-                <div className="text-sm sm:text-base font-bold text-slate-900">
-                  {lomacast?.fase_floracion_nombre ?? "Fase 3: Alfombra Verde Activa"}
-                </div>
-                <div className="grid grid-cols-5 gap-1.5 pt-1">
-                  {[1, 2, 3, 4, 5].map((f) => (
-                    <div
-                      key={f}
-                      className={`h-2.5 rounded-full transition-all ${
-                        f <= (lomacast?.fase_floracion_index ?? 3)
-                          ? "bg-emerald-600"
-                          : "bg-slate-200"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+          {isUnlocked ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-bold bg-[#F0F5ED] text-[#2E6540] border border-[#CAD9BE]">
+              <ShieldCheck className="w-4 h-4" />
+              <span>PRO desbloqueado</span>
+            </span>
+          ) : (
+            <button
+              onClick={() => openUpgradeModal(currentLoma.id)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-bold bg-[#F3F5F0] hover:bg-[#E4E9DE] text-[#3E5238] border border-[#E4E9DE] transition-colors"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Acceso PRO</span>
+            </button>
+          )}
 
-              {/* Colchon de Nubes y Golden Hour */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
-                  <div className="text-xs text-slate-500 uppercase font-semibold">
-                    Colchón de Nubes
-                  </div>
-                  <div className="text-2xl font-black text-primary font-mono mt-0.5">
-                    {lomacast?.probabilidad_colchon_hoy_pct ?? 85}%
-                  </div>
-                  <div className="text-xs text-slate-600 mt-1">
-                    Ventana: {lomacast?.ventana_optima_hoy ?? "06:00 a 08:30"}
-                  </div>
-                </div>
+          <span className="text-sm font-bold text-[#3E5238] ml-auto tabular-nums">
+            {(currentLoma.altitud_max_msnm ?? 0).toLocaleString()} msnm
+          </span>
+        </div>
+      </div>
 
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70">
-                  <div className="text-xs text-slate-500 uppercase font-semibold">
-                    Golden Hour Hoy
-                  </div>
-                  <div className="text-sm font-bold text-slate-900 mt-1">
-                    {lomacast?.golden_hour_hoy ?? "06:15 AM / 17:35 PM"}
-                  </div>
-                  <div className="text-xs text-slate-600 mt-1">
-                    Barro: {lomacast?.estado_sendero_barro ?? "Firme"}
-                  </div>
-                </div>
-              </div>
+      {/* 2. PESTAÑAS · Subnavegación de la Ficha (RFwu1 en Pencil) */}
+      <div className="h-12 px-4 border-b border-[#E4E9DE] flex items-center bg-[#F3F5F0]/60 flex-shrink-0 gap-1">
+        <button
+          onClick={() => setActiveTab("lomacast")}
+          className={`flex-1 h-10 rounded-lg text-[13px] sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "lomacast"
+              ? "bg-white text-[#203B2E] shadow-sm border border-[#E4E9DE]"
+              : "text-[#546349] hover:text-[#203B2E]"
+          }`}
+        >
+          <CloudSun className="w-4 h-4" />
+          <span>LomaCast</span>
+        </button>
 
-              {/* Tabla de Pronostico 7 Dias */}
-              {lomacast?.pronostico_7_dias && lomacast.pronostico_7_dias.length > 0 && (
-                <div className="space-y-2.5">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Pronóstico LomaCast 7 Días
-                  </div>
-                  <div className="space-y-2">
-                    {lomacast.pronostico_7_dias.map((d, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between text-xs sm:text-sm"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <CloudSun className="w-4 h-4 text-primary shrink-0" />
-                          <div>
-                            <span className="font-bold text-slate-900">{d.dia_nombre}</span>
-                            <span className="text-slate-400 ml-1.5 text-xs">{d.fecha}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-slate-500 font-medium">
-                            {d.temp_min_c}C - {d.temp_max_c}C
-                          </span>
-                          <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
-                            {d.probabilidad_colchon_nubes_pct}% nubes
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
+        <button
+          onClick={() => setActiveTab("sendero")}
+          className={`flex-1 h-10 rounded-lg text-[13px] sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "sendero"
+              ? "bg-white text-[#203B2E] shadow-sm border border-[#E4E9DE]"
+              : "text-[#546349] hover:text-[#203B2E]"
+          }`}
+        >
+          <Footprints className="w-4 h-4" />
+          <span>Sendero</span>
+        </button>
 
-            {/* PESTAÑA 2: SENDERO Y SIN SENAL */}
-            <TabsContent value="sendero" className="space-y-4 m-0">
-              {/* Boton Maletin Offline */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      <Download className="w-4 h-4 text-primary" />
-                      Maletín Offline Zero Signal
-                    </div>
-                    <div className="text-xs text-slate-500 mt-0.5">
-                      Mapas, sendero 3D y waypoints para navegar sin conexión
-                    </div>
-                  </div>
-                  {isOfflineSaved && (
-                    <Badge variant="default" className="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5">
-                      Descargado
-                    </Badge>
-                  )}
-                </div>
-                <Button
-                  onClick={handleDownloadPack}
-                  disabled={isDownloadingPack}
-                  variant={isOfflineSaved ? "outline" : "default"}
-                  className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  {isDownloadingPack
-                    ? "Descargando maletín..."
-                    : isOfflineSaved
-                    ? "Actualizar Maletín Offline"
-                    : "Descargar Maletín Offline (Sin Señal)"}
-                </Button>
-              </div>
+        <button
+          onClick={() => setActiveTab("transporte")}
+          className={`flex-1 h-10 rounded-lg text-[13px] sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "transporte"
+              ? "bg-white text-[#203B2E] shadow-sm border border-[#E4E9DE]"
+              : "text-[#546349] hover:text-[#203B2E]"
+          }`}
+        >
+          <Car className="w-4 h-4" />
+          <span>Transporte</span>
+        </button>
 
-              {/* Grafico SVG de Perfil de Elevacion */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
-                <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="font-bold uppercase tracking-wider text-slate-500">
-                    Perfil de Elevación
-                  </span>
-                  <span className="font-mono text-primary font-bold">
-                    +{sendero?.desnivel_positivo_m ?? currentLoma.desnivel_positivo_m ?? 580} m desnivel
-                  </span>
-                </div>
+        <button
+          onClick={() => setActiveTab("grupo")}
+          className={`flex-1 h-10 rounded-lg text-[13px] sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "grupo"
+              ? "bg-white text-[#203B2E] shadow-sm border border-[#E4E9DE]"
+              : "text-[#546349] hover:text-[#203B2E]"
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Grupo & Sello</span>
+        </button>
+      </div>
 
-                <div className="w-full bg-slate-900 rounded-xl p-3.5 relative overflow-hidden shadow-inner">
-                  <svg
-                    viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                    className="w-full h-28 overflow-visible"
-                  >
-                    <polyline
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={svgPoints}
-                    />
-                  </svg>
-                  <div className="flex justify-between text-xs font-mono text-slate-400 mt-1.5">
-                    <span>{minEle} msnm</span>
-                    <span>Max {maxEle} msnm</span>
-                    <span>{maxDist} km</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Composicion de Superficie Estilo Komoot */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Composición de Terreno
-                </div>
-                <div className="h-3 rounded-full flex overflow-hidden border border-slate-300">
-                  <div style={{ width: `${compTierra}%` }} className="bg-amber-600" title="Tierra compacta" />
-                  <div style={{ width: `${compRoca}%` }} className="bg-slate-500" title="Roca granito" />
-                  <div style={{ width: `${compBarro}%` }} className="bg-emerald-700" title="Barro arcilloso" />
-                </div>
-                <div className="flex justify-between text-xs text-slate-700 font-semibold pt-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block" />
-                    Tierra {compTierra}%
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block" />
-                    Roca {compRoca}%
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-700 inline-block" />
-                    Barro {compBarro}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Descargar GPX */}
-              <a
-                href={downloadGpxUrl(currentLoma.id)}
-                download={`${currentLoma.id}_sendero.gpx`}
-                className="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs sm:text-sm font-bold text-slate-900 flex items-center justify-center gap-2 transition-colors shadow-sm"
-              >
-                <Compass className="w-4 h-4 text-primary" />
-                <span>Descargar Archivo GPX (Garmin / Apple Watch)</span>
-              </a>
-            </TabsContent>
-
-            {/* PESTAÑA 3: ULTIMA MILLA 3 MODOS */}
-            <TabsContent value="acceso" className="space-y-4 m-0">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Comparador Última Milla (Citymapper)
-              </div>
-
-              {guia?.modos_transporte && guia.modos_transporte.length > 0 ? (
-                <div className="space-y-3">
-                  {guia.modos_transporte.map((m, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-2 shadow-sm"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                          {m.modo === "mochilero" && <Footprints className="w-4 h-4 text-primary" />}
-                          {m.modo === "smart" && <Navigation className="w-4 h-4 text-blue-600" />}
-                          {m.modo === "directo" && <Car className="w-4 h-4 text-emerald-600" />}
-                          {m.etiqueta}
-                        </span>
-                        <Badge variant="outline" className="text-xs font-mono font-bold px-2 py-0.5">
-                          {m.tiempo_estimado_min} min
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs sm:text-sm text-slate-500">
-                        <span>Por persona: S/ {m.costo_por_persona_pen}</span>
-                        <span>Grupo 4: S/ {m.costo_grupal_4_pen}</span>
-                      </div>
-                      <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                        {m.resumen_ruta}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700 space-y-1">
-                  <div className="font-bold text-slate-900">Transporte sugerido:</div>
-                  <p>{currentLoma.transporte_principal}</p>
-                </div>
-              )}
-
-              {/* Tarifario Justo Anti Estafa */}
-              <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50/60 space-y-2 text-xs">
-                <div className="font-bold text-amber-900 flex items-center gap-2 text-xs sm:text-sm">
-                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                  Tarifario oficial
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-800">
-                  <div>
-                    <span className="text-slate-500">Mototaxi justo garita:</span>
-                    <div className="font-bold text-slate-900 text-sm">
-                      S/ {guia?.tarifa_justa_mototaxi_pen ?? tarifario?.mototaxi_justo_pen ?? 6}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">Último retorno:</span>
-                    <div className="font-bold text-slate-900 text-sm">
-                      {guia?.ultimo_transporte_retorno ?? "18:30 PM"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {tarifario?.whatsapp_contacto && (
-                <a
-                  href={`https://wa.me/${tarifario.whatsapp_contacto.replace(/[^0-9]/g, "")}?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20el%20acceso%20a%20${encodeURIComponent(currentLoma.nombre)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Contactar Asociación Comunal (WhatsApp)</span>
-                </a>
-              )}
-            </TabsContent>
-
-            {/* PESTAÑA 4: GRUPO Y PASAPORTE */}
-            <TabsContent value="grupo" className="space-y-4 m-0">
-              {/* Calculadora Chancha Grupal */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-primary" />
-                    Chancha Grupal (Splitwise)
-                  </div>
-                  <Badge variant="outline" className="text-xs font-mono font-bold px-2 py-0.5">
-                    {groupCount} Personas
-                  </Badge>
-                </div>
-
+      {/* 3. CONTENIDO PRINCIPAL SCROLLEABLE SEGÚN PESTAÑA */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 flex flex-col gap-5 bg-white">
+        
+        {/* PESTAÑA 1: LOMACAST (Frames 01, 02, 11) */}
+        {activeTab === "lomacast" && (
+          <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+            {/* Ciclo de flor de Amancaes (JC1Vp en Pencil) */}
+            <div className="p-4 bg-[#F0F5ED] border border-[#CAD9BE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-xs font-extrabold tracking-wider text-[#3E5238]">
                 <div className="flex items-center gap-1.5">
-                  {[1, 2, 4, 6, 8, 10].map((num) => (
+                  <Sparkles className="w-4 h-4 text-[#2E6540]" />
+                  <span>FLOR DE AMANCAES</span>
+                </div>
+                <span className="text-[#203B2E] tabular-nums font-extrabold">
+                  {String(florIndex).padStart(2, "0")} / 05
+                </span>
+              </div>
+
+              <div>
+                <span className="text-[17px] font-extrabold text-[#203B2E]">
+                  {florFase}
+                </span>
+                <p className="text-sm font-medium text-[#3E5238] mt-0.5">
+                  {currentLoma.temporada_optima
+                    ? `Temporada óptima: ${currentLoma.temporada_optima}.`
+                    : "Hojas maduras y formación de cápsula de semillas."}
+                </p>
+              </div>
+
+              {/* Barra de 5 fases */}
+              <div className="grid grid-cols-5 gap-1.5 pt-1">
+                {[0, 1, 2, 3, 4].map((step) => (
+                  <div
+                    key={step}
+                    className={`h-2 rounded-full ${
+                      step < florIndex ? "bg-[#2E6540]" : "bg-[#CAD9BE]/60"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Condiciones de hoy (HD2NN en Pencil) */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Colchón de nubes */}
+              <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-extrabold tracking-wider text-[#546349]">
+                  <CloudSun className="w-4 h-4 text-[#546349]" />
+                  <span>COLCHÓN DE NUBES</span>
+                </div>
+                <div className="my-1.5">
+                  <span className="text-[28px] font-extrabold text-[#203B2E] tracking-tight tabular-nums">
+                    {colchonPct}%
+                  </span>
+                </div>
+                <span className="text-sm font-semibold text-[#3E5238] tabular-nums">
+                  Ventana {ventanaHoy}
+                </span>
+              </div>
+
+              {/* Luz y Terreno */}
+              <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-extrabold tracking-wider text-[#546349]">
+                  <Sun className="w-4 h-4 text-[#82642F]" />
+                  <span>GOLDEN HOUR · HOY</span>
+                </div>
+                <div className="my-1.5 flex items-baseline gap-2 tabular-nums">
+                  <span className="text-[18px] font-extrabold text-[#203B2E]">{goldenAm}</span>
+                  <span className="text-sm text-[#546349]">·</span>
+                  <span className="text-[18px] font-extrabold text-[#203B2E]">{goldenPm}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm font-bold text-[#82642F] bg-[#F8F3E7] px-2.5 py-0.5 rounded-md border border-[#E4D8BB]">
+                  <span>Barro {barroEstado.toLowerCase()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pronóstico de siete días (mKLpa en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[16px] font-extrabold text-[#203B2E]">Esta semana</h4>
+                <span className="text-xs font-bold text-[#546349] tracking-wider uppercase">
+                  {currentLoma.lomacast?.mejor_dia_semana
+                    ? `MEJOR DÍA: ${currentLoma.lomacast.mejor_dia_semana}`
+                    : "PRONÓSTICO 7 DÍAS"}
+                </span>
+              </div>
+
+              <div className="flex flex-col divide-y divide-[#E4E9DE]/60 text-[15px]">
+                {(currentLoma.lomacast?.pronostico_7_dias &&
+                currentLoma.lomacast.pronostico_7_dias.length > 0
+                  ? currentLoma.lomacast.pronostico_7_dias.map((d, idx) => ({
+                      dia: idx === 0 ? `Hoy · ${d.dia_nombre}` : d.dia_nombre,
+                      temp: `${d.temp_min_c.toFixed(1)}° – ${d.temp_max_c.toFixed(1)}°`,
+                      nubes: `${d.probabilidad_colchon_nubes_pct}%`,
+                    }))
+                  : [
+                      { dia: "Hoy · 27", temp: "13.2° – 18.4°", nubes: `${colchonPct}%` },
+                      { dia: "Miércoles 28", temp: "13.5° – 18.7°", nubes: "69%" },
+                      { dia: "Jueves 29", temp: "13.8° – 19.1°", nubes: "72%" },
+                      { dia: "Viernes 30", temp: "14.0° – 19.3°", nubes: "74%" },
+                      { dia: "Sábado 31", temp: "13.4° – 18.7°", nubes: "66%" },
+                      { dia: "Domingo 01", temp: "13.6° – 18.9°", nubes: "67%" },
+                      { dia: "Lunes 02", temp: "13.5° – 18.9°", nubes: "64%" },
+                    ]
+                ).map((row, i) => (
+                  <div
+                    key={i}
+                    className="py-2 flex items-center justify-between first:pt-0 last:pb-0 tabular-nums"
+                  >
+                    <span className="font-bold text-[#203B2E] w-32 truncate">{row.dia}</span>
+                    <CloudSun className="w-4 h-4 text-[#546349]" />
+                    <span className="text-[#3E5238] font-semibold">{row.temp}</span>
+                    <span className="font-extrabold text-[#2E6540] w-12 text-right">
+                      {row.nubes}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {!isUnlocked && (
+                <button
+                  type="button"
+                  onClick={() => openUpgradeModal(currentLoma.id)}
+                  className="mt-1 h-11 px-3 bg-[#F0F5ED] hover:bg-[#E4E9DE] text-[#2E6540] border border-[#CAD9BE] rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Desbloquear LomaCast 7D en tiempo real con PRO</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA 2: SENDERO / OFFLINE (Frames 05, 12) */}
+        {activeTab === "sendero" && (
+          <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+            {/* Maletín offline Zero Signal (VNG6z en Pencil) */}
+            <div className="p-4 bg-[#F0F5ED] border border-[#CAD9BE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-white border border-[#CAD9BE] flex items-center justify-center text-[#2E6540]">
+                  <WifiOff className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-[16px] font-extrabold text-[#203B2E]">Tu ruta, incluso sin señal.</h4>
+                  <p className="text-sm font-medium text-[#3E5238]">Mapas, sendero 3D y waypoints offline.</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleDownloadPack}
+                disabled={isDownloadingPack}
+                className="mt-1 h-11 px-3 bg-[#243C2D] hover:bg-[#192b20] text-white text-sm font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all"
+              >
+                {isDownloadingPack ? (
+                  <span>Descargando pack offline...</span>
+                ) : isOfflineSaved ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Pack guardado en tu dispositivo</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>Descargar maletín offline Zero Signal</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Perfil de elevación (vjIQv en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[16px] font-extrabold text-[#203B2E]">Perfil de elevación</span>
+                <span className="text-sm font-extrabold text-[#2E6540] bg-[#F0F5ED] px-2.5 py-0.5 rounded-md border border-[#CAD9BE] tabular-nums">
+                  ↗ +{currentLoma.desnivel_positivo_m ?? 580} m
+                </span>
+              </div>
+
+              {/* Gráfico SVG de elevación */}
+              <div className="w-full bg-[#F3F5F0] rounded-lg p-2 flex items-center justify-center">
+                <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-24 overflow-visible">
+                  <polyline
+                    fill="none"
+                    stroke="#2E6540"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={svgPoints}
+                  />
+                  <path
+                    d={`M 10,${svgHeight - 12} L ${svgPoints} L ${svgWidth - 10},${svgHeight - 12} Z`}
+                    fill="url(#gradElevation)"
+                    opacity="0.25"
+                  />
+                  <defs>
+                    <linearGradient id="gradElevation" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#2E6540" />
+                      <stop offset="100%" stopColor="#CAD9BE" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+
+              <div className="flex items-center justify-between text-[13px] text-[#3E5238] font-semibold pt-1 tabular-nums">
+                <span>Inicio: {minEle} msnm</span>
+                <span>Distancia: {maxDist} km</span>
+                <span>Máx: {maxEle} msnm</span>
+              </div>
+            </div>
+
+            {/* Composición del terreno (Y7spIz en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <span className="text-[16px] font-extrabold text-[#203B2E]">Conoce el terreno</span>
+
+              {/* Barra segmentada */}
+              <div className="h-3 w-full rounded-full overflow-hidden flex bg-[#E4E9DE]">
+                <div style={{ width: `${compTierra}%` }} className="bg-[#8CA276]" title="Tierra compacta" />
+                <div style={{ width: `${compRoca}%` }} className="bg-[#BDC8AF]" title="Roca granito" />
+                <div style={{ width: `${compBarro}%` }} className="bg-[#D8C8A6]" title="Barro arcilloso" />
+              </div>
+
+              {/* Leyenda */}
+              <div className="flex items-center justify-between text-sm font-bold text-[#3E5238] pt-1 tabular-nums">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#8CA276]" />
+                  <span>Tierra {compTierra}%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#BDC8AF]" />
+                  <span>Roca {compRoca}%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#D8C8A6]" />
+                  <span>Barro {compBarro}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Descarga GPX para dispositivos (USuEw en Pencil) */}
+            <a
+              href={downloadGpxUrl(currentLoma.id)}
+              download={`${currentLoma.nombre.replace(/\s+/g, "_")}.gpx`}
+              className="h-11 px-3 bg-white border border-[#CAD9BE] hover:bg-[#F3F5F0] text-[#203B2E] text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
+            >
+              <FileDown className="w-4 h-4 text-[#2E6540]" />
+              <span>Descargar archivo GPX (Garmin / Strava)</span>
+            </a>
+          </div>
+        )}
+
+        {/* PESTAÑA 3: TRANSPORTE / 3 MODOS (Frames 04, 13, 14) */}
+        {activeTab === "transporte" && (
+          <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[17px] font-extrabold text-[#203B2E]">Cómo llegar al sendero</h4>
+              <span className="text-sm font-bold text-[#546349]">3 Modos de acceso</span>
+            </div>
+
+            {/* Modo 1: Transporte Público */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-[#F0F5ED] text-[#2E6540] flex items-center justify-center">
+                    <Bus className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-[16px] font-extrabold text-[#203B2E]">Transporte Público / Intermodal</h5>
+                    <span className="text-sm font-semibold text-[#546349]">Tren Eléctrico L1 + Combi</span>
+                  </div>
+                </div>
+                <div className="text-right tabular-nums">
+                  <span className="text-[16px] font-extrabold text-[#203B2E]">S/ 8.50</span>
+                  <p className="text-sm font-medium text-[#546349]">~95 min</p>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-[#3E5238] border-t border-[#E4E9DE]/60 pt-2 leading-relaxed">
+                Bajar en Estación María Auxiliadora y tomar combi a Nueva Esperanza hasta el último paradero.
+              </p>
+            </div>
+
+            {/* Modo 2: Auto o Taxi Directo */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-[#F0F5ED] text-[#2E6540] flex items-center justify-center">
+                    <Car className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-[16px] font-extrabold text-[#203B2E]">Auto Particular o Taxi</h5>
+                    <span className="text-sm font-semibold text-[#546349]">Vía Panamericana Sur</span>
+                  </div>
+                </div>
+                <div className="text-right tabular-nums">
+                  <span className="text-[16px] font-extrabold text-[#203B2E]">S/ 35.00</span>
+                  <p className="text-sm font-medium text-[#546349]">~42 min</p>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-[#3E5238] border-t border-[#E4E9DE]/60 pt-2 leading-relaxed">
+                Estacionamiento comunitario vigilado disponible junto a la garita de control oficial.
+              </p>
+            </div>
+
+            {/* Modo 3: Mototaxi Última Milla */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-[#F8F3E7] text-[#82642F] flex items-center justify-center">
+                    <Bike className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-[16px] font-extrabold text-[#203B2E]">Mototaxi Comunitario</h5>
+                    <span className="text-sm text-[#82642F] font-bold">Tarifa Justa Oficial</span>
+                  </div>
+                </div>
+                <div className="text-right tabular-nums">
+                  <span className="text-[16px] font-extrabold text-[#82642F]">S/ 3.50</span>
+                  <p className="text-sm font-medium text-[#546349]">por persona</p>
+                </div>
+              </div>
+              <p className="text-sm font-medium text-[#3E5238] border-t border-[#E4E9DE]/60 pt-2 leading-relaxed">
+                Desde paradero final de Edén del Manantial hasta la entrada del circuito ecoturístico.
+              </p>
+            </div>
+
+            {/* Horario de Retorno y Seguridad */}
+            <div className="p-4 bg-[#F8F3E7] border border-[#E4D8BB] rounded-xl flex items-center gap-2.5 text-sm text-[#82642F]">
+              <Clock className="w-4 h-4 flex-shrink-0 text-[#82642F]" />
+              <div>
+                <span className="font-bold tabular-nums">
+                  Hora límite de bajada: {currentLoma.garita_control?.hora_limite_bajada ?? "16:30"}.
+                </span>
+                <p className="text-sm font-medium text-[#82642F]/90 mt-0.5 tabular-nums">
+                  Último transporte de retorno a las{" "}
+                  {currentLoma.garita_control?.ultimo_transporte_retorno ??
+                    guia?.ultimo_transporte_retorno ??
+                    "17:45"}
+                  .
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PESTAÑA 4: GRUPO & PASAPORTE (Frames 03, 15, 16) */}
+        {activeTab === "grupo" && (
+          <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+            {/* Título de grupo */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-[17px] font-extrabold text-[#203B2E]">La escapada, en grupo.</h4>
+                <p className="text-sm font-medium text-[#546349]">Calcula la cuota por persona (chancha).</p>
+              </div>
+              <Users className="w-5 h-5 text-[#2E6540]" />
+            </div>
+
+            {/* Selector de participantes (Wn39Y en Pencil) */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-bold text-[#3E5238]">¿Cuántos van? ({groupCount} personas)</span>
+              <div className="grid grid-cols-6 gap-1.5">
+                {[1, 2, 4, 6, 8, 10].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setGroupCount(num)}
+                    className={`h-10 rounded-lg text-[15px] font-extrabold tabular-nums transition-all ${
+                      groupCount === num
+                        ? "bg-[#243C2D] text-white shadow-sm"
+                        : "bg-[#F3F5F0] text-[#3E5238] hover:bg-[#E4E9DE]"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Desglose de gastos (l7R46T en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2 text-[15px]">
+              <div className="flex justify-between items-center py-1.5 border-b border-[#E4E9DE]/60">
+                <div>
+                  <span className="font-bold text-[#203B2E]">Guía comunitario</span>
+                  <p className="text-sm font-medium text-[#546349]">
+                    {tarifario?.asociacion ?? "Asociación local Ecoturística"}
+                  </p>
+                </div>
+                <span className="font-extrabold text-[#203B2E] tabular-nums">S/ {costGuia}</span>
+              </div>
+
+              <div className="flex justify-between items-center py-1.5 border-b border-[#E4E9DE]/60">
+                <div>
+                  <span className="font-bold text-[#203B2E]">Entradas</span>
+                  <p className="text-sm font-medium text-[#546349] tabular-nums">
+                    {groupCount} personas x S/ {tarifario?.entrada_adulto_pen ?? 10}
+                  </p>
+                </div>
+                <span className="font-extrabold text-[#203B2E] tabular-nums">S/ {costEntrada}</span>
+              </div>
+
+              <div className="flex justify-between items-center py-1.5">
+                <div>
+                  <span className="font-bold text-[#203B2E]">Transporte última milla</span>
+                  <p className="text-sm font-medium text-[#546349] tabular-nums">
+                    {mototaxisNeeded} motos · ida y vuelta
+                  </p>
+                </div>
+                <span className="font-extrabold text-[#203B2E] tabular-nums">S/ {costTransporte}</span>
+              </div>
+            </div>
+
+            {/* Tarjeta de Cuota Individual (OCEn5 en Pencil) */}
+            <div className="p-4 bg-[#F0F5ED] border border-[#CAD9BE] rounded-xl flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-extrabold tracking-wider text-[#3E5238] uppercase">
+                  CUOTA POR PERSONA
+                </span>
+                <span className="text-sm font-semibold text-[#546349] tabular-nums">
+                  S/ {totalChancha} en total · entre {groupCount}
+                </span>
+              </div>
+              <span className="text-[28px] font-extrabold text-[#203B2E] tracking-tight tabular-nums">
+                S/ {cuotaPorPersona}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopyChancha}
+              className="h-11 px-3 bg-white border border-[#CAD9BE] hover:bg-[#F3F5F0] text-[#203B2E] text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
+            >
+              <Copy className="w-4 h-4 text-[#2E6540]" />
+              <span>Copiar desglose al portapapeles</span>
+            </button>
+
+            {/* Pasaporte digital de cumbres (lkkxL en Pencil) */}
+            <div className="p-4 bg-white border border-[#E4E9DE] rounded-xl flex flex-col gap-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-[#2E6540]" />
+                  <span className="text-[16px] font-extrabold text-[#203B2E]">Pasaporte de cumbres</span>
+                </div>
+                <span className={`text-sm font-bold px-2.5 py-0.5 rounded-md ${
+                  summitStamp ? "bg-[#F0F5ED] text-[#2E6540]" : "bg-[#F3F5F0] text-[#546349]"
+                }`}>
+                  {summitStamp ? "Sellado" : "Pendiente"}
+                </span>
+              </div>
+              <p className="text-sm font-medium text-[#3E5238] leading-relaxed">
+                Acércate a menos de 60 m del punto de cumbre y activa Fog Guardian para registrar tu sello digital con firma SHA-256.
+              </p>
+              {onToggleGuardian && (
+                <button
+                  type="button"
+                  onClick={onToggleGuardian}
+                  className={`h-11 px-3 rounded-lg text-sm font-bold flex items-center justify-center gap-1.5 transition-all border ${
+                    isGuardianActive
+                      ? "bg-[#243C2D] text-white border-[#243C2D]"
+                      : "bg-[#F0F5ED] hover:bg-[#E4E9DE] text-[#2E6540] border-[#CAD9BE]"
+                  }`}
+                >
+                  <Compass className="w-4 h-4" />
+                  <span>
+                    {isGuardianActive
+                      ? "Ocultar Fog Guardian GPS"
+                      : "Activar Fog Guardian GPS"}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Disparador de Reporte Ciudadano (Frame 16) */}
+            <button
+              type="button"
+              onClick={() => setShowReportModal(true)}
+              className="h-11 px-3 bg-[#F3F5F0] hover:bg-[#E4E9DE] text-[#203B2E] text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-all border border-[#E4E9DE]"
+            >
+              <MessageCircle className="w-4 h-4 text-[#2E6540]" />
+              <span>¿Cómo está la loma hoy? Enviar reporte ciudadano</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 4. PIE DE PANEL FIJO (Euby2 en Pencil) */}
+      <div className="p-4 border-t border-[#E4E9DE] bg-white flex flex-col gap-2 flex-shrink-0">
+        <button
+          onClick={() => onSetAsStartPoint(currentLoma.coordenadas)}
+          className="h-12 w-full bg-[#243C2D] hover:bg-[#192b20] active:scale-[0.99] text-white text-[15px] font-bold rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all"
+        >
+          <Navigation className="w-4 h-4" />
+          <span>Usar como punto de partida</span>
+        </button>
+
+        <button
+          onClick={() => onFocusMap(currentLoma.coordenadas)}
+          className="h-11 w-full bg-white border border-[#CAD9BE] hover:bg-[#F3F5F0] text-[#3E5238] text-[15px] font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all"
+        >
+          <Compass className="w-4 h-4 text-[#546349]" />
+          <span>Centrar en el mapa</span>
+        </button>
+      </div>
+
+      {/* MODAL / OVERLAY: Reporte Ciudadano (Frame 16: pr52w) */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#CAD9BE] rounded-2xl shadow-lomo-panel p-5 flex flex-col gap-4 animate-in zoom-in-95">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-[20px] font-extrabold text-[#203B2E]">¿Cómo está la loma hoy?</h3>
+                <p className="text-sm font-medium text-[#546349] mt-0.5">Tu reporte ayuda a quienes vienen después.</p>
+              </div>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="p-1 rounded-lg text-[#546349] hover:text-[#203B2E] hover:bg-[#F3F5F0]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSendReport} className="flex flex-col gap-3">
+              <div>
+                <label className="text-sm font-bold text-[#3E5238] block mb-1">Tu nombre</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Valeria Romero"
+                  value={reportAuthor}
+                  onChange={(e) => setReportAuthor(e.target.value)}
+                  className="w-full h-11 px-3 bg-[#F3F5F0] border border-[#E4E9DE] rounded-lg text-[15px] font-medium text-[#203B2E] placeholder-[#546349] focus:outline-none focus:border-[#2E6540]"
+                />
+              </div>
+
+              {/* Casillas de Avistamiento */}
+              <div className="flex items-center gap-4 py-1">
+                <label className="flex items-center gap-2 cursor-pointer text-[15px] font-bold text-[#203B2E]">
+                  <input
+                    type="checkbox"
+                    checked={reportAmancaes}
+                    onChange={(e) => setReportAmancaes(e.target.checked)}
+                    className="w-4 h-4 accent-[#2E6540] rounded"
+                  />
+                  <span>Flor de Amancaes</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer text-[15px] font-bold text-[#203B2E]">
+                  <input
+                    type="checkbox"
+                    checked={reportColchon}
+                    onChange={(e) => setReportColchon(e.target.checked)}
+                    className="w-4 h-4 accent-[#2E6540] rounded"
+                  />
+                  <span>Colchón de nubes</span>
+                </label>
+              </div>
+
+              {/* Estado de barro */}
+              <div>
+                <label className="text-sm font-bold text-[#3E5238] block mb-1">Estado del terreno / barro</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["Seco", "Moderado", "Resbaladizo"].map((nivel) => (
                     <button
-                      key={num}
-                      onClick={() => setGroupCount(num)}
-                      className={`flex-1 py-1.5 text-xs sm:text-sm rounded-lg font-bold transition-all ${
-                        groupCount === num
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                      key={nivel}
+                      type="button"
+                      onClick={() => setReportBarro(nivel)}
+                      className={`h-10 rounded-lg text-sm font-bold transition-all ${
+                        reportBarro === nivel
+                          ? "bg-[#2E6540] text-white shadow-xs"
+                          : "bg-[#F3F5F0] text-[#3E5238] hover:bg-[#E4E9DE]"
                       }`}
                     >
-                      {num}
+                      {nivel}
                     </button>
                   ))}
                 </div>
+              </div>
 
-                <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm space-y-1.5">
-                  <div className="flex justify-between text-slate-500">
-                    <span>Guía comunitario ({tarifario?.asociacion ?? "Comunal"}):</span>
-                    <span className="font-mono font-semibold text-slate-800 whitespace-nowrap">S/ {costGuia}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-500">
-                    <span>Entradas ({groupCount} pers):</span>
-                    <span className="font-mono font-semibold text-slate-800">S/ {costEntrada}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-500">
-                    <span>Transporte ({mototaxisNeeded} motos ida y vuelta):</span>
-                    <span className="font-mono font-semibold text-slate-800">S/ {costTransporte}</span>
-                  </div>
-                  <div className="flex justify-between text-slate-900 font-bold pt-1.5 border-t border-slate-100">
-                    <span>Cuota por persona:</span>
-                    <span className="text-primary font-black text-base">S/ {cuotaPorPersona}</span>
-                  </div>
-                </div>
+              {/* Comentario */}
+              <div>
+                <label className="text-sm font-bold text-[#3E5238] block mb-1">Cuéntanos sobre el sendero y el clima…</label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Detalla cómo está el viento, la visibilidad y el calzado recomendado hoy..."
+                  value={reportComment}
+                  onChange={(e) => setReportComment(e.target.value)}
+                  className="w-full p-3 bg-[#F3F5F0] border border-[#E4E9DE] rounded-lg text-[15px] font-medium text-[#203B2E] placeholder-[#546349] focus:outline-none focus:border-[#2E6540]"
+                />
+              </div>
 
-                <Button
-                  onClick={handleCopyChancha}
-                  variant="outline"
-                  className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#E4E9DE]">
+                <button
+                  type="button"
+                  onClick={() => setShowReportModal(false)}
+                  className="h-11 px-4 text-sm font-bold text-[#546349] hover:bg-[#F3F5F0] rounded-lg"
                 >
-                  <Share2 className="w-4 h-4" />
-                  <span>Copiar Desglose para WhatsApp / Yape</span>
-                </Button>
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReport}
+                  className="h-11 px-5 bg-[#243C2D] hover:bg-[#192b20] text-white text-sm font-bold rounded-lg flex items-center gap-1.5 shadow-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>{isSubmittingReport ? "Publicando..." : "Enviar reporte"}</span>
+                </button>
               </div>
-
-              {/* Sello de Cumbre */}
-              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Award className="w-4 h-4 text-emerald-600" />
-                    Pasaporte Digital de Cumbres
-                  </span>
-                  {summitStamp ? (
-                    <Badge variant="default" className="bg-emerald-600 text-white text-xs font-semibold px-2 py-0.5">
-                      Cumbre Sellada
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-slate-400 text-xs px-2 py-0.5">
-                      Pendiente
-                    </Badge>
-                  )}
-                </div>
-
-                {summitStamp ? (
-                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 text-xs sm:text-sm space-y-1 text-slate-900">
-                    <div className="font-bold text-emerald-800 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      Cumbre Verificada a {summitStamp.altitud_msnm} msnm
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      Sellado el {new Date(summitStamp.fecha_iso).toLocaleDateString()} a {summitStamp.distancia_cumbre_m}m de la cumbre
-                    </div>
-                    <div className="text-xs font-mono text-slate-400 truncate">
-                      SHA256: {summitStamp.hash_firma_sha256}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-                    Llega a menos de 60m de la cumbre y activa el Fog Guardian para sellar tu pasaporte digital de cumbres.
-                  </div>
-                )}
-              </div>
-
-              {/* Muro de Reportes Ciudadanos */}
-              <div className="space-y-3 pt-1">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Muro de Reportes Ciudadanos
-                </div>
-
-                <form onSubmit={handleSendReport} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5 text-xs">
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Tu nombre"
-                      value={reportAuthor}
-                      onChange={(e) => setReportAuthor(e.target.value)}
-                      className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
-                    />
-                    <select
-                      value={reportBarro}
-                      onChange={(e) => setReportBarro(e.target.value)}
-                      className="p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
-                    >
-                      <option value="Óptimo y Seco">Óptimo y Seco</option>
-                      <option value="Húmedo / Resbaloso">Húmedo / Resbaloso</option>
-                      <option value="Muy Embarrado">Muy Embarrado</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs font-medium text-slate-700">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={reportAmancaes}
-                        onChange={(e) => setReportAmancaes(e.target.checked)}
-                      />
-                      <span>Flor Amancaes vista</span>
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={reportColchon}
-                        onChange={(e) => setReportColchon(e.target.checked)}
-                      />
-                      <span>Colchón de nubes</span>
-                    </label>
-                  </div>
-                  <textarea
-                    rows={2}
-                    placeholder="Reporte breve sobre el sendero y clima hoy..."
-                    value={reportComment}
-                    onChange={(e) => setReportComment(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-slate-200 bg-white text-xs sm:text-sm text-slate-900"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={isSubmittingReport}
-                    className="w-full text-xs sm:text-sm font-bold h-9 bg-primary text-primary-foreground"
-                  >
-                    <Send className="w-3.5 h-3.5 mr-1.5" />
-                    {isSubmittingReport ? "Publicando..." : "Enviar Reporte Ciudadano"}
-                  </Button>
-                </form>
-
-                {currentLoma.reportes_recientes && currentLoma.reportes_recientes.length > 0 && (
-                  <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                    {currentLoma.reportes_recientes.map((rep) => (
-                      <div key={rep.id} className="p-3 rounded-xl border border-slate-200 bg-white text-xs space-y-1">
-                        <div className="flex items-center justify-between text-slate-500">
-                          <span className="font-bold text-slate-900 text-xs sm:text-sm">{rep.autor}</span>
-                          <span className="text-xs text-slate-400">
-                            {new Date(rep.fecha_iso).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-700">{rep.comentario}</p>
-                        <div className="flex items-center gap-2 text-xs text-emerald-700 font-semibold pt-0.5">
-                          {rep.flor_amancaes_vista && <span>Amancaes visible</span>}
-                          {rep.colchon_nubes_visto && <span>Colchón visible</span>}
-                          <span className="text-slate-400 font-normal">{rep.estado_barro}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </CardContent>
-
-          {/* Botones de Accion Fijos */}
-          <div className="p-3.5 border-t border-slate-200 bg-white flex-shrink-0 space-y-2">
-            <Button
-              onClick={() => onSetAsStartPoint(currentLoma.coordenadas)}
-              variant="outline"
-              className="w-full text-xs sm:text-sm font-bold h-10 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive flex items-center justify-center gap-2"
-            >
-              <span>Usar como punto de partida</span>
-            </Button>
-            <Button
-              onClick={() => onFocusMap(currentLoma.coordenadas)}
-              variant="secondary"
-              className="w-full text-xs sm:text-sm font-bold h-10 flex items-center justify-center gap-2"
-            >
-              <span>Centrar en el mapa</span>
-            </Button>
+            </form>
           </div>
-        </Tabs>
-      </Card>
+        </div>
+      )}
     </div>
   );
 };
