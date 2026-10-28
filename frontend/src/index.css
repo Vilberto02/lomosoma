@@ -1,5 +1,7 @@
-@import "leaflet/dist/leaflet.css";
+@import "mapbox-gl/dist/mapbox-gl.css";
 @import "@fontsource-variable/rubik";
+@import "@fontsource-variable/inter";
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -49,42 +51,64 @@
 
 @layer base {
   :root {
-    /* Modo Claro Base */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Sistema de diseño Lomosoma (Pencil) */
+    --lomo-canvas: #E8EDE9;
+    --lomo-map-surface: #E9EDEB;
+    --lomo-surface: #FFFFFF;
+    --lomo-surface-inset: #F3F5F0;
+    --lomo-surface-selected: #F0F5ED;
+    --lomo-ink-primary: #1B3326;
+    --lomo-ink-secondary: #3E5238;
+    --lomo-ink-muted: #546349;
+    --lomo-ink-disabled: #95A08B;
+    --lomo-action-primary: #243C2D;
+    --lomo-action-hover: #192b20;
+    --lomo-accent: #2E6540;
+    --lomo-on-action: #FFFFFF;
+    --lomo-on-action-muted: #D8E7C9;
+    --lomo-border: #E4E9DE;
+    --lomo-border-selected: #CAD9BE;
+    --lomo-warning-ink: #82642F;
+    --lomo-warning-surface: #F8F3E7;
+    --lomo-warning-border: #E4D8BB;
+    --lomo-terrain-earth: #8CA276;
+    --lomo-terrain-rock: #BDC8AF;
+    --lomo-terrain-mud: #D8C8A6;
+
+    /* Tokens shadcn mapeados a la paleta Lomosoma */
+    --background: 135 11% 92%; /* #E8EDE9 */
+    --foreground: 153 30% 18%; /* #203B2E */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 153 30% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 153 30% 18%;
 
-    /* Color Principal: Verde Esmeralda (#059669) con HSL */
-    --primary: 160 96% 24%;
+    --primary: 140 37% 29%; /* #2E6540 */
     --primary-foreground: 0 0% 100%;
 
-    /* Colores Secundarios y Superficie */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 100 15% 95%; /* #F3F5F0 */
+    --secondary-foreground: 106 19% 27%; /* #3E5238 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 100 15% 95%;
+    --muted-foreground: 95 15% 34%; /* #546349 */
 
-    --accent: 152 76% 96%;
-    --accent-foreground: 160 84% 28%;
+    --accent: 102 27% 95%; /* #F0F5ED */
+    --accent-foreground: 140 37% 29%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 88%;
-    --input: 214.3 31.8% 88%;
-    --ring: 160 84% 39%;
+    --border: 90 18% 89%; /* #E4E9DE */
+    --input: 90 18% 89%;
+    --ring: 140 37% 29%;
 
     --radius: 0.75rem;
 
-    /* Sombras tactiles de elevacion fisica */
-    --shadow-panel: 0 10px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.06);
-    --shadow-control: 0 4px 12px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.05);
+    /* Sombras del sistema Lomosoma */
+    --shadow-panel: 0 16px 40px -8px rgba(32, 59, 46, 0.12), 0 4px 12px -2px rgba(32, 59, 46, 0.05);
+    --shadow-control: 0 4px 14px rgba(32, 59, 46, 0.08), 0 1px 3px rgba(32, 59, 46, 0.04);
   }
 
   * {
@@ -93,7 +117,18 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Rubik Variable', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Manrope', 'Rubik Variable', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    caret-color: var(--lomo-accent);
+    text-underline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--lomo-on-action-muted);
+    color: var(--lomo-ink-primary);
   }
 }
 
@@ -103,7 +138,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  font-family: 'Rubik Variable', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Manrope', 'Rubik Variable', 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -117,29 +152,38 @@ html, body, #root {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.35);
+  background: rgba(108, 121, 95, 0.25);
   border-radius: 9999px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.6);
+  background: rgba(108, 121, 95, 0.45);
 }
 
-/* Personalización Leaflet */
-.leaflet-container {
+/* Personalización Mapbox GL */
+.mapboxgl-map {
   height: 100%;
   width: 100%;
   z-index: 0;
-  font-family: 'Rubik Variable', 'Rubik', sans-serif !important;
+  background: #E8EDE9 !important;
+  font-family: 'Manrope', 'Rubik Variable', 'Rubik', sans-serif !important;
 }
 
-.leaflet-container:focus {
+.mapboxgl-canvas:focus {
   outline: none;
 }
 
-/* Eliminar cajas predeterminadas de Leaflet DivIcon para que los marcadores sean transparentes */
-.leaflet-div-icon {
-  background: transparent !important;
-  border: none !important;
+.mapboxgl-popup-content {
+  background: #ffffff !important;
+  border: 1px solid #E4E9DE !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(32, 59, 46, 0.08), 0 1px 3px rgba(32, 59, 46, 0.04) !important;
+  padding: 8px 12px !important;
+  font-family: 'Manrope', 'Rubik Variable', 'Rubik', sans-serif !important;
+  color: #203B2E !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: #ffffff !important;
 }
 
 .custom-user-marker {

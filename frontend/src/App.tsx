@@ -11,6 +11,7 @@ import {
   fetchPresets,
   optimizeRoute,
   checkBackendHealth,
+  fetchLomaDetail,
 } from "./services/api";
 import { ProProvider, usePro } from "./context/ProContext";
 import { GoogleStyleMap } from "./components/Map/GoogleStyleMap";
@@ -23,7 +24,7 @@ import { ProUpgradeModal } from "./components/Panels/ProUpgradeModal";
 import toast, { Toaster } from "react-hot-toast";
 
 function AppContent() {
-  const { offlinePackIds } = usePro();
+  const { offlinePackIds, isLomaProUnlocked } = usePro();
   const [lomas, setLomas] = useState<Loma[]>([]);
   const [presets, setPresets] = useState<PresetZona[]>([]);
   const [backendOnline, setBackendOnline] = useState<boolean>(true);
@@ -36,23 +37,43 @@ function AppContent() {
   });
   const [selectedLoma, setSelectedLoma] = useState<Loma | null>(null);
   const [mapCenterTarget, setMapCenterTarget] = useState<Coordenadas | null>(null);
+  const [mapCenterSeq, setMapCenterSeq] = useState<number>(0);
   const [activeFilter, setActiveFilter] = useState<QuickFilterType>(null);
   const [activeView, setActiveView] = useState<SidebarView>("catalog");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [isGuardianVisible, setIsGuardianVisible] = useState<boolean>(false);
 
   const [optimizationResult, setOptimizationResult] =
     useState<OptimizationResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastPrefs, setLastPrefs] = useState<UserPreferencesRequest | null>(null);
 
+  const selectedId = selectedLoma?.id;
+  useEffect(() => {
+    if (!selectedId || activeView !== "detail") return;
+    let cancelled = false;
+    void fetchLomaDetail(selectedId)
+      .then((detail) => {
+        if (!cancelled) {
+          setSelectedLoma((current) =>
+            current?.id === selectedId ? detail : current
+          );
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, activeView, isLomaProUnlocked]);
+
   useEffect(() => {
     const handleOnline = () => {
       setIsBrowserOnline(true);
-      toast.success("Conexión a internet restablecida");
+      toast.success("Conexión restablecida");
     };
     const handleOffline = () => {
       setIsBrowserOnline(false);
-      toast.error("Sin conexión a internet. Modo Zero Signal activado.");
+      toast.error("Sin conexión. Modo Offline activado.");
     };
 
     window.addEventListener("online", handleOnline);
@@ -87,9 +108,6 @@ function AppContent() {
     if (activeFilter === "offline") {
       return lomas.filter((l) => offlinePackIds.includes(l.id));
     }
-    if (activeFilter === "naturales") {
-      return lomas.filter((l) => l.es_loma_natural !== false);
-    }
     return lomas;
   }, [lomas, activeFilter, offlinePackIds]);
 
@@ -108,7 +126,6 @@ function AppContent() {
       } catch (err: unknown) {
         console.error("Error al conectar con la API:", err);
         setBackendOnline(false);
-        toast.error("No se pudo conectar al Backend FastAPI. Modo offline activo.");
       }
     }
     loadData();
@@ -123,7 +140,7 @@ function AppContent() {
         setOptimizationResult(result);
         setActiveView("results");
         setIsSidebarCollapsed(false);
-        toast.success("Ruta óptima calculada con éxito");
+        toast.success("Ruta calculada con éxito");
 
         if (result.ruta_ids.length > 0) {
           const firstLoma = lomasById.get(result.ruta_ids[0]);
@@ -145,15 +162,32 @@ function AppContent() {
     [lomasById]
   );
 
-  const handleSelectLoma = useCallback((loma: Loma) => {
-    setSelectedLoma(loma);
-    setMapCenterTarget(loma.coordenadas);
-    setActiveView("detail");
-    setIsSidebarCollapsed(false);
+  const handleFocusMap = useCallback((coords: Coordenadas) => {
+    setMapCenterTarget({ lat: coords.lat, lon: coords.lon });
+    setMapCenterSeq((prev) => prev + 1);
   }, []);
+
+  const handleSelectLoma = useCallback(
+    (loma: Loma) => {
+      setSelectedLoma(loma);
+      handleFocusMap(loma.coordenadas);
+    },
+    [handleFocusMap]
+  );
+
+  const handleOpenLomaDetail = useCallback(
+    (loma: Loma) => {
+      setSelectedLoma(loma);
+      setActiveView("detail");
+      setIsSidebarCollapsed(false);
+      handleFocusMap(loma.coordenadas);
+    },
+    [handleFocusMap]
+  );
 
   const handleBackToCatalog = useCallback(() => {
     setSelectedLoma(null);
+    setIsGuardianVisible(false);
     setActiveView("catalog");
   }, []);
 
@@ -185,21 +219,21 @@ function AppContent() {
   }, []);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-background">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#E8EDE9]">
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 3500,
           style: {
             background: "#ffffff",
-            color: "#0f172a",
-            border: "1px solid #e2e8f0",
-            boxShadow:
-              "0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)",
+            color: "#203B2E",
+            border: "1px solid #E4E9DE",
+            boxShadow: "0 12px 32px -4px rgba(32, 59, 46, 0.12)",
             borderRadius: "12px",
-            fontSize: "14px",
-            fontFamily: "'Rubik Variable', 'Rubik', sans-serif",
-            padding: "10px 16px",
+            fontSize: "15px",
+            fontWeight: "600",
+            fontFamily: "'Manrope', 'Rubik Variable', sans-serif",
+            padding: "12px 18px",
           },
         }}
       />
@@ -208,10 +242,17 @@ function AppContent() {
         lomas={displayedLomas}
         selectedLoma={selectedLoma}
         onSelectLoma={handleSelectLoma}
+        onOpenLomaDetail={handleOpenLomaDetail}
+        onClearSelectedLoma={handleBackToCatalog}
         userCoords={userCoords}
         onUserCoordsChange={setUserCoords}
-        optimizationResult={optimizationResult}
+        optimizationResult={activeView === "results" ? optimizationResult : null}
         mapCenterTarget={mapCenterTarget}
+        mapCenterSeq={mapCenterSeq}
+        showRouteOverlay={activeView === "results" && !!optimizationResult}
+        hidePreviewCard={activeView === "detail" || activeView === "planner"}
+        isGuardianVisible={isGuardianVisible}
+        onGuardianVisibleChange={setIsGuardianVisible}
       />
 
       <AppSidebar
@@ -231,12 +272,14 @@ function AppContent() {
         isBrowserOnline={isBrowserOnline}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-        onFocusMap={(coords) => setMapCenterTarget(coords)}
+        onFocusMap={handleFocusMap}
         onSetAsStartPoint={handleSetAsStartPoint}
         activeView={activeView}
         onChangeView={handleChangeView}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}
+        isGuardianVisible={isGuardianVisible}
+        onToggleGuardian={() => setIsGuardianVisible((prev) => !prev)}
       />
 
       <ProUpgradeModal lomas={lomas} />
