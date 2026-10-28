@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  define: { "import.meta.env.VITE_API_URL": JSON.stringify("/api") },
   plugins: [react()],
   resolve: {
     alias: {
@@ -16,7 +17,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8005",
+        target: "http://127.0.0.1:8001",
         changeOrigin: true,
       },
     },

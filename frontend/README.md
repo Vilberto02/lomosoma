@@ -20,13 +20,13 @@ Aplicación web para planificar rutas de trekking en las lomas de Lima, utilizan
 
 ## Requisitos Previos
 
-- Node.js 20+ y npm
+- Node.js 22.20 y pnpm mediante Corepack
 
 ## Instalación
 
 ```bash
 cd frontend
-npm install
+corepack pnpm install --frozen-lockfile
 ```
 
 ## Variables de entorno
@@ -34,13 +34,13 @@ npm install
 Crea un archivo `.env` en la carpeta `frontend/` basándote en `.env.example`:
 
 ```env
-VITE_API_URL=http://127.0.0.1:8001/api
+VITE_API_URL=/api
 ```
 
 
 | Variable       | Descripción                  | Valor por defecto           |
 | -------------- | ---------------------------- | --------------------------- |
-| `VITE_API_URL` | URL base del backend FastAPI | `http://127.0.0.1:8001/api` |
+| `VITE_API_URL` | La API se mantiene en el mismo origen para cookies y CSRF | `/api` (fijado por Vite) |
 
 
 ## Ejecución
@@ -48,7 +48,7 @@ VITE_API_URL=http://127.0.0.1:8001/api
 ### Desarrollo
 
 ```bash
-npm run dev
+corepack pnpm dev
 ```
 
 La aplicación estará disponible en `http://localhost:5173`.
@@ -56,7 +56,7 @@ La aplicación estará disponible en `http://localhost:5173`.
 ### Build de producción
 
 ```bash
-npm run build
+corepack pnpm build
 ```
 
 Los archivos generados se encuentran en `dist/`.
@@ -64,14 +64,18 @@ Los archivos generados se encuentran en `dist/`.
 ### Preview del build
 
 ```bash
-npm run preview
+corepack pnpm preview
 ```
 
 ### Linter
 
 ```bash
-npm run lint
+corepack pnpm lint
 ```
+
+## Despliegue y compras
+
+Sigue [la guía de publicación](../docs/despliegue.md). El acceso usa códigos por correo y cookies HttpOnly; los pagos se realizan únicamente al QR de Yape y se activan tras revisión manual. No hay aprobación local de compras ni claves privadas en variables `VITE_`.
 
 ## Estructura del proyecto
 

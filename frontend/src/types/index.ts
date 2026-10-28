@@ -204,29 +204,22 @@ export interface BillingPlan {
   nombre: string;
   tipo_pago: string;
   precio_pen: number;
-  precio_usd: number;
   descripcion: string;
   beneficios: string[];
 }
 
-export interface CheckoutRequest {
-  plan_id: "pack_lima_pro" | "loma_individual" | string;
-  loma_id?: string;
-  metodo_pago: "yape_plin" | "tarjeta";
-  email_cliente?: string;
-}
-
-export interface CheckoutResponse {
-  orden_id: string;
-  estado: string;
-  plan_id: string;
-  lomas_desbloqueadas: string[];
-  acceso_total_lima: boolean;
-  monto_pagado_pen: number;
-  metodo_pago: string;
-  token_licencia: string;
-  emitido_en: string;
-  mensaje: string;
+export interface PaymentOrder {
+  id: string;
+  plan_id: "pack_lima_pro" | "loma_individual";
+  loma_id: string | null;
+  status: "pendiente_pago" | "en_revision" | "aprobado" | "rechazado";
+  amount_pen: number;
+  metodo_pago: "yape";
+  reason: string | null;
+  created_at: number;
+  payment_date: string | null;
+  operation_code?: string;
+  reported_amount_pen?: number;
 }
 
 export interface PresetZona {
