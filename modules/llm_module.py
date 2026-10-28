@@ -39,7 +39,6 @@ class LomasLLMService:
             self.api_key = (
                 os.getenv("GEMINI_API_KEY")
                 or os.getenv("GOOGLE_API_KEY")
-                or os.getenv("OPENAI_API_KEY")
             )
         self.model_name = model or os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         self.client = None
@@ -50,9 +49,9 @@ class LomasLLMService:
             logger.info("USE_MOCK_LLM activo: se forzarán los fallbacks locales sin llamar a Gemini.")
         elif self.api_key and GENAI_AVAILABLE:
             try:
-                self.client = genai.Client(api_key=self.api_key)
-            except Exception as e:
-                logger.warning(f"No se pudo inicializar el cliente de Gemini: {e}")
+                self.client = genai.Client(api_key=self.api_key, http_options=types.HttpOptions(timeout=15000, retry_options=types.HttpRetryOptions(attempts=1)))
+            except Exception:
+                logger.warning("No se pudo inicializar Gemini; se utilizará el fallback local.")
                 self.client = None
 
     def is_gemini_active(self) -> bool:
@@ -73,8 +72,8 @@ class LomasLLMService:
                 if resultado:
                     self.ultimo_origen = "gemini"
                     return resultado
-            except Exception as e:
-                logger.warning(f"Error al llamar a la API de Gemini en extraer_preferencias_cualitativas: {e}")
+            except Exception:
+                logger.warning("Falló la extracción con Gemini; se utilizará el fallback local.")
 
         self.ultimo_origen = "fallback"
         return self._extraer_fallback_heuristico(texto)
@@ -124,6 +123,7 @@ Responde ÚNICAMENTE con el objeto JSON válido con las 4 llaves requeridas.
 """
         config = types.GenerateContentConfig(
             temperature=0.1,
+            max_output_tokens=2048,
             response_mime_type="application/json",
         )
 
@@ -218,8 +218,8 @@ Responde ÚNICAMENTE con el objeto JSON válido con las 4 llaves requeridas.
                 if narrativa and len(narrativa.strip()) > 30:
                     self.ultimo_origen = "gemini"
                     return narrativa
-            except Exception as e:
-                logger.warning(f"Error al generar narrativa con Gemini: {e}")
+            except Exception:
+                logger.warning("Falló la narrativa con Gemini; se utilizará el fallback local.")
 
         self.ultimo_origen = "fallback"
         return self._generar_fallback_estatico(destinos, float(costo_total), float(distancia_total), perfil_usuario)
@@ -279,6 +279,7 @@ Redacta de manera motivadora, clara y profesional en idioma Español.
 """
         config = types.GenerateContentConfig(
             temperature=0.3,
+            max_output_tokens=4096,
         )
 
         response = self.client.models.generate_content(
@@ -332,8 +333,8 @@ Redacta de manera motivadora, clara y profesional en idioma Español.
                 if perfil_api:
                     self.ultimo_origen = "gemini"
                     return perfil_api
-            except Exception as e:
-                logger.warning(f"Error al extraer perfil completo con Gemini: {e}")
+            except Exception:
+                logger.warning("Falló la extracción del perfil con Gemini; se utilizará el fallback local.")
 
         self.ultimo_origen = "fallback"
         return self._extraer_perfil_fallback_heuristico(str(texto))
@@ -355,6 +356,7 @@ Responde ÚNICAMENTE con el objeto JSON válido.
 """
         config = types.GenerateContentConfig(
             temperature=0.1,
+            max_output_tokens=2048,
             response_mime_type="application/json",
         )
 

@@ -2,13 +2,13 @@
 Modelos Pydantic para la API REST del Sistema Inteligente de Lomas de Lima.
 """
 
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional, Literal
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class CoordenadasModel(BaseModel):
-    lat: float = Field(..., description="Latitud en grados decimales")
-    lon: float = Field(..., description="Longitud en grados decimales")
+    lat: float = Field(..., ge=-90, le=90, allow_inf_nan=False, description="Latitud en grados decimales")
+    lon: float = Field(..., ge=-180, le=180, allow_inf_nan=False, description="Longitud en grados decimales")
 
 
 class PuntoSenal4GModel(BaseModel):
@@ -116,11 +116,11 @@ class SenderoProfileModel(BaseModel):
 
 
 class ReporteCiudadanoCreateRequest(BaseModel):
-    autor: str = Field(default="Excursionista Anónimo")
-    estado_barro: str = Field(default="Húmedo con buen agarre")
+    autor: str = Field(default="Excursionista Anónimo", max_length=120)
+    estado_barro: str = Field(default="Húmedo con buen agarre", max_length=80)
     flor_amancaes_vista: bool = Field(default=False)
     colchon_nubes_visto: bool = Field(default=True)
-    comentario: str
+    comentario: str = Field(min_length=1, max_length=2000)
 
 
 class ReporteCiudadanoModel(BaseModel):
@@ -135,15 +135,17 @@ class ReporteCiudadanoModel(BaseModel):
 
 
 class UserPreferencesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     dias_disponibles: int = Field(default=3, ge=1, le=15, description="Cantidad de dias disponibles para trekking")
-    presupuesto_max: float = Field(default=60.0, ge=10.0, description="Presupuesto maximo total en Soles PEN")
-    condicion_fisica: str = Field(default="Moderado", description="Condicion fisica Facil Moderado o Dificil")
+    presupuesto_max: float = Field(default=60.0, ge=10.0, le=100000, allow_inf_nan=False, description="Presupuesto maximo total en Soles PEN")
+    condicion_fisica: Literal["Fácil", "Facil", "Moderado", "Difícil", "Dificil"] = "Moderado"
     nodo_base: CoordenadasModel = Field(
         default_factory=lambda: CoordenadasModel(lat=-12.0464, lon=-77.0428),
         description="Coordenadas del punto de partida o alojamiento"
     )
     texto_usuario: Optional[str] = Field(
         default=None,
+        max_length=2000,
         description="Descripcion cualitativa libre de preferencias"
     )
 
@@ -216,36 +218,6 @@ class OfflinePackResponseModel(BaseModel):
     guia_acceso: GuiaAccesoModel
     gpx_xml: str
     checksum_sha256: str
-
-
-class BillingPlanModel(BaseModel):
-    plan_id: str
-    nombre: str
-    tipo_pago: str
-    precio_pen: float
-    precio_usd: float
-    descripcion: str
-    beneficios: List[str]
-
-
-class CheckoutRequestModel(BaseModel):
-    plan_id: str = Field(..., description="pack_lima_pro o loma_individual")
-    loma_id: Optional[str] = None
-    metodo_pago: str = Field(default="yape_plin", description="yape_plin o tarjeta")
-    email_cliente: str = Field(default="excursionista@lomosoma.pe")
-
-
-class CheckoutResponseModel(BaseModel):
-    orden_id: str
-    estado: str
-    plan_id: str
-    lomas_desbloqueadas: List[str]
-    acceso_total_lima: bool
-    monto_pagado_pen: float
-    metodo_pago: str
-    token_licencia: str
-    emitido_en: str
-    mensaje: str
 
 
 class PresetZonaModel(BaseModel):

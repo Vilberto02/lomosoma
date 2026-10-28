@@ -1,3 +1,5 @@
+-- Historical geographic schema; NOT the deployment migration.
+-- Accounts/payments: python -m alembic -c backend/alembic.ini upgrade head
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TABLE IF NOT EXISTS lomas (
@@ -49,18 +51,6 @@ CREATE TABLE IF NOT EXISTS reportes_ciudadanos (
     colchon_nubes_visto BOOLEAN NOT NULL DEFAULT FALSE,
     comentario TEXT NOT NULL,
     fecha_iso TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS licencias_pago_unico (
-    orden_id VARCHAR(64) PRIMARY KEY,
-    email_cliente VARCHAR(180) NOT NULL,
-    plan_id VARCHAR(40) NOT NULL,
-    loma_id VARCHAR(16),
-    acceso_total_lima BOOLEAN NOT NULL DEFAULT FALSE,
-    monto_pagado_pen NUMERIC(8, 2) NOT NULL,
-    metodo_pago VARCHAR(40) NOT NULL,
-    token_licencia VARCHAR(128) NOT NULL UNIQUE,
-    emitido_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS sellos_cumbre_offline (

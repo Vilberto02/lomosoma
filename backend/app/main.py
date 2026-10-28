@@ -12,11 +12,39 @@ if PROJECT_ROOT not in sys.path:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from contextlib import asynccontextmanager
+from backend.app.settings import settings
+from backend.app.auth import router as auth_router, cipher
+from backend.app.security import SecurityMiddleware
+from backend.app.storage import transaction
+from sqlalchemy import text
 from backend.app.api.routes_lomas import router as lomas_router
 from backend.app.api.routes_optimize import router as optimize_router
 from backend.app.api.routes_billing import router as billing_router
 
+@asynccontextmanager
+async def lifespan(app):
+    config = settings()
+    if config.production:
+        if len(config.proxy_secret) < 32:
+            raise RuntimeError("Production requires a private proxy secret")
+        if not config.database_url or not config.supabase_url or not config.supabase_key:
+            raise RuntimeError("Missing production account configuration")
+        if not config.allowed_origins or any(not value.startswith("https://") for value in config.allowed_origins):
+            raise RuntimeError("Production requires explicit HTTPS origins")
+        if "*" in config.allowed_hosts:
+            raise RuntimeError("Wildcard hosts are not allowed")
+        cipher()
+        with transaction() as conn:
+            conn.execute(text("SELECT 1 FROM web_sessions LIMIT 1"))
+        if os.getenv("USE_MOCK_LLM", "").lower() not in ("1", "true", "yes") and not os.getenv("GEMINI_API_KEY"):
+            raise RuntimeError("Missing Gemini API key")
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Sistema Inteligente de Rutas - Lomas de Lima",
     description=(
         "API RESTful para recomendación y optimización heurística de rutas turísticas "
@@ -24,23 +52,27 @@ app = FastAPI(
         "y Lógica Difusa Mamdani."
     ),
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
+    docs_url=None if settings().production else "/docs",
+    redoc_url=None if settings().production else "/redoc",
+    openapi_url=None if settings().production else "/openapi.json",
 )
 
 # Configuración de CORS para permitir conexiones desde el Frontend (Vite / React)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En desarrollo permite cualquier origen local (ej. localhost:5173)
+    allow_origins=list(settings().allowed_origins),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-CSRF-Token"],
 )
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings().allowed_hosts))
+app.add_middleware(SecurityMiddleware)
 
 # Registro de routers de la API
 app.include_router(lomas_router, prefix="/api")
 app.include_router(optimize_router, prefix="/api")
 app.include_router(billing_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
 
 
 @app.get("/api/health", tags=["Health"])
@@ -50,5 +82,5 @@ def health_check():
         "status": "online",
         "service": "Sistema Inteligente Lomas de Lima API",
         "version": "1.0.0",
-        "docs": "/docs"
+        "docs": None if settings().production else "/docs"
     }

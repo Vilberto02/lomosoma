@@ -1,9 +1,7 @@
-"""Verificacion de clima, rutas, maletin offline y licencias de demostracion."""
+"""Verificacion de clima, rutas, maletin offline y catálogo público."""
 
-import base64
 import copy
 import hashlib
-import hmac
 import io
 import json
 import math
@@ -15,7 +13,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app.main import app
-from backend.app.api import routes_billing, routes_lomas
+from backend.app.api import routes_lomas
 from backend.app.schemas.api_models import LomaCastReportModel, SenderoProfileModel
 from modules.access_module import LomasAccessService
 from modules.dtos import CoordenadasDTO, FuzzySemanticPreferencesDTO, UserPreferencesDTO
@@ -183,8 +181,12 @@ def test_detalle_y_servicios_para_todo_catalogo(client, did):
     data = response.json()
     assert len(data["guia_acceso"]["modos_transporte"]) == 3
     assert data["guia_acceso"]["geometria_vial"][0] == [-12.17, -76.96]
-    assert len(data["lomacast"]["pronostico_7_dias"]) == 7
-    assert data["sendero"]["loma_id"] == did
+    if did == "L0":
+        assert len(data["lomacast"]["pronostico_7_dias"]) == 7
+        assert data["sendero"]["loma_id"] == did
+    else:
+        assert data["lomacast"] is None
+        assert data["sendero"] is None
 
 
 @pytest.mark.parametrize("endpoint", ["lomacast", "sendero", "gpx", "offline-pack"])
@@ -245,30 +247,8 @@ def test_planes_pago_unico(client):
     assert all(p["tipo_pago"] == "pago_unico" for p in planes)
 
 
-@pytest.mark.parametrize("plan,metodo", [("pack_lima_pro", "yape_plin"), ("loma_individual", "tarjeta")])
-def test_checkout_licencia_firmada_y_alcance(client, plan, metodo):
-    response = client.post("/api/billing/checkout", json={"plan_id": plan, "loma_id": "L1", "metodo_pago": metodo})
-    assert response.status_code == 200
-    data = response.json()
-    assert data["estado"] == "aprobado_demo"
-    assert data["acceso_total_lima"] == (plan == "pack_lima_pro")
-    assert len(data["lomas_desbloqueadas"]) == (15 if data["acceso_total_lima"] else 1)
-    assert data["monto_pagado_pen"] == (19.9 if data["acceso_total_lima"] else 4.9)
-    payload, firma = data["token_licencia"].split(".")
-    esperado = hmac.new(routes_billing.SIGNING_KEY, payload.encode(), hashlib.sha256).hexdigest()
-    assert hmac.compare_digest(firma, esperado)
-    claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
-    assert claims["lomas_desbloqueadas"] == data["lomas_desbloqueadas"]
-    assert claims["entorno"] == "demo"
-    assert not hmac.compare_digest(firma, hmac.new(routes_billing.SIGNING_KEY, (payload + "x").encode(), hashlib.sha256).hexdigest())
-
-
-@pytest.mark.parametrize("payload,status", [({"plan_id": "suscripcion"}, 422),
-                                              ({"plan_id": "loma_individual"}, 422),
-                                              ({"plan_id": "loma_individual", "loma_id": "NO_EXISTE"}, 404),
-                                              ({"plan_id": "pack_lima_pro", "metodo_pago": "otro"}, 422)])
-def test_checkout_rechaza_solicitudes_invalidas(client, payload, status):
-    assert client.post("/api/billing/checkout", json=payload).status_code == status
+def test_checkout_demo_ya_no_existe(client):
+    assert client.post("/api/billing/checkout", json={"plan_id": "pack_lima_pro"}).status_code == 404
 
 
 def test_afinidad_semantica_y_checklist_modifican_resultado(monkeypatch):

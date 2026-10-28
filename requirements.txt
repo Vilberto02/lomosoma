@@ -1,3 +1,6 @@
+# Full local environment, including the historical Streamlit prototype.
+# Production installs only backend/requirements.txt.
+-r backend/requirements.txt
 streamlit>=1.35.0
 folium>=0.16.0
 streamlit-folium>=0.20.0

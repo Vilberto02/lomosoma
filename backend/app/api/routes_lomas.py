@@ -9,7 +9,9 @@ from datetime import datetime, timezone
 from threading import Lock
 from uuid import uuid4
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Response, Depends, Request
+from backend.app.auth import optional_account
+from backend.app.storage import has_access, rate_limit
 
 from backend.app.schemas.api_models import (
     LomaSummaryModel,
@@ -78,9 +80,9 @@ PRESETS_LIMA = [
 
 @router.get("/lomas", response_model=List[LomaSummaryModel])
 def get_lomas(
-    q: Optional[str] = Query(None, description="Búsqueda por nombre de loma o distrito"),
-    distrito: Optional[str] = Query(None, description="Filtrar por distrito exacto"),
-    dificultad: Optional[str] = Query(None, description="Filtrar por dificultad (Fácil, Moderado, Difícil)"),
+    q: Optional[str] = Query(None, max_length=200, description="Búsqueda por nombre de loma o distrito"),
+    distrito: Optional[str] = Query(None, max_length=120, description="Filtrar por distrito exacto"),
+    dificultad: Optional[str] = Query(None, max_length=40, description="Filtrar por dificultad (Fácil, Moderado, Difícil)"),
     solo_naturales: Optional[bool] = Query(None),
 ):
     """
@@ -108,7 +110,7 @@ def get_lomas(
 
 @router.get("/lomas/{id_loma}", response_model=LomaDetailModel)
 def get_loma_detail(id_loma: str, user_lat: Optional[float] = Query(None, ge=-90, le=90),
-                    user_lon: Optional[float] = Query(None, ge=-180, le=180)):
+                    user_lon: Optional[float] = Query(None, ge=-180, le=180), account=Depends(optional_account)):
     """
     Retorna la ficha técnica y detallada de una loma específica junto a sus instrucciones de acceso y transporte público.
     """
@@ -121,34 +123,47 @@ def get_loma_detail(id_loma: str, user_lat: Optional[float] = Query(None, ge=-90
                           coordenadas_destino=CoordenadasModel(lat=garita["lat"], lon=garita["lon"]))
     with REPORTES_LOCK:
         recientes = list(REPORTES[id_upper])
+    allowed = has_access(account.id if account else None, id_upper)
     return {**loma, "score_difuso": SCORES_DIFUSOS.get(id_upper, 0.0), "guia_acceso": guia,
-            "lomacast_resumen": _resumen_clima(id_upper), "lomacast": WEATHER_SERVICE.obtener_reporte(id_upper),
-            "sendero": ROUTING_SERVICE.obtener_perfil_sendero(id_upper), "reportes_recientes": recientes}
+            "lomacast_resumen": _resumen_clima(id_upper),
+            "lomacast": WEATHER_SERVICE.obtener_reporte(id_upper) if allowed else None,
+            "sendero": ROUTING_SERVICE.obtener_perfil_sendero(id_upper) if allowed else None,
+            "reportes_recientes": recientes}
+
+
+def check_pro(account, did):
+    if not has_access(account.id if account else None, did):
+        raise HTTPException(403 if account else 401, "Esta loma requiere acceso PRO")
 
 
 @router.get("/lomas/{id_loma}/lomacast", response_model=LomaCastReportModel)
-def get_lomacast(id_loma: str):
+def get_lomacast(id_loma: str, account=Depends(optional_account)):
     did, _ = _obtener_loma(id_loma)
+    check_pro(account, did)
     return WEATHER_SERVICE.obtener_reporte(did)
 
 
 @router.get("/lomas/{id_loma}/sendero", response_model=SenderoProfileModel)
-def get_sendero(id_loma: str):
+def get_sendero(id_loma: str, account=Depends(optional_account)):
     did, _ = _obtener_loma(id_loma)
+    check_pro(account, did)
     return ROUTING_SERVICE.obtener_perfil_sendero(did)
 
 
 @router.get("/lomas/{id_loma}/gpx")
-def get_gpx(id_loma: str):
+def get_gpx(id_loma: str, account=Depends(optional_account)):
     did, _ = _obtener_loma(id_loma)
+    check_pro(account, did)
     return Response(content=ROUTING_SERVICE.generar_gpx_xml(did), media_type="application/gpx+xml",
                     headers={"Content-Disposition": f'attachment; filename="lomosoma_{did}.gpx"'})
 
 
 @router.get("/lomas/{id_loma}/offline-pack", response_model=OfflinePackResponseModel)
 def get_offline_pack(id_loma: str, user_lat: Optional[float] = Query(None, ge=-90, le=90),
-                     user_lon: Optional[float] = Query(None, ge=-180, le=180)):
-    detail = LomaDetailModel.model_validate(get_loma_detail(id_loma, user_lat, user_lon)).model_dump(mode="json")
+                     user_lon: Optional[float] = Query(None, ge=-180, le=180), account=Depends(optional_account)):
+    did, _ = _obtener_loma(id_loma)
+    check_pro(account, did)
+    detail = LomaDetailModel.model_validate(get_loma_detail(id_loma, user_lat, user_lon, account)).model_dump(mode="json")
     pack = ROUTING_SERVICE.generar_offline_pack(detail["id"], detail, detail["lomacast"])
     pack = OfflinePackResponseModel.model_validate(pack).model_dump(mode="json")
     pack["checksum_sha256"] = ROUTING_SERVICE.calcular_checksum(pack)
@@ -156,7 +171,8 @@ def get_offline_pack(id_loma: str, user_lat: Optional[float] = Query(None, ge=-9
 
 
 @router.post("/lomas/{id_loma}/reportes", response_model=ReporteCiudadanoModel, status_code=201)
-def post_reporte(id_loma: str, request: ReporteCiudadanoCreateRequest):
+def post_reporte(id_loma: str, request: ReporteCiudadanoCreateRequest, http_request: Request):
+    rate_limit("reports", http_request.client.host, 10, 3600)
     did, _ = _obtener_loma(id_loma)
     if not request.comentario.strip() or len(request.comentario) > 2000:
         raise HTTPException(status_code=422, detail="Comentario requerido con maximo de 2000 caracteres")
