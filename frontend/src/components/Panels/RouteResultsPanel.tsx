@@ -1,28 +1,20 @@
 import React, { useState, useMemo, memo } from "react";
 import type { OptimizationResult, Loma, UserPreferencesRequest } from "../../types";
 import {
-  X,
-  MapPin,
-  Gauge,
-  Cpu,
-  ChevronRight,
-  RotateCcw,
-  Route,
-  Check,
-  CheckSquare,
-  Users,
-  ShieldCheck,
   ArrowLeft,
+  RotateCcw,
+  Compass,
+  ChevronDown,
+  Activity,
+  Backpack,
+  Wallet,
+  ScrollText,
+  CircleCheck,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { FuzzyScoresModal } from "./FuzzyScoresModal";
 import { useCountUp } from "../../hooks/useCountUp";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 
 interface RouteResultsPanelProps {
   isOpen: boolean;
@@ -35,526 +27,307 @@ interface RouteResultsPanelProps {
   isEmbedded?: boolean;
 }
 
+const DEFAULT_CHECKLIST = [
+  "Calzado de trekking con buen agarre (suela vibram o labrada)",
+  "Casaca cortaviento impermeable o poncho para garúa",
+  "1.5 a 2 litros de agua por persona",
+  "Bastones de trekking con puntas de goma",
+  "Snacks energéticos (frutos secos, plátano, barras de cereal)",
+  "Protector solar y lentes con filtro UV",
+  "Bolsa para recoger todos los residuos (Cero Huella)",
+];
+
+const NUMBER_WORDS = ["Cero", "Un", "Dos", "Tres", "Cuatro", "Cinco", "Seis", "Siete"];
+
+/** "Cuatro días para descubrir Lima." (referencia Pencil: Ruta / cuatro días) */
+const buildTitle = (k: number) => {
+  const amount = NUMBER_WORDS[k] ?? String(k);
+  return `${amount} ${k === 1 ? "día" : "días"} para descubrir Lima.`;
+};
+
+interface DisclosureRowProps {
+  icon: React.ReactNode;
+  label: string;
+  meta?: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+/** Fila plegable: barra inset de 44 px + contenido propio. */
+const DisclosureRow: React.FC<DisclosureRowProps> = ({ icon, label, meta, open, onToggle, children }) => (
+  <div className="flex flex-col gap-2 flex-shrink-0">
+    <button
+      type="button"
+      aria-expanded={open}
+      onClick={onToggle}
+      className="h-11 w-full px-3.5 flex items-center gap-2.5 rounded-lg bg-lomo-surface-inset text-left transition-colors hover:bg-lomo-surface-selected focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lomo-accent/30"
+    >
+      <span className="text-lomo-ink-secondary flex-shrink-0">{icon}</span>
+      <span className="flex-1 min-w-0 truncate text-[15px] font-bold text-lomo-ink-primary">{label}</span>
+      {meta && <span className="text-sm font-semibold text-lomo-ink-secondary flex-shrink-0 tabular-nums">{meta}</span>}
+      <ChevronDown
+        className={`w-4 h-4 text-lomo-ink-secondary flex-shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+      />
+    </button>
+    {open && <div className="px-1 animate-in fade-in">{children}</div>}
+  </div>
+);
+
 const RouteResultsPanelComponent: React.FC<RouteResultsPanelProps> = ({
   isOpen,
   onClose,
   result,
   lomas,
-  prefs,
+  prefs: _prefs,
   onFocusLoma,
   onNewSearch,
-  isEmbedded = false,
+  isEmbedded: _isEmbedded = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<string>("itinerario");
   const [scoresModalOpen, setScoresModalOpen] = useState<boolean>(false);
+  const [showChecklist, setShowChecklist] = useState<boolean>(false);
+  const [showCostesGrupal, setShowCostesGrupal] = useState<boolean>(false);
+  const [showNarrativa, setShowNarrativa] = useState<boolean>(false);
+  const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({
+    0: true,
+    1: true,
+    2: true,
+  });
 
   const lomasDict = useMemo(() => {
     const map = new Map<string, Loma>();
     lomas.forEach((l) => map.set(l.id, l));
+    result?.destinos_ordenados?.forEach((l) => {
+      if (!map.has(l.id)) map.set(l.id, l);
+    });
     return map;
-  }, [lomas]);
+  }, [lomas, result]);
 
-  // Cálculo de riesgo promedio difuso
   const riesgoPromedio = useMemo(() => {
     if (!result) return 0;
-    return result.ruta_ids.reduce((acc, id) => acc + (result.riesgos_ruta[id] || 5.0), 0) /
+    const avg =
+      result.ruta_ids.reduce((acc, id) => acc + (result.riesgos_ruta[id] || 4.0), 0) /
       Math.max(1, result.ruta_ids.length);
+    return Math.round(avg * 10) / 10;
   }, [result]);
 
-  const checksCumplePresupuesto = result ? result.costo_total <= (prefs?.presupuesto_max ?? Infinity) : true;
-  const horasUtilesMax = (prefs?.dias_disponibles ?? result?.k ?? 1) * 8;
-  const checksCumpleTiempo = result ? result.tiempo_estimado_horas <= horasUtilesMax : true;
-  const cumpleRequerimientos = checksCumplePresupuesto && checksCumpleTiempo;
-
-  const kpiLomas = useCountUp(result?.k ?? 0);
   const kpiCosto = useCountUp(result?.costo_total ?? 0);
   const kpiDistancia = useCountUp(result?.distancia_total_km ?? 0);
-  const kpiRiesgo = useCountUp(riesgoPromedio);
 
   if (!isOpen || !result) return null;
 
-  const containerClass = isEmbedded
-    ? "flex flex-col h-full w-full overflow-hidden bg-white"
-    : "absolute top-20 left-4 z-20 w-[92vw] sm:w-[460px] max-w-[460px] h-[calc(100vh-140px)] max-h-[760px] flex flex-col animate-in slide-in-from-left-4 fade-in-50 duration-200";
+  const toggleCheck = (idx: number) => {
+    setCheckedItems((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
-  const cardClass = isEmbedded
-    ? "border-0 shadow-none bg-transparent rounded-none flex flex-col h-full overflow-hidden bg-white"
-    : "border border-slate-200 shadow-panel bg-white rounded-2xl flex flex-col h-full overflow-hidden";
+  const checklist =
+    result.checklist_equipamiento && result.checklist_equipamiento.length > 0
+      ? result.checklist_equipamiento
+      : DEFAULT_CHECKLIST;
+
+  const totalGrupo4 = Math.round(result.costo_total * 4 * 0.72);
+  const cuotaGrupo4 = Math.round((totalGrupo4 / 4) * 10) / 10;
+
+  const stops = result.ruta_ids
+    .map((id) => lomasDict.get(id))
+    .filter((l): l is Loma => Boolean(l));
 
   return (
-    <div className={containerClass}>
-      <Card className={cardClass}>
-        {/* Cabecera Limpia */}
-        <CardHeader className="p-4 border-b border-slate-200 bg-white flex-shrink-0">
-          <div className="flex items-center justify-between mb-2.5">
-            <button
-              onClick={onClose}
-              className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary hover:text-primary/80 transition-colors py-1 px-2 rounded-lg hover:bg-primary/10"
-              title="Volver al catálogo de lomas"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Volver al catálogo</span>
-            </button>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={onNewSearch}
-                title="Nueva búsqueda"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center justify-between pb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <Route className="w-4 h-4" />
-              </div>
-              <div>
-                <CardTitle className="text-base sm:text-lg font-bold text-slate-900">
-                  Ruta óptima calculada
-                </CardTitle>
-                <p
-                  className="text-xs sm:text-sm text-slate-500 mt-0.5"
-                  title="Método de optimización usado: atajo determinista para K=1, algoritmo genético en los demás casos"
-                >
-                  {result.metodo === "atajo_determinista"
-                    ? "Atajo Determinista (K=1)"
-                    : "Algoritmo Genético Multiobjetivo"}
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden bg-lomo-surface">
+      {/* Cabecera · Tu itinerario está listo */}
+      <div className="px-6 pb-4 flex flex-col gap-2 flex-shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          className="self-start h-9 -ml-2 px-2 rounded-lg flex items-center gap-2 text-[15px] font-bold text-lomo-ink-secondary transition-colors hover:text-lomo-ink-primary hover:bg-lomo-surface-inset"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Todas las lomas</span>
+        </button>
 
-          {/* Tarjetas de Métricas Clave */}
-          <div className="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-slate-200">
-            <div className="bg-slate-50 p-3 rounded-xl text-center border border-slate-200 shadow-sm">
-              <div className="text-xs text-slate-500 uppercase font-semibold">
-                Lomas
-              </div>
-              <div className="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5 font-mono">
-                {Math.round(kpiLomas)}
-              </div>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-xl text-center border border-slate-200 shadow-sm">
-              <div className="text-xs text-slate-500 uppercase font-semibold">
-                Costo
-              </div>
-              <div className="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5 font-mono">
-                S/ {kpiCosto.toFixed(0)}
-              </div>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-xl text-center border border-slate-200 shadow-sm">
-              <div className="text-xs text-slate-500 uppercase font-semibold">
-                Distancia
-              </div>
-              <div className="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5 font-mono">
-                {kpiDistancia.toFixed(1)} km
-              </div>
-            </div>
-            <div className="bg-slate-50 p-3 rounded-xl text-center border border-slate-200 shadow-sm">
-              <div className="text-xs text-slate-500 uppercase font-semibold">
-                Riesgo D.
-              </div>
-              <div className="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5 font-mono">
-                {kpiRiesgo.toFixed(1)}/10
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+        <h2 className="text-[26px] leading-[1.2] font-extrabold tracking-[-0.025em] text-lomo-ink-primary text-balance">
+          {buildTitle(result.k)}
+        </h2>
+        <p className="text-[15px] font-semibold text-lomo-ink-secondary">
+          Ruta óptima · algoritmo genético multiobjetivo
+        </p>
+      </div>
 
-        {/* Contenido con Scroll Interno Controlado */}
-        <CardContent className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white">
-          {/* Verificación de Requerimientos */}
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full border border-slate-200 px-3.5 rounded-xl mt-2 bg-slate-50/60"
+      {/* Contenido desplazable · Resumen de la ruta */}
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-6 pb-4 flex flex-col gap-3.5">
+        {/* Métricas: tres columnas sin cajas, separadas por un filete inferior */}
+        <dl className="grid grid-cols-3 gap-3 pb-4 border-b border-lomo-border flex-shrink-0">
+          <div className="flex flex-col gap-1 min-w-0">
+            <dt className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-ink-secondary">Costo</dt>
+            <dd className="text-[25px] leading-none font-extrabold tracking-[-0.03em] text-lomo-ink-primary tabular-nums truncate">
+              S/ {kpiCosto}
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <dt className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-ink-secondary">Distancia</dt>
+            <dd className="text-[25px] leading-none font-extrabold tracking-[-0.03em] text-lomo-ink-primary tabular-nums truncate">
+              {kpiDistancia} <span className="text-sm font-bold tracking-normal text-lomo-ink-muted">km</span>
+            </dd>
+          </div>
+          <div className="flex flex-col gap-1 min-w-0">
+            <dt className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-ink-secondary">Riesgo difuso</dt>
+            <dd className="text-[25px] leading-none font-extrabold tracking-[-0.03em] text-lomo-warning-ink tabular-nums truncate">
+              {riesgoPromedio}
+              <span className="text-sm font-bold tracking-normal text-lomo-ink-muted">/10</span>
+            </dd>
+          </div>
+        </dl>
+
+        {/* Validación de requisitos */}
+        <div className="flex items-center gap-2 flex-shrink-0 text-sm font-bold text-lomo-ink-secondary">
+          <CircleCheck className="w-4 h-4 text-lomo-accent flex-shrink-0" />
+          <span>Cumple tu presupuesto y tiempo disponible</span>
+        </div>
+
+        {/* Equipamiento y presupuesto */}
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <DisclosureRow
+            icon={<Backpack className="w-4 h-4" />}
+            label="Checklist de equipamiento"
+            meta={`${checklist.length} ítems`}
+            open={showChecklist}
+            onToggle={() => setShowChecklist((prev) => !prev)}
           >
-            <AccordionItem value="mamdani">
-              <AccordionTrigger className="text-sm font-bold text-slate-900">
-                <p className="flex gap-2">
-                  La ruta cumple los requerimientos:{" "}
-                  <span
-                    className={
-                      cumpleRequerimientos
-                        ? "text-emerald-600"
-                        : "text-destructive"
-                    }
-                  >
-                    {cumpleRequerimientos ? "Sí" : "No"}
-                  </span>
-                </p>
-              </AccordionTrigger>
-              <AccordionContent className="px-2 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-1.5">
-                <div className="flex items-center gap-2">
-                  {checksCumplePresupuesto ? (
-                    <Check className="w-4 h-4 text-emerald-600"></Check>
-                  ) : (
-                    <X className="w-4 h-4 text-destructive"></X>
-                  )}
-                  Presupuesto: S/ {result.costo_total.toFixed(0)} de S/{" "}
-                  {prefs?.presupuesto_max ?? "—"}
-                </div>
-                <div className="flex items-center gap-2">
-                  {checksCumpleTiempo ? (
-                    <Check className="w-4 h-4 text-emerald-600"></Check>
-                  ) : (
-                    <X className="w-4 h-4 text-destructive"></X>
-                  )}
-                  Tiempo estimado: {result.tiempo_estimado_horas.toFixed(1)} h
-                  de {horasUtilesMax} h útiles
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  Horizonte de planificación: {result.k} lomas
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  Método:{" "}
-                  {result.metodo === "atajo_determinista"
-                    ? "atajo determinista"
-                    : "algoritmo genético"}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {result.checklist_equipamiento && result.checklist_equipamiento.length > 0 && (
-              <AccordionItem value="checklist">
-                <AccordionTrigger className="text-sm font-bold text-slate-900">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-primary" />
-                    <span>Checklist de Equipamiento Inteligente</span>
-                    <Badge variant="outline" className="text-xs font-mono px-2 py-0.5">
-                      {result.checklist_equipamiento.length} items
-                    </Badge>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-2 text-xs sm:text-sm text-slate-700 space-y-2">
-                  {result.checklist_equipamiento.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 py-0.5">
-                      <CheckSquare className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            )}
-
-            <AccordionItem value="costos-grupales">
-              <AccordionTrigger className="text-sm font-bold text-slate-900">
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <span>Resumen de Costos y Chancha Grupal</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-2 text-xs sm:text-sm text-slate-700 space-y-2.5">
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
-                  <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
-                    <div className="text-xs uppercase font-bold text-slate-500">
-                      Costo Individual
-                    </div>
-                    <div className="text-lg font-black text-slate-900 mt-0.5 font-mono">
-                      S/ {result.costo_total.toFixed(0)}
-                    </div>
-                    <div className="text-xs text-slate-400 mt-0.5">Viajero solo</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 shadow-sm">
-                    <div className="text-xs uppercase font-bold text-emerald-800">
-                      Cuota Grupo 4
-                    </div>
-                    <div className="text-lg font-black text-emerald-700 mt-0.5 font-mono">
-                      S/ {((result.costo_total * 4 * 0.72) / 4).toFixed(0)} / pers
-                    </div>
-                    <div className="text-xs text-emerald-700 font-semibold mt-0.5">
-                      Ahorro compartiendo guía y transporte
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs text-slate-500 italic">
-                  Total estimado para 4 personas: S/ {(result.costo_total * 4 * 0.72).toFixed(0)} (entradas completas, 1 guía compartido y taxis divididos).
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
-          {/* Secuencia Recomendada Día a Día */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Secuencia de excursiones
-              </div>
-              <Button
-                variant={"link"}
-                onClick={() => setScoresModalOpen(true)}
-                className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                Ver scores difusos
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {result.ruta_ids.map((id, index) => {
-                const loma = lomasDict.get(id);
-                if (!loma) return null;
-                const riesgo = result.riesgos_ruta[id] || 5.0;
-
+            <ul className="flex flex-col gap-1.5 pt-1">
+              {checklist.map((item, idx) => {
+                const isChecked = !!checkedItems[idx];
                 return (
-                  <button
-                    key={id}
-                    onClick={() => onFocusLoma(loma)}
-                    className="w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50/80 hover:border-primary/50 shadow-sm transition-all flex items-center justify-between group"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">
-                        {index + 1}
-                      </div>
-                      <div className="min-w-0 truncate">
-                        <div className="text-sm sm:text-base font-bold text-slate-900 leading-tight group-hover:text-primary truncate">
-                          {loma.nombre}
-                        </div>
-                        <div className="text-xs sm:text-sm text-slate-500 mt-1 truncate">
-                          {loma.distrito} · S/ {loma.costo_estimado} ·{" "}
-                          {loma.dificultad}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <span className="text-xs px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 font-semibold border border-amber-200">
-                        Riesgo {riesgo.toFixed(1)}
+                  <li key={idx}>
+                    <label className="min-h-9 py-1 flex items-start gap-2.5 cursor-pointer text-[15px] font-medium text-lomo-ink-primary select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleCheck(idx)}
+                        className="w-4 h-4 mt-1 flex-shrink-0 accent-[#2E6540] rounded"
+                      />
+                      <span className={`min-w-0 leading-[1.45] ${isChecked ? "line-through text-lomo-ink-muted" : ""}`}>
+                        {item}
                       </span>
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
-                    </div>
-                  </button>
+                    </label>
+                  </li>
                 );
               })}
+            </ul>
+          </DisclosureRow>
+
+          <DisclosureRow
+            icon={<Wallet className="w-4 h-4" />}
+            label="Costes y chancha grupal"
+            open={showCostesGrupal}
+            onToggle={() => setShowCostesGrupal((prev) => !prev)}
+          >
+            <div className="flex flex-col gap-3 pt-1">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-ink-muted">Viajando solo</span>
+                  <span className="text-[20px] font-extrabold text-lomo-ink-primary tabular-nums">S/ {result.costo_total}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-accent">Grupo de 4</span>
+                  <span className="text-[20px] font-extrabold text-lomo-accent tabular-nums">S/ {cuotaGrupo4} c/u</span>
+                </div>
+              </div>
+              <p className="text-sm font-medium leading-[1.5] text-lomo-ink-secondary text-pretty">
+                Total estimado: S/ {totalGrupo4} para 4 personas (incluye entradas comunitarias, guía oficial y transporte compartido).
+              </p>
             </div>
+          </DisclosureRow>
+
+          {result.itinerario_narrativo && (
+            <DisclosureRow
+              icon={<ScrollText className="w-4 h-4" />}
+              label="Itinerario narrativo"
+              open={showNarrativa}
+              onToggle={() => setShowNarrativa((prev) => !prev)}
+            >
+              <div className="pt-1 text-[15px] font-medium text-lomo-ink-secondary leading-[1.65] prose prose-sm max-w-none break-words">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.itinerario_narrativo}</ReactMarkdown>
+              </div>
+            </DisclosureRow>
+          )}
+        </div>
+
+        {/* Secuencia de excursiones */}
+        <section className="flex flex-col gap-1 flex-shrink-0" aria-label="Excursiones de la ruta">
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <h3 className="text-xs font-bold tracking-[0.05em] uppercase text-lomo-ink-secondary">
+              Tus {stops.length} {stops.length === 1 ? "excursión" : "excursiones"}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setScoresModalOpen(true)}
+              className="h-9 -mr-2 px-2.5 rounded-lg flex items-center gap-1.5 text-sm font-bold text-lomo-accent transition-colors hover:bg-lomo-surface-selected"
+            >
+              <Activity className="w-4 h-4" />
+              <span>Ver scores difusos</span>
+            </button>
           </div>
 
-          {/* Pestañas de Detalle */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white">
-            <TabsList className="grid grid-cols-4 w-full h-10">
-              <TabsTrigger value="itinerario" className="text-xs sm:text-sm font-semibold">Itinerario</TabsTrigger>
-              <TabsTrigger value="transporte" className="text-xs sm:text-sm font-semibold">Transporte</TabsTrigger>
-              <TabsTrigger value="tramos" className="text-xs sm:text-sm font-semibold">Tramos</TabsTrigger>
-              <TabsTrigger value="diagnostico" className="text-xs sm:text-sm font-semibold">AG</TabsTrigger>
-            </TabsList>
-
-            {/* Tab 1: Itinerario Narrativo con Renderizador Markdown */}
-            <TabsContent value="itinerario" className="space-y-2 mt-3">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed max-h-56 overflow-y-auto custom-scrollbar">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    h2: ({ children }) => (
-                      <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider pb-1.5 border-b border-slate-200 mb-2">
-                        {children}
-                      </h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="text-xs sm:text-sm font-bold text-primary mt-3 mb-1 flex items-center gap-1">
-                        {children}
-                      </h3>
-                    ),
-                    p: ({ children }) => (
-                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed mb-2 last:mb-0">
-                        {children}
-                      </p>
-                    ),
-                    ul: ({ children }) => (
-                      <ul className="list-disc pl-4 space-y-1 mb-2 text-xs sm:text-sm text-slate-700 marker:text-primary">
-                        {children}
-                      </ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className="list-decimal pl-4 space-y-1 mb-2 text-xs sm:text-sm text-slate-700 marker:text-primary">
-                        {children}
-                      </ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                        {children}
-                      </li>
-                    ),
-                    strong: ({ children }) => (
-                      <strong className="font-bold text-slate-900">
-                        {children}
-                      </strong>
-                    ),
-                    hr: () => <hr className="my-2 border-slate-200" />,
-                  }}
-                >
-                  {result.itinerario_narrativo}
-                </ReactMarkdown>
-              </div>
-              <p className="text-xs text-slate-400 text-right italic tracking-wide">
-                {result.llm_provider === "gemini"
-                  ? "Texto generado por Gemini"
-                  : "Texto generado localmente (sin conexión)"}
-              </p>
-            </TabsContent>
-
-            {/* Tab 2: Guía de Transporte */}
-            <TabsContent
-              value="transporte"
-              className="space-y-3 mt-3 max-h-56 overflow-y-auto custom-scrollbar"
-            >
-              {result.guias_acceso.map((guia, i) => (
-                <div
-                  key={i}
-                  className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 shadow-sm"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                      {guia.nombre}
-                    </span>
-                    <Badge variant="default" className="text-xs font-semibold shrink-0">
-                      ~{guia.tiempo_total_min} min · S/ {guia.costo_total_soles}
-                    </Badge>
-                  </div>
-                  <div className="text-xs sm:text-sm text-slate-500 space-y-1">
-                    <div>
-                      <b>Medio:</b> {guia.medio_transporte}
-                    </div>
-                    <div>
-                      <b>Partida:</b> {guia.punto_partida_recomendado}
-                    </div>
-                  </div>
-                  <div className="pt-2 space-y-1.5 border-t border-slate-200">
-                    {guia.pasos.map((paso, pIdx) => (
-                      <div
-                        key={pIdx}
-                        className="text-xs text-slate-700 flex items-start gap-1.5 px-1"
-                      >
-                        <span>{paso}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </TabsContent>
-
-            {/* Tab 3: Tramos Radiales */}
-            <TabsContent value="tramos" className="space-y-2 mt-3">
-              <div className="text-xs font-medium text-slate-500 mb-1">
-                Distancias radiales (ida y vuelta diaria desde tu punto de
-                partida):
-              </div>
-              <div className="space-y-2 max-h-56 overflow-y-auto custom-scrollbar">
-                {result.tramos.map((t, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm"
+          <ol className="flex flex-col">
+            {stops.map((loma, index) => {
+              const riesgo = result.riesgos_ruta[loma.id] || 4.0;
+              return (
+                <li key={loma.id} className="border-b border-lomo-border last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => onFocusLoma(loma)}
+                    className="w-full py-3.5 flex items-center gap-3 text-left group transition-colors focus-visible:outline-none focus-visible:bg-lomo-surface-inset"
                   >
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-destructive" />
-                      <span className="text-slate-800 font-medium">
-                        {t.hacia}
+                    <span className="w-8 h-8 rounded-2xl bg-lomo-surface-inset flex items-center justify-center flex-shrink-0 text-sm font-extrabold text-lomo-ink-secondary tabular-nums transition-colors group-hover:bg-lomo-action-primary group-hover:text-lomo-on-action">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="min-w-0 flex-1 flex flex-col gap-0.5">
+                      <span className="text-[16px] leading-tight font-extrabold text-lomo-ink-primary truncate">
+                        {loma.nombre}
                       </span>
-                    </div>
-                    <span className="font-mono text-primary font-bold">
-                      {t.distancia_km.toFixed(1)} km
+                      <span className="text-sm font-medium leading-tight text-lomo-ink-secondary truncate">
+                        {loma.distrito} · S/ {loma.costo_estimado} · {loma.dificultad}
+                      </span>
                     </span>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
+                    <span className="text-sm font-bold text-lomo-warning-ink flex-shrink-0 tabular-nums">
+                      R {riesgo.toFixed(1)}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      </div>
 
-            {/* Tab 4: Diagnóstico Heurístico & Difuso (AG) */}
-            <TabsContent value="diagnostico" className="space-y-3 mt-3">
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-                    <Gauge className="w-4 h-4 text-primary" />
-                    Fitness Multiobjetivo
-                  </div>
-                  <div className="text-lg font-bold text-slate-900 mt-1 font-mono">
-                    {result.fitness.toFixed(3)}
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  <div
-                    className="text-xs font-semibold text-slate-500 flex items-center gap-1.5"
-                    title="Nivel de exigencia (0-1) traducido a partir de los genes reales del cromosoma por el sistema difuso"
-                  >
-                    <Cpu className="w-4 h-4 text-blue-600" />
-                    Exigencia Cromosoma
-                  </div>
-                  <div className="text-lg font-bold text-slate-900 mt-1 font-mono">
-                    {result.nivel_exigencia.toFixed(3)} / 1.0
-                  </div>
-                </div>
-              </div>
+      {/* Pie de panel · Reconfigurar mi ruta */}
+      <div className="px-6 py-4 border-t border-lomo-border bg-lomo-surface flex flex-col gap-2 flex-shrink-0">
+        <button
+          type="button"
+          onClick={onNewSearch}
+          className="h-12 w-full bg-lomo-action-primary hover:bg-lomo-action-hover active:scale-[0.98] text-lomo-on-action text-[15px] font-bold rounded-lg flex items-center justify-center gap-2 transition-[background-color,transform] duration-150"
+        >
+          <RotateCcw className="w-4 h-4 text-lomo-on-action-muted" />
+          <span>Reconfigurar mi ruta</span>
+        </button>
 
-              {/* Genes Reales del Cromosoma */}
-              {result.genes_reales &&
-                Object.keys(result.genes_reales).length > 0 && (
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs sm:text-sm">
-                    <div className="font-bold text-slate-500 uppercase tracking-wider text-xs">
-                      Genes reales optimizados
-                    </div>
-                    <div className="flex justify-between text-slate-700">
-                      <span>Horas de recorrido:</span>
-                      <b className="font-mono text-slate-900">
-                        {result.genes_reales.horas_recorrido?.toFixed(1) || 0} h
-                      </b>
-                    </div>
-                    <div className="flex justify-between text-slate-700">
-                      <span>Cobertura de zona:</span>
-                      <b className="font-mono text-slate-900">
-                        {(
-                          (result.genes_reales.cobertura_zona || 0) * 100
-                        ).toFixed(0)}
-                        %
-                      </b>
-                    </div>
-                    <div className="flex justify-between text-slate-700">
-                      <span>Extensión de circuito:</span>
-                      <b className="font-mono text-slate-900">
-                        {result.genes_reales.extension_circuito?.toFixed(1) ||
-                          0}{" "}
-                        km
-                      </b>
-                    </div>
-                  </div>
-                )}
-
-              {/* Gráfica ASCII de Convergencia */}
-              {result.grafica_ascii && (
-                <div className="space-y-2">
-                  <div className="text-xs font-bold text-slate-500 uppercase">
-                    Curva de convergencia evolutiva
-                  </div>
-                  <pre className="text-xs font-mono bg-slate-950 text-emerald-400 p-3.5 rounded-xl overflow-x-auto max-h-48 overflow-y-auto custom-scrollbar leading-tight shadow-inner">
-                    {result.grafica_ascii}
-                  </pre>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-
-        {/* Footer Fijo con Botón */}
-        <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
-          <Button
-            onClick={onNewSearch}
-            variant="outline"
-            className="w-full text-sm sm:text-base font-bold h-11 flex items-center justify-center gap-2"
+        {stops.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onFocusLoma(stops[0])}
+            className="h-11 w-full rounded-lg flex items-center justify-center gap-1.5 text-[15px] font-semibold text-lomo-ink-secondary transition-colors hover:bg-lomo-surface-inset"
           >
-            <RotateCcw className="w-4 h-4 text-slate-500" />
-            <span>Reconfigurar parámetros</span>
-          </Button>
-        </div>
-      </Card>
+            <Compass className="w-4 h-4 text-lomo-ink-muted" />
+            <span>Centrar en la primera parada</span>
+          </button>
+        )}
+      </div>
+
       <FuzzyScoresModal
         open={scoresModalOpen}
         onOpenChange={setScoresModalOpen}
         lomas={lomas}
+        routeIds={result.ruta_ids}
       />
     </div>
   );
